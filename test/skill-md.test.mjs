@@ -205,9 +205,19 @@ test('主技能（ponytail）：收尾强制句、Never cut、卫星技能指针
   assert.match(MAIN, /stop-wishing-debt/)
 })
 
-test('审查技能：六维、先理解、Check before you report、输出格式', () => {
+test('审查技能：两轴（Intent / Engineering）、六维、12 条坏味道、并行与串行降级、输出格式', () => {
   const text = readSkill('stop-wishing-review')
   for (const dim of ['Bug', 'Risk', 'Scale', 'Missing test', 'Speed', 'Lean']) assert.ok(text.includes(`**${dim}**`) || text.includes(dim), `审查缺维度: ${dim}`)
+  assert.match(text, /Intent/)
+  assert.match(text, /Engineering/)
+  assert.match(text, /docs\/project\.md/)
+  assert.match(text, /Scope creep/)
+  assert.match(text, /Looks done, is wrong/)
+  const smells = ['Mysterious Name', 'Duplicated Code', 'Repeated Switches', 'Feature Envy', 'Data Clumps', 'Message Chains', 'Primitive Obsession', 'Speculative Generality', 'Refused Bequest', 'Middle Man', 'Shotgun Surgery', 'Divergent Change']
+  for (const smell of smells) assert.ok(text.includes(smell), `缺坏味道: ${smell}`)
+  assert.match(text, /sub-agent/i)
+  assert.match(text, /Not parallel: sub-agent tool unavailable/)
+  assert.match(text, /Spec source:/)
   assert.match(text, /Read-only/)
   assert.match(text, /diff[\s\S]*caller[\s\S]*tests[\s\S]*docs/i)
   assert.match(text, /grep`? \*\*all\*\* callers|grep.*all.*callers/i)
