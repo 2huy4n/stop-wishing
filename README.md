@@ -148,7 +148,7 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 | `skills/stop-wishing/scripts/init-docs.js` | 从 `templates/<lang>/` 生成 7 份项目文档（含 `LICENSES.md` 与进度快照） | 0 成功 / 1 参数错误或已存在 / 2 模板缺失 |
 | `skills/stop-wishing/scripts/check-hardcode.js` | 扫绝对路径/密钥/URL/端口/魔法数字（支持 `.hardcodeignore`） | 0 干净或全部被抑制 / 2 有未抑制命中或忽略文件非法 |
 | `skills/stop-wishing/scripts/check-tickets.js` | 校验 `docs/tickets/*.md`（并对照 `docs/specs/`、`docs/project.md`）：E1–E13 错误 + W1–W5 警告 | 0 无错误（可有警告）/ 1 有错误 / 2 用法或 IO |
-| `skills/stop-wishing/scripts/setup.js` | 生成/更新 `docs/agents/{issue-tracker,domain,triage-labels}.md`（只动标记段、幂等），可选维护既有 `AGENTS.md`/`CLAUDE.md` 的 `## Project docs` 段（**绝不创建**它们） | 0 成功（含 unchanged）/ 1 参数错误 / 2 IO 错误 |
+| `skills/stop-wishing/scripts/setup.js` | 生成/更新 `docs/agents/{issue-tracker,domain,triage-labels}.md`（只动标记段、幂等；`--issue-tracker local` 指向 `docs/issues/`，与工作计划目录 `docs/tickets/` 分开），可选维护既有 `AGENTS.md`/`CLAUDE.md` 的 `## Project docs` 段（**绝不创建**它们） | 0 成功（含 unchanged）/ 1 参数错误 / 2 IO 错误 |
 | `skills/stop-wishing/scripts/build-portable.js` | 把主技能正文合成 `portable/stop-wishing.md` | 0 成功 / 2 `SKILL.md` 缺失 |
 
 `check-tickets.js` 的检查项：E1 front-matter 解析、E2 必填字段（id/title/spec/status/acceptance/verify）、E3 文件名、E4 id 与文件名前缀、E5 id 重复、E6 status、E7 spec 不存在、E8 blocked_by 指向不存在的票、E9 自依赖、E10 成环、E11 验收为空、E12 verify 为空或少于验收条数、E13 done/dropped 仍被依赖；警告：W1 缺 estimate、W2 验收超过 5 条、W3 verify 全不可执行、W4 spec 的 `card_sha256` 与 `docs/project.md` 不一致、W5 spec 未被任何票引用。
