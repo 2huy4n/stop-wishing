@@ -90,7 +90,10 @@ export function issueTrackerContent(options) {
     `- **Where:** ${where}`,
     `- **Create:** ${create}`,
     `- **Read:** ${read}`,
-    '- **Status mapping:** 见 `docs/agents/triage-labels.md`（needs-triage / ready / blocked / in-progress / done）',
+    // 没有生成 triage-labels.md 时不要留死指针：指向不存在的文件比没有更糟。
+    ...(options.labels === 'default'
+      ? ['- **Status mapping:** 见 `docs/agents/triage-labels.md`（needs-triage / ready / blocked / in-progress / done）']
+      : []),
     '- **Managed by:** 由 stop-wishing-setup 管理（重跑会更新本段，段外可自由编辑）',
   ].join('\n')
 }
@@ -108,13 +111,13 @@ export function domainContent(options) {
 
 export function triageLabelsContent() {
   return [
-    '| 角色 | 标签 | 含义 |',
-    '|---|---|---|',
-    '| needs-triage | `needs-triage` | 新票，尚未确认范围或优先级 |',
-    '| ready | `ready` | 范围与验收清楚，可以开工 |',
-    '| blocked | `blocked` | 被别的票/外部依赖挡住 |',
-    '| in-progress | `in-progress` | 正在做 |',
-    '| done | `done` | 验收通过、已关闭 |',
+    '| 角色 | 标签 |',
+    '|---|---|',
+    '| needs-triage | `needs-triage` |',
+    '| ready | `ready` |',
+    '| blocked | `blocked` |',
+    '| in-progress | `in-progress` |',
+    '| done | `done` |',
   ].join('\n')
 }
 
@@ -123,27 +126,59 @@ export function block(content, begin = BEGIN, end = END) {
   return `${begin}\n${content}\n${end}\n`
 }
 
-/** 把 block 写进现有文本：有标记段就替换（含标记），没有就追加到末尾；返回新文本。 */
-export function upsertBlock(text, blockText, begin = BEGIN, end = END) {
-  const start = text.indexOf(begin)
-  const stop = text.indexOf(end)
-  if (start !== -1 && stop !== -1 && stop > start) {
-    // blockText 自带结尾换行；把紧跟 END 的那个换行吃掉，避免每跑一次多一行。
-    const tail = text.slice(stop + end.length).replace(/^\r?\n/, '')
-    return text.slice(0, start) + blockText + tail
+function markerCount(text, marker) {
+  let count = 0
+  let at = text.indexOf(marker)
+  while (at !== -1) {
+    count += 1
+    at = text.indexOf(marker, at + marker.length)
   }
-  if (text === '') return blockText
-  const needsNewline = !text.endsWith('\n')
-  return text + (needsNewline ? '\n' : '') + (text.trimEnd() === '' ? '' : '\n') + blockText
+  return count
 }
 
-function planFile(root, rel, content, options) {
+function markerLine(text, marker) {
+  const at = text.indexOf(marker)
+  return at === -1 ? '未出现' : `第 ${text.slice(0, at).split('\n').length} 行`
+}
+
+/**
+ * 把 block 写进现有文本：
+ * - 没有标记段 → 追加；
+ * - 恰好一对且顺序正确 → 替换段内（含标记）；
+ * - 残缺 / 重复 / 顺序颠倒 → 抛错，调用方停下，绝不猜。
+ */
+export function upsertBlock(text, blockText, begin = BEGIN, end = END) {
+  const begins = markerCount(text, begin)
+  const ends = markerCount(text, end)
+  if (begins === 0 && ends === 0) {
+    if (text === '') return blockText
+    const needsNewline = !text.endsWith('\n')
+    return text + (needsNewline ? '\n' : '') + (text.trimEnd() === '' ? '' : '\n') + blockText
+  }
+  if (begins !== 1 || ends !== 1) {
+    throw new Error(`标记段异常：begin ${begins} 个（${markerLine(text, begin)}），end ${ends} 个（${markerLine(text, end)}）；为避免猜错已停止`)
+  }
+  const start = text.indexOf(begin)
+  const stop = text.indexOf(end)
+  if (stop < start) throw new Error('标记段顺序错误：end 出现在 begin 之前；为避免猜错已停止')
+  // blockText 自带结尾换行；把紧跟 END 的那个换行吃掉，避免每跑一次多一行。
+  const tail = text.slice(stop + end.length).replace(/^\r?\n/, '')
+  return text.slice(0, start) + blockText + tail
+}
+
+function planFile(root, rel, content, title) {
   const file = join(root, rel)
   const exists = existsSync(file)
   const current = exists ? readFileSync(file, 'utf8') : ''
-  const next = upsertBlock(current, block(content))
-  const action = !exists ? 'created' : next === current ? 'unchanged' : 'updated'
-  return { path: rel, file, exists, current, next, action }
+  let next
+  try {
+    next = upsertBlock(current, block(content))
+  } catch (error) {
+    return { path: rel, file, exists, current, error: `${rel}: ${error.message}` }
+  }
+  const withTitle = exists ? next : `# ${title}\n\n${next}`
+  const action = !exists ? 'created' : withTitle === current ? 'unchanged' : 'updated'
+  return { path: rel, file, exists, current, next: withTitle, action }
 }
 
 export function setup(options) {
@@ -158,11 +193,15 @@ export function setup(options) {
   }
 
   const plans = [
-    planFile(root, 'docs/agents/issue-tracker.md', issueTrackerContent(options), options),
-    planFile(root, 'docs/agents/domain.md', domainContent(options), options),
+    planFile(root, 'docs/agents/issue-tracker.md', issueTrackerContent(options), 'Issue tracker'),
+    planFile(root, 'docs/agents/domain.md', domainContent(options), 'Domain docs'),
   ]
   if (options.labels === 'default') {
-    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(), options))
+    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(), 'Triage labels'))
+  }
+  const broken = plans.filter(plan => plan.error)
+  if (broken.length > 0) {
+    return { ok: false, code: 1, message: '标记段异常，未写任何文件：\n' + broken.map(plan => '  - ' + plan.error).join('\n') }
   }
 
   let agentsMd = { status: options.agentsMd ? 'not-applicable' : 'disabled', path: null, action: 'skipped' }
@@ -179,23 +218,44 @@ export function setup(options) {
         AGENTS_BEGIN,
         '## Project docs',
         '',
-        '- `docs/agents/issue-tracker.md` — 票在哪里、怎么读写',
+        '- `docs/project.md` — 需求卡与边界',
+        '- `docs/progress.md` — 进展与证据',
+        '- `docs/todo.md` — 待办',
+        '- `docs/discipline.md` — 规范与许可证闸门',
+        '- `docs/structure.md` — 目录与模块',
+        '- `docs/agents/issue-tracker.md` — issue 在哪里、怎么读写',
         '- `docs/agents/domain.md` — 术语、ADR、目录布局',
         ...(options.labels === 'default' ? ['- `docs/agents/triage-labels.md` — 五角色标签映射'] : []),
-        '- `docs/project.md` — 需求卡（若存在）',
+        '- `docs/tickets/` — 工单与依赖顺序',
         AGENTS_END,
         '',
       ].join('\n')
       const current = readFileSync(file, 'utf8')
-      const next = upsertBlock(current, section, AGENTS_BEGIN, AGENTS_END)
-      const action = next === current ? 'unchanged' : 'updated'
-      agentsMd = { status: 'written', path: target, file, current, next, action, note }
+      // 已有指针段但没有标记（旧版 init-docs 写的）：不追加，避免两份指针。
+      if (!current.includes(AGENTS_BEGIN) && /^##\s+(Project docs|项目文档)/m.test(current)) {
+        agentsMd = {
+          status: 'skipped',
+          path: target,
+          file,
+          action: 'skipped',
+          note: '已有指针段但没有标记；为避免重复未追加，请手动合并后重跑',
+        }
+      } else {
+        let next
+        try {
+          next = upsertBlock(current, section, AGENTS_BEGIN, AGENTS_END)
+        } catch (error) {
+          return { ok: false, code: 1, message: `${target}: ${error.message}` }
+        }
+        const action = next === current ? 'unchanged' : 'updated'
+        agentsMd = { status: 'written', path: target, file, current, next, action, note }
+      }
     } else {
       agentsMd = {
         status: 'skipped',
         path: null,
         action: 'skipped',
-        note: '没有 AGENTS.md 也没有 CLAUDE.md：按约定绝不创建，已跳过（如需要请用户自行创建后重跑）',
+        note: '没有 AGENTS.md 也没有 CLAUDE.md：按约定绝不创建，已跳过（需要时先跑 init-docs.js --lang <zh|en> --agents-md，或让用户自己创建后重跑）',
       }
     }
   }
@@ -219,6 +279,14 @@ export function setup(options) {
   if (options.issueTracker === 'other') questions.push('issue tracker 具体用哪个工具/字段？（--issue-tracker other）')
   if (options.layout === 'multi') questions.push('多包各自的包名与入口目录是什么？')
 
+  const notes = []
+  if (options.labels === 'none') {
+    notes.push('未生成 triage-labels.md，因此 issue-tracker.md 不含 Status mapping 指针')
+    if (existsSync(join(root, 'docs/agents/triage-labels.md'))) {
+      notes.push('已存在 docs/agents/triage-labels.md：--labels none 不会删除它（非破坏性）')
+    }
+  }
+
   return {
     ok: true,
     code: 0,
@@ -232,6 +300,7 @@ export function setup(options) {
       note: agentsMd.note ?? null,
     },
     questions,
+    notes,
   }
 }
 

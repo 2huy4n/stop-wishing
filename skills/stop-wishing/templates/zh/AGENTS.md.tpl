@@ -1,5 +1,6 @@
 # AGENTS.md
 
+<!-- stop-wishing:project-docs:begin -->
 ## 项目文档
 
 开工前先读 `docs/project.md`（需求卡、边界、假设）。
@@ -8,3 +9,4 @@
 目录与模块见 `docs/structure.md`；文案与数据来源见 `docs/content.md`；依赖与素材许可见 `docs/LICENSES.md`。
 
 <!-- 由 stop-wishing 生成：只放指针，不放正文；后续修改请直接编辑本文件。 -->
+<!-- stop-wishing:project-docs:end -->

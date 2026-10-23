@@ -24,7 +24,7 @@
 # 只看看会复制什么（不写盘）
 node install.js --dry-run
 
-# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets}
+# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets,stop-wishing-setup}
 node install.js --tool dsh --verify
 
 # 同时装给 Claude Code：~/.claude/skills/<七个技能>

@@ -136,3 +136,47 @@ test('参数错误 → exit 1；目录不存在 → exit 2', () => {
   assert.equal(missing.status, 2)
   assert.match(missing.stderr, /目录不存在/)
 })
+
+test('标记段残缺 → 停下报错，不写任何文件', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const rel = 'docs/agents/domain.md'
+  const broken = read(root, rel).replace(END, '')
+  writeFileSync(join(root, rel), broken, 'utf8')
+  const otherBefore = read(root, 'docs/agents/issue-tracker.md')
+
+  const out = run(['--dir', root])
+  assert.equal(out.status, 1, out.stdout + out.stderr)
+  assert.match(out.stderr, /标记段异常/)
+  assert.equal(read(root, rel), broken, '出错时不得改残缺文件')
+  assert.equal(read(root, 'docs/agents/issue-tracker.md'), otherBefore, '出错时其它文件也不得改')
+})
+
+test('标记段重复 → 停下报错，不替换', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const rel = 'docs/agents/domain.md'
+  const doubled = read(root, rel) + '\n' + read(root, rel)
+  writeFileSync(join(root, rel), doubled, 'utf8')
+  const out = run(['--dir', root])
+  assert.equal(out.status, 1, out.stdout + out.stderr)
+  assert.match(out.stderr, /标记段异常/)
+  assert.equal(read(root, rel), doubled, '不得替换或多删')
+})
+
+test('--labels none → issue-tracker.md 不指向不存在的 triage-labels.md', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root, '--labels', 'none']).status, 0)
+  assert.doesNotMatch(read(root, 'docs/agents/issue-tracker.md'), /triage-labels\.md/)
+})
+
+test('已有指针段但无标记 → 跳过而非重复追加', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# 项目约定\n\n## 项目文档\n\n手写指针。\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const text = read(root, 'AGENTS.md')
+  assert.equal((text.match(/## 项目文档/g) ?? []).length, 1, '不应出现第二个指针段')
+  assert.doesNotMatch(text, /stop-wishing:project-docs:begin/)
+  assert.match(out.stdout, /skipped/)
+})
