@@ -180,3 +180,43 @@ test('已有指针段但无标记 → 跳过而非重复追加', () => {
   assert.doesNotMatch(text, /stop-wishing:project-docs:begin/)
   assert.match(out.stdout, /skipped/)
 })
+
+test('--labels none 且已有标签文件 → 说明不会删除，JSON 也带 notes', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const out = run(['--dir', root, '--labels', 'none'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  assert.match(out.stdout, /不会删除/, '必须说明旧文件保留')
+  const json = JSON.parse(run(['--dir', root, '--labels', 'none', '--json']).stdout)
+  assert.ok(Array.isArray(json.notes) && json.notes.some(note => note.includes('不会删除')))
+})
+
+test('新建文件首行是 H1，标签表两列', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  assert.match(read(root, 'docs/agents/issue-tracker.md').split('\n')[0], /^# Issue tracker$/)
+  assert.match(read(root, 'docs/agents/domain.md').split('\n')[0], /^# Domain docs$/)
+  const triage = read(root, 'docs/agents/triage-labels.md')
+  assert.match(triage.split('\n')[0], /^# Triage labels$/)
+  assert.match(triage, /\| 角色 \| 标签 \|/)
+  assert.doesNotMatch(triage, /\| 角色 \| 标签 \| 含义 \|/)
+})
+
+test('init-docs --agents-md 之后跑 setup：只留一个指针段', () => {
+  const root = freshProject()
+  const docs = spawnSync(process.execPath, [join(ROOT, 'skills', 'stop-wishing', 'scripts', 'init-docs.js'), '--lang', 'zh', '--dir', root, '--agents-md'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 20000,
+  })
+  assert.equal(docs.status, 0, docs.stdout + docs.stderr)
+  assert.ok(read(root, 'AGENTS.md').includes('stop-wishing:project-docs:begin'), 'init-docs 模板应带标记')
+
+  const out = run(['--dir', root, '--agents-md'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const text = read(root, 'AGENTS.md')
+  assert.equal((text.match(/stop-wishing:project-docs:begin/g) ?? []).length, 1, '只能有一段指针')
+  assert.doesNotMatch(text, /## 项目文档/, '旧指针段应被替换，而不是并存')
+  assert.match(text, /## Project docs/)
+})

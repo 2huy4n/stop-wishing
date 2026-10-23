@@ -318,12 +318,14 @@ if (process.argv[1]?.endsWith('setup.js')) {
       process.stderr.write(result.message + '\n')
       process.exitCode = result.code
     } else if (options.json) {
-      process.stdout.write(JSON.stringify({ tool: 'stop-wishing/setup', dir: result.root, dryRun: result.dryRun, files: result.files, agentsMd: result.agentsMd, questions: result.questions }, null, 2) + '\n')
+      process.stdout.write(JSON.stringify({ tool: 'stop-wishing/setup', dir: result.root, dryRun: result.dryRun, files: result.files, agentsMd: result.agentsMd, questions: result.questions, notes: result.notes }, null, 2) + '\n')
       process.exitCode = 0
     } else {
       if (result.dryRun) process.stdout.write('[dry-run] 不会写盘\n')
       for (const file of result.files) process.stdout.write(`${file.action}\t${file.path}\n`)
-      process.stdout.write(`agents-md: ${result.agentsMd.status}${result.agentsMd.path ? ' -> ' + result.agentsMd.path : ''}${result.agentsMd.note ? '（' + result.agentsMd.note + '）' : ''}\n`)
+      const unchanged = result.agentsMd.action === 'unchanged' ? ' (unchanged)' : ''
+      process.stdout.write(`agents-md: ${result.agentsMd.status}${unchanged}${result.agentsMd.path ? ' -> ' + result.agentsMd.path : ''}${result.agentsMd.note ? '（' + result.agentsMd.note + '）' : ''}\n`)
+      for (const note of result.notes ?? []) process.stdout.write('note: ' + note + '\n')
       for (const question of result.questions) process.stdout.write('question: ' + question + '\n')
       process.exitCode = 0
     }
