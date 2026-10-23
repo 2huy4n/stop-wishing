@@ -1,6 +1,7 @@
 ---
 name: stop-wishing-debt
-description: Build a debt ledger from `shortcut:` comments (legacy `ponytail:`), listing what was simplified, its ceiling and the trigger that should force an upgrade. Use when planning cleanup or checking how much deferred work a repo carries. 中文触发词：stop-wishing-debt、技术债、债务台账、shortcut 注释、ponytail 注释。
+description: >-
+  Build a debt ledger from `shortcut:` comments (legacy `ponytail:`), listing what was simplified, its ceiling and the trigger that should force an upgrade. Use when planning cleanup or checking how much deferred work a repo carries. 中文触发词：stop-wishing-debt、技术债、债务台账、shortcut 注释、ponytail 注释。
 user-invocable: true
 ---
 

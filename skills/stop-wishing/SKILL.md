@@ -1,6 +1,7 @@
 ---
 name: stop-wishing
-description: Stop wishing-driven programming: a vague request becomes AI-invented scope and unusable code. Use for vague requests, before coding or changing a repo, before adding dependencies, fonts, icons, images or APIs, or when asked to explain first, back up first, ban hardcoding, or init project docs. 中文触发词：stop-wishing、许愿式编程、先解释再写码、改动前备份、禁止硬编码、初始化项目文档。
+description: >-
+  Stop wishing-driven programming: a vague request becomes AI-invented scope and unusable code. Use for vague requests, before coding or changing a repo, before adding dependencies, fonts, icons, images or APIs, or when asked to explain first, back up first, ban hardcoding, or init project docs. 中文触发词：stop-wishing、许愿式编程、先解释再写码、改动前备份、禁止硬编码、初始化项目文档。
 user-invocable: true
 ---
 

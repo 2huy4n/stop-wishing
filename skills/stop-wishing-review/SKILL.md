@@ -1,6 +1,7 @@
 ---
 name: stop-wishing-review
-description: Review one change (a diff, branch or PR), not the whole repo, across six dimensions — bugs, risk, scale, missing tests, speed and leanness — with every finding verified against the code. Use before merging a risky change or when asked to review a diff. 中文触发词：stop-wishing-review、审查改动、代码审查、上线前检查、diff 审查。
+description: >-
+  Review one change (a diff, branch or PR), not the whole repo, across six dimensions — bugs, risk, scale, missing tests, speed and leanness — with every finding verified against the code. Use before merging a risky change or when asked to review a diff. 中文触发词：stop-wishing-review、审查改动、代码审查、上线前检查、diff 审查。
 user-invocable: true
 ---
 

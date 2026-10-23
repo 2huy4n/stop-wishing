@@ -71,7 +71,7 @@ test('--verify：四个技能逐个 PASS，退出码 0', () => {
   assert.match(out.stdout, /\[PASS\] scripts\/ four scripts present/)
   assert.match(out.stdout, /\[PASS\] templates\/zh\/ seven files/)
   assert.match(out.stdout, /\[PASS\] templates\/en\/ seven files/)
-  assert.match(out.stdout, /\[PASS\] LICENSE present/)
+  assert.match(out.stdout, /\[PASS\] license and third-party notices/)
   assert.doesNotMatch(out.stdout, /\[FAIL\]/)
 })
 

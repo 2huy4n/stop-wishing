@@ -16,9 +16,23 @@ function frontMatter(text) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(text)
   assert.ok(match, 'SKILL.md 必须有 front-matter')
   const fields = {}
-  for (const line of match[1].split(/\r?\n/)) {
-    const kv = /^([a-zA-Z-]+):\s*(.*)$/.exec(line)
-    if (kv) fields[kv[1]] = kv[2]
+  const lines = match[1].split(/\r?\n/)
+  for (let i = 0; i < lines.length; i++) {
+    const kv = /^([a-zA-Z-]+):\s*(.*)$/.exec(lines[i])
+    if (!kv) continue
+    const [, key, raw] = kv
+    if (['>-', '>', '|-', '|'].includes(raw)) {
+      const parts = []
+      let j = i + 1
+      while (j < lines.length && (/^\s+/.test(lines[j]) || lines[j].trim() === '')) {
+        parts.push(lines[j].trim())
+        j++
+      }
+      fields[key] = parts.join(' ').trim()
+      i = j - 1
+    } else {
+      fields[key] = raw
+    }
   }
   return fields
 }

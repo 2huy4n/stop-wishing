@@ -1,6 +1,7 @@
 ---
 name: stop-wishing-audit
-description: Audit a whole repository — architecture, build, dependencies, entry points, tests and real data flows — across six dimensions (bug, risk, scale, missing test, speed, lean), capped at 20 verified findings. Use when taking over an unfamiliar repo or asking for a codebase health check. 中文触发词：stop-wishing-audit、全仓审计、代码体检、接手项目、仓库审计。
+description: >-
+  Audit a whole repository — architecture, build, dependencies, entry points, tests and real data flows — across six dimensions (bug, risk, scale, missing test, speed, lean), capped at 20 verified findings. Use when taking over an unfamiliar repo or asking for a codebase health check. 中文触发词：stop-wishing-audit、全仓审计、代码体检、接手项目、仓库审计。
 user-invocable: true
 ---
 

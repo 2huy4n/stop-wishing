@@ -15,6 +15,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)))
 const SKILLS_ROOT = join(ROOT, 'skills')
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'test', 'tmp', '.tmp', 'dist', 'coverage'])
 const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-/
+// 每个技能安装后都必须携带的许可与归属声明（MIT 要求副本保留声明）。
+const NOTICE_FILES = ['LICENSE', 'THIRD-PARTY-NOTICES.md']
 
 export const TOOL_ORDER = ['dsh', 'claude', 'codex', 'trae']
 /** 每个工具对应的 skills 根目录（四个技能会作为子目录放在这里）。 */
@@ -122,8 +124,8 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     groups.push({ label: 'scripts/ four scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
     groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
     groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
-    groups.push({ label: 'LICENSE present', files: ['LICENSE'] })
   }
+  groups.push({ label: 'license and third-party notices', files: NOTICE_FILES })
 
   const results = []
   for (const group of groups) {
@@ -131,8 +133,8 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     const stale = []
     for (const file of group.files) {
       const target = join(dir, file)
-      const source = file === 'LICENSE' && skillName === MAIN_SKILL && !existsSync(join(sourceDir, file))
-        ? join(sourceRoot, 'LICENSE')
+      const source = NOTICE_FILES.includes(file) && !existsSync(join(sourceDir, file))
+        ? join(sourceRoot, file)
         : join(sourceDir, file)
       if (!existsSync(target)) {
         missing.push(file)
@@ -205,7 +207,7 @@ export function install(options, home = homedir()) {
 
   const files = SKILL_NAMES.flatMap(name => {
     const list = collectFiles(join(SKILLS_ROOT, name))
-    if (name === MAIN_SKILL) list.push('LICENSE')
+    for (const notice of NOTICE_FILES) if (!list.includes(notice)) list.push(notice)
     return list.map(file => `${name}/${file}`)
   })
   const plan = []
@@ -239,7 +241,7 @@ export function install(options, home = homedir()) {
       files,
       plan,
       defaultHint,
-      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；主技能另查 scripts/ 4 个、templates/{zh,en} 各 7 份、LICENSE；不一致报 WARN 并退出 4',
+      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 4 个、templates/{zh,en} 各 7 份；不一致报 WARN 并退出 4',
     }
   }
 
@@ -252,10 +254,10 @@ export function install(options, home = homedir()) {
     if (item.action.startsWith('仅校验')) continue
     const sourceDir = join(SKILLS_ROOT, item.skill)
     const skillFiles = collectFiles(sourceDir)
-    if (item.skill === MAIN_SKILL) skillFiles.push('LICENSE')
+    skillFiles.push(...NOTICE_FILES.filter(file => !skillFiles.includes(file)))
     for (const file of skillFiles) {
-      const from = file === 'LICENSE' && item.skill === MAIN_SKILL && !existsSync(join(sourceDir, file))
-        ? join(ROOT, 'LICENSE')
+      const from = NOTICE_FILES.includes(file) && !existsSync(join(sourceDir, file))
+        ? join(ROOT, file)
         : join(sourceDir, file)
       const target = join(item.dest, file)
       mkdirSync(dirname(target), { recursive: true })
