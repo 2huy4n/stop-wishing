@@ -2,7 +2,7 @@
 
 治「许愿式编程」的技能包：**用户给一句模糊指令，AI 别急着写码，先对齐目标/边界/验收、先解释、先备份，再最小差异动手。**
 
-仓库现在包含 **4 个并列技能**：主技能负责接需求与交付流程，三个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」。
+仓库现在包含 **6 个并列技能**：主技能负责接需求与交付流程，五个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」「把需求写成 spec 卡」「把 spec 拆成有依赖顺序的票」。
 
 | 技能 | 用途 | 何时用 |
 |---|---|---|
@@ -10,21 +10,23 @@
 | [`stop-wishing-review`](skills/stop-wishing-review/SKILL.md) | 审查一次改动（diff / 分支 / PR），六维检查 | 合并前、上线前、让 AI 看一遍 diff |
 | [`stop-wishing-audit`](skills/stop-wishing-audit/SKILL.md) | 全仓审计：架构、流程、风险，最多 20 条发现 | 接手陌生项目、做代码体检 |
 | [`stop-wishing-debt`](skills/stop-wishing-debt/SKILL.md) | 从 `shortcut:` 注释生成技术债台账 | 规划清理、评估欠了多少债 |
+| [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | 把已确认的需求卡写成带验收标准的 spec 卡，并维护 `card_sha256` 与 `docs/project.md` 的一致性 | 需求谈完、要落成文档时 |
+| [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | 把 spec 拆成 tracer-bullet 票，维护 `blocked_by` 依赖 DAG 与状态 | 一个 spec 一次做不完、要排顺序时 |
 
 主技能正文为英文（`description` 中英双语，中文触发词保留），原中文版备份在 `skills/stop-wishing/SKILL.md.bak-20261023-1220`（已被 `.gitignore` 忽略）。
 
 ## 怎么装
 
-安装器会把 `skills/` 下的**四个技能**一起装进目标 skills 根目录：
+安装器会把 `skills/` 下的**六个技能**一起装进目标 skills 根目录：
 
 ```bash
 # 只看看会复制什么（不写盘）
 node install.js --dry-run
 
-# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt}
+# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets}
 node install.js --tool dsh --verify
 
-# 同时装给 Claude Code：~/.claude/skills/<四个技能>
+# 同时装给 Claude Code：~/.claude/skills/<六个技能>
 node install.js --tool claude --verify
 
 # 自定义 skills 根目录
@@ -34,7 +36,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 4 个脚本、`templates/{zh,en}` 各 7 份、`LICENSE`。
+`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 5 个脚本、`templates/{zh,en}` 各 7 份、`LICENSE`。
 
 编辑器适配说明见 [`adapters/`](adapters/)：`claude-code/README.md`、`codex/AGENTS.md`、`trae/README.md`。
 
@@ -50,14 +52,17 @@ stop-wishing/
 │   │   │   ├── check-env.js          # git/bash/node/仓库探测 → JSON + 备份建议
 │   │   │   ├── init-docs.js          # 生成 7 份项目文档到 <dir>/docs/
 │   │   │   ├── check-hardcode.js     # 硬编码扫描（支持 .hardcodeignore）
+│   │   │   ├── check-tickets.js      # 校验 docs/tickets 与 docs/specs（13 错 5 警）
 │   │   │   └── build-portable.js     # 生成 portable/stop-wishing.md
 │   │   └── templates/{zh,en}/        # 7 份项目文档模板
 │   ├── stop-wishing-review/SKILL.md  # 审查一次改动
 │   ├── stop-wishing-audit/SKILL.md   # 全仓审计
-│   └── stop-wishing-debt/SKILL.md    # 技术债台账
+│   ├── stop-wishing-debt/SKILL.md    # 技术债台账
+│   ├── stop-wishing-spec/SKILL.md    # 把需求写成 spec 卡
+│   └── stop-wishing-tickets/SKILL.md # 把 spec 拆成票（依赖 DAG）
 ├── LICENSE                           # AGPL-3.0-or-later 全文
 ├── THIRD-PARTY-NOTICES.md            # ponytail (MIT) 的版权与许可声明
-├── install.js                        # 安装四个技能（--dry-run / --force / --tool / --dest / --target / --verify）
+├── install.js                        # 安装六个技能（--dry-run / --force / --tool / --dest / --target / --verify）
 ├── adapters/                         # 各编辑器接入说明
 ├── portable/                         # 便携单文件（由 build-portable.js 生成）
 ├── test/                             # node --test 用例
@@ -106,12 +111,12 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 
    参数：`--tool` / `--dest` / `--verify` / `--dry-run` / `--force` / `--target`。其中：
 
-   - `--dest <skills 根目录>` = 直接作为 skills 根目录，下面创建 4 个技能子目录；
-   - `--target <base>` = **兼容旧用法**，同样把 4 个技能装到 `<base>/stop-wishing{,-review,-audit,-debt}`。
+   - `--dest <skills 根目录>` = 直接作为 skills 根目录，下面创建 6 个技能子目录；
+   - `--target <base>` = **兼容旧用法**，同样把 6 个技能装到 `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets}`。
 
    `--verify` 逐文件与源做 hash 比对：`[PASS] 齐全且与源一致` / `[WARN] 齐全但内容落后于源（退出码 4，建议加 --force 更新）` / `[FAIL] 缺失或不一致（退出码 3）`。总体退出码：0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 缺失或不一致 / 4 落后于源。
 
-5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/` 四个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（4 个）、`templates/zh` 与 `templates/en`（各 7 份）、`LICENSE`。`--verify` 全 PASS 才算装好。
+5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/` 六个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（5 个）、`templates/zh` 与 `templates/en`（各 7 份）、`LICENSE`。`--verify` 全 PASS 才算装好。
 6. **失败处理**：若写入被沙箱/权限拒绝，**不要反复重试**，直接告诉用户「需要你手动执行」，并给出可直接复制的命令：
 
    ```bash
@@ -121,13 +126,32 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
    cp -R skills/stop-wishing-review  ~/.agents/skills/stop-wishing-review
    cp -R skills/stop-wishing-audit   ~/.agents/skills/stop-wishing-audit
    cp -R skills/stop-wishing-debt    ~/.agents/skills/stop-wishing-debt
+   cp -R skills/stop-wishing-spec    ~/.agents/skills/stop-wishing-spec
+   cp -R skills/stop-wishing-tickets ~/.agents/skills/stop-wishing-tickets
 
    # Windows PowerShell
    New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
    Copy-Item skills\stop-wishing* "$env:USERPROFILE\.agents\skills\" -Recurse
    ```
 
-7. **装完告诉用户怎么触发**：输入 `/stop-wishing`，或直接说「用 stop-wishing 流程」（也可说「先解释再写码」「改动前备份」等触发词）。审查/审计/债务分别用 `/stop-wishing-review`、`/stop-wishing-audit`、`/stop-wishing-debt`。
+7. **装完告诉用户怎么触发**：输入 `/stop-wishing`，或直接说「用 stop-wishing 流程」（也可说「先解释再写码」「改动前备份」等触发词）。审查/审计/债务/写规格/拆票分别用 `/stop-wishing-review`、`/stop-wishing-audit`、`/stop-wishing-debt`、`/stop-wishing-spec`、`/stop-wishing-tickets`。
+
+## 脚本（零第三方依赖）
+
+| 脚本 | 用途 | 退出码 |
+|---|---|---|
+| `skills/stop-wishing/scripts/check-env.js` | 探测 git/bash/node/是否 git 仓库，输出 JSON + 备份建议 | 0 就绪 / 1 缺关键项 |
+| `skills/stop-wishing/scripts/init-docs.js` | 从 `templates/<lang>/` 生成 7 份项目文档（含 `LICENSES.md` 与进度快照） | 0 成功 / 1 参数错误或已存在 / 2 模板缺失 |
+| `skills/stop-wishing/scripts/check-hardcode.js` | 扫绝对路径/密钥/URL/端口/魔法数字（支持 `.hardcodeignore`） | 0 干净或全部被抑制 / 2 有未抑制命中或忽略文件非法 |
+| `skills/stop-wishing/scripts/check-tickets.js` | 校验 `docs/tickets/*.md`（并对照 `docs/specs/`、`docs/project.md`）：E1–E13 错误 + W1–W5 警告 | 0 无错误（可有警告）/ 1 有错误 / 2 用法或 IO |
+| `skills/stop-wishing/scripts/build-portable.js` | 把主技能正文合成 `portable/stop-wishing.md` | 0 成功 / 2 `SKILL.md` 缺失 |
+
+`check-tickets.js` 的检查项：E1 front-matter 解析、E2 必填字段（id/title/spec/status/acceptance/verify）、E3 文件名、E4 id 与文件名前缀、E5 id 重复、E6 status、E7 spec 不存在、E8 blocked_by 指向不存在的票、E9 自依赖、E10 成环、E11 验收为空、E12 verify 为空或少于验收条数、E13 done/dropped 仍被依赖；警告：W1 缺 estimate、W2 验收超过 5 条、W3 verify 全不可执行、W4 spec 的 `card_sha256` 与 `docs/project.md` 不一致、W5 spec 未被任何票引用。
+
+```bash
+node skills/stop-wishing/scripts/check-tickets.js --dir <项目根> [--json]
+# 0 = 无错误（警告不影响退出码）；1 = 有错误；2 = 用法或 IO 错误
+```
 
 ## 许可证
 

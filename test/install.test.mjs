@@ -18,7 +18,7 @@ function cli(args) {
   })
 }
 
-test('install --dry-run：报告四个技能但不写盘，退出码 0', () => {
+test('install --dry-run：报告六个技能但不写盘，退出码 0', () => {
   const base = mkdtempSync(join(tmpdir(), 'sw-install-dry-'))
   const out = cli(['--dry-run', '--target', base])
   assert.equal(out.status, 0, out.stderr)
@@ -27,7 +27,7 @@ test('install --dry-run：报告四个技能但不写盘，退出码 0', () => {
   assert.equal(existsSync(join(base, 'stop-wishing')), false, 'dry-run 绝不能创建目标目录')
 })
 
-test('install：真实复制四个技能到 --target，含主技能脚本/模板与卫星 SKILL.md', () => {
+test('install：真实复制六个技能到 --target，含主技能脚本/模板与卫星 SKILL.md', () => {
   const base = mkdtempSync(join(tmpdir(), 'sw-install-real-'))
   const out = cli(['--target', base])
   assert.equal(out.status, 0, out.stderr)
@@ -51,7 +51,7 @@ test('install：默认不覆盖（exit 1），--force 才覆盖', () => {
   assert.equal(cli(['--target', base, '--force']).status, 0)
 })
 
-test('--dest：作为 skills 根目录，安装四个子目录', () => {
+test('--dest：作为 skills 根目录，安装六个子目录', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-install-dest-'))
   const out = cli(['--dest', root])
   assert.equal(out.status, 0, out.stderr)
@@ -61,14 +61,14 @@ test('--dest：作为 skills 根目录，安装四个子目录', () => {
   assert.equal(existsSync(join(root, 'SKILL.md')), false, '--dest 不应把文件散在根下')
 })
 
-test('--verify：四个技能逐个 PASS，退出码 0', () => {
+test('--verify：六个技能逐个 PASS，退出码 0', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-install-verify-'))
   const out = cli(['--dest', root, '--verify'])
   assert.equal(out.status, 0, out.stdout + out.stderr)
   for (const skill of SKILL_NAMES) {
     assert.match(out.stdout, new RegExp(`\\[PASS\\] SKILL\\.md exists and name: ${skill}`))
   }
-  assert.match(out.stdout, /\[PASS\] scripts\/ four scripts present/)
+  assert.match(out.stdout, /\[PASS\] scripts\/ five scripts present/)
   assert.match(out.stdout, /\[PASS\] templates\/zh\/ seven files/)
   assert.match(out.stdout, /\[PASS\] templates\/en\/ seven files/)
   assert.match(out.stdout, /\[PASS\] license and third-party notices/)
@@ -81,7 +81,7 @@ test('--verify：删掉主技能一个脚本后自检失败，退出码 3', () =
   rmSync(join(root, 'stop-wishing', 'scripts', 'check-env.js'))
   const out = cli(['--dest', root, '--verify'])
   assert.equal(out.status, 3, out.stdout + out.stderr)
-  assert.match(out.stdout, /\[FAIL\] scripts\/ four scripts present/)
+  assert.match(out.stdout, /\[FAIL\] scripts\/ five scripts present/)
   assert.match(out.stdout, /check-env/)
 })
 
@@ -107,7 +107,7 @@ test('--verify：front-matter name 与目录名不一致时 FAIL', () => {
   assert.match(out.stdout, /front-matter name/)
 })
 
-test('--tool 路径解析：返回 skills 根目录，四个技能由安装器创建子目录', () => {
+test('--tool 路径解析：返回 skills 根目录，六个技能由安装器创建子目录', () => {
   const home = join(tmpdir(), 'sw-fake-home')
   for (const tool of ['dsh', 'codex', 'trae']) {
     const [dest] = resolveDestinations({ tool }, home)
@@ -117,7 +117,7 @@ test('--tool 路径解析：返回 skills 根目录，四个技能由安装器�
   assert.equal(claudeDest, join(home, '.claude', 'skills'))
 })
 
-test('--tool claude --dry-run：解析到 ~/.claude/skills 且列出四个技能', () => {
+test('--tool claude --dry-run：解析到 ~/.claude/skills 且列出六个技能', () => {
   const out = cli(['--tool', 'claude', '--dry-run'])
   assert.equal(out.status, 0, out.stderr)
   assert.match(out.stdout, /\.claude[/\\]skills[/\\]stop-wishing/)
@@ -132,7 +132,7 @@ test('--tool 未知值：退出码 1 并列出可选值', () => {
   assert.match(out.stderr, /dsh \| claude \| codex \| trae/)
 })
 
-test('--dest 与 --target 都是 skills 根目录：各自生成四个子目录', () => {
+test('--dest 与 --target 都是 skills 根目录：各自生成六个子目录', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-levels-'))
   const destRoot = join(root, 'dest')
   assert.equal(cli(['--dest', destRoot]).status, 0)
