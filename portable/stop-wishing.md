@@ -1,8 +1,8 @@
 # stop-wishing · portable edition (full text + hard-constraint quick reference + script usage)
 
-> Generated 2026-10-23T16:40+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
+> Generated 2026-10-23T17:48+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
 > This file = the full SKILL.md body (including §9) + the quick reference below + script usage.
-> The five satellite skills (review / audit / debt / spec / tickets) are separate directories under `skills/`.
+> The six satellite skills (review / audit / debt / spec / tickets / setup) are separate directories under `skills/`.
 
 # stop-wishing — align before you code
 
@@ -226,4 +226,4 @@ node install.js --tool claude --verify
 node skills/stop-wishing/scripts/build-portable.js
 ```
 
-Satellite skills are documented separately: `skills/stop-wishing-review`, `skills/stop-wishing-audit`, `skills/stop-wishing-debt`, `skills/stop-wishing-spec`, `skills/stop-wishing-tickets`.
+Satellite skills are documented separately: `skills/stop-wishing-review`, `skills/stop-wishing-audit`, `skills/stop-wishing-debt`, `skills/stop-wishing-spec`, `skills/stop-wishing-tickets`, `skills/stop-wishing-setup`.

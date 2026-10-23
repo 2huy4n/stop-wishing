@@ -7,7 +7,7 @@
 | 技能 | 用途 | 何时用 |
 |---|---|---|
 | [`stop-wishing`](skills/stop-wishing/SKILL.md) | 主技能：澄清、需求卡、许可证闸门、备份、最小差异、证据汇报 | 接到模糊需求、改别人的仓库、引入依赖/字体/图标/API |
-| [`stop-wishing-review`](skills/stop-wishing-review/SKILL.md) | 审查一次改动（diff / 分支 / PR），六维检查 | 合并前、上线前、让 AI 看一遍 diff |
+| [`stop-wishing-review`](skills/stop-wishing-review/SKILL.md) | 审查一次改动（diff / 分支 / PR）：Intent（有没有做对）+ Engineering（会不会炸，六维 + 12 条坏味道） | 合并前、上线前、让 AI 看一遍 diff |
 | [`stop-wishing-audit`](skills/stop-wishing-audit/SKILL.md) | 全仓审计：架构、流程、风险，最多 20 条发现 | 接手陌生项目、做代码体检 |
 | [`stop-wishing-debt`](skills/stop-wishing-debt/SKILL.md) | 从 `shortcut:` 注释生成技术债台账 | 规划清理、评估欠了多少债 |
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | 把已确认的需求卡写成带验收标准的 spec 卡，并维护 `card_sha256` 与 `docs/project.md` 的一致性 | 需求谈完、要落成文档时 |
@@ -48,7 +48,7 @@ stop-wishing/
 ├── skills/
 │   ├── stop-wishing/                 # 主技能
 │   │   ├── SKILL.md                  # 英文正文（17 章）
-│   │   ├── SKILL.md.bak-20261023-1220# 原中文版备份（git 忽略）
+│   │   ├── SKILL.md.bak-20261023-1220# 原中文版备份（仅本地，不入库）
 │   │   ├── agents/openai.yaml        # Codex 元数据（展示名/简介）
 │   │   ├── scripts/
 │   │   │   ├── check-env.js          # git/bash/node/仓库探测 → JSON + 备份建议
@@ -179,5 +179,7 @@ node skills/stop-wishing/scripts/setup.js --dir <项目根> \
 - 你可以按 AGPL 条款**使用、修改、再分发**；
 - 分发修改版时需保留同样的许可证与版权声明；若把它作为网络服务提供给别人使用，AGPL 第 13 条要求向使用者提供对应源码；
 - 主技能另外**要求使用者在引入任何外部东西之前**过一遍许可证闸门（代码依赖、字体、图标/图片、第三方 API 条款、模板片段），并把结论写进项目里的 `docs/LICENSES.md`。
+
+## Credits
 
 `stop-wishing` 的部分内容改写并合并自 MIT 许可的 **ponytail**（Copyright (c) 2026 DietrichGebert）。完整 MIT 文本与归属说明见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md)。
