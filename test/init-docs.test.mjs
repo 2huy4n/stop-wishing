@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -98,4 +98,32 @@ test('F3/F7 单元：insertSnapshot 把快照插在 H1 之后', () => {
   assert.equal(lines[0], '# 标题')
   assert.equal(lines[2], '> 快照')
   assert.ok(result.includes('正文'))
+})
+
+test('AGENTS.md：默认不生成；--agents-md 才生成指针文件', () => {
+  const off = mkdtempSync(join(tmpdir(), 'sw-agents-off-'))
+  assert.equal(cli(['--lang', 'zh', '--dir', off]).status, 0)
+  assert.equal(existsSync(join(off, 'AGENTS.md')), false, '未加 --agents-md 不得生成')
+
+  const on = mkdtempSync(join(tmpdir(), 'sw-agents-on-'))
+  const out = cli(['--lang', 'zh', '--dir', on, '--agents-md'])
+  assert.equal(out.status, 0, out.stderr)
+  const text = readFileSync(join(on, 'AGENTS.md'), 'utf8')
+  assert.match(text, /docs\/project\.md/)
+  assert.match(text, /docs\/discipline\.md/)
+  assert.match(out.stdout, /已生成 AGENTS\.md/)
+})
+
+test('AGENTS.md：已存在 AGENTS.md / CLAUDE.md 时绝不覆盖', () => {
+  const a = mkdtempSync(join(tmpdir(), 'sw-agents-exist-'))
+  writeFileSync(join(a, 'AGENTS.md'), '# 我自己的约定\n', 'utf8')
+  const out = cli(['--lang', 'zh', '--dir', a, '--agents-md'])
+  assert.equal(out.status, 0, out.stderr)
+  assert.equal(readFileSync(join(a, 'AGENTS.md'), 'utf8'), '# 我自己的约定\n', '不得覆盖用户文件')
+  assert.match(out.stdout, /未生成 AGENTS\.md/)
+
+  const b = mkdtempSync(join(tmpdir(), 'sw-claude-exist-'))
+  writeFileSync(join(b, 'CLAUDE.md'), '# CLAUDE\n', 'utf8')
+  assert.equal(cli(['--lang', 'zh', '--dir', b, '--agents-md']).status, 0)
+  assert.equal(existsSync(join(b, 'AGENTS.md')), false, '有 CLAUDE.md 时不再建 AGENTS.md')
 })

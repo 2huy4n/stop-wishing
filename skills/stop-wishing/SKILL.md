@@ -74,6 +74,16 @@ Seven fields: 1. **Goal** — whose problem, what it becomes. 2. **Users and sce
 
 Plus **Assumptions** (value + reason + cost if wrong) and **Open questions** (not blocking; when each must be decided). Light: verbal. **Medium/heavy: `docs/project.md`; confirm before starting.**
 
+### AGENTS.md — ask before writing
+
+When `docs/` is created or first used in a repo, add one opening question:
+
+> "Do you want a repo-root `AGENTS.md` pointing to these docs, so any agent working here reads them automatically?"
+
+- **Only write after an explicit yes** — run `init-docs.js --agents-md`. Silence, "maybe" or a changed subject is **no**.
+- **Never overwrite** an existing `AGENTS.md` or `CLAUDE.md`: it is the user's own steering file. Offer to append a short `## Project docs` block instead; if they decline, skip.
+- Keep it to **pointers only** (5–10 lines). Never paste the documents into it: it sits in every future conversation and costs tokens.
+
 ## 6) Defaults
 
 "Don't know / you decide / anything": give **one recommendation** (not a menu), **one plain reason**, **record it in Assumptions**, continue — not a failed question. Never read "you decide" as scope expansion; never decide outside Assumptions.

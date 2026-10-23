@@ -64,6 +64,22 @@ stop-wishing/
 └── .hardcodeignore                   # 本仓自己的抑制清单（每条都要写理由）
 ```
 
+## 项目文档与 AGENTS.md（可选）
+
+`init-docs.js` 默认只在 `<项目>/docs/` 生成 7 份文档。加 `--agents-md` 会**额外**在仓库根写一个 `AGENTS.md`，里面只有 5–10 行指针，让任何 agent 一进仓库就先读这些文档：
+
+```bash
+node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --agents-md
+```
+
+规则：
+
+- **默认不生成**，只有用户明确同意才加这个参数；
+- 已存在 `AGENTS.md` 或 `CLAUDE.md` 时**绝不覆盖**，只报告「未生成」；
+- 只放指针，不搬正文——它会常驻每次对话，塞多了是负担。
+
+技能本身也会在开头提问时问一次：「要不要放一个 AGENTS.md 指向这些文档？」回答不是明确的「要」，就不写。
+
 ## 给 AI 看：用户不会装时按此执行
 
 给 claude/gpt/kimi/deepseek/glm/hy/minimax/qwen 或者任何 AI 看：

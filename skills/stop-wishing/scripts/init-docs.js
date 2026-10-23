@@ -15,11 +15,12 @@ const DOCS = ['project', 'content', 'structure', 'progress', 'todo', 'discipline
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 export function parseArgs(argv) {
-  const options = { lang: null, dir: process.cwd(), force: false, help: false, unknown: [] }
+  const options = { lang: null, dir: process.cwd(), force: false, agentsMd: false, help: false, unknown: [] }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === '--help' || arg === '-h') options.help = true
     else if (arg === '--force') options.force = true
+    else if (arg === '--agents-md') options.agentsMd = true
     else if (arg === '--lang') {
       options.lang = argv[i + 1] ?? null
       i += 1
@@ -35,11 +36,13 @@ export function parseArgs(argv) {
 
 function usage() {
   return [
-    '用法: node scripts/init-docs.js --lang <en|zh> [--dir <目录>] [--force]',
+    '用法: node scripts/init-docs.js --lang <en|zh> [--dir <目录>] [--force] [--agents-md]',
     '',
     '  --lang  模板语言（必填）：en | zh',
     '  --dir   目标目录（默认当前目录）；文档写到 <dir>/docs/',
     '  --force 覆盖已存在的文档（默认拒绝）',
+    '  --agents-md  额外在仓库根写一个 AGENTS.md（只放指向 docs/ 的指针）；',
+    '               仅在用户明确同意时使用；已存在 AGENTS.md 或 CLAUDE.md 时不覆盖',
     '',
     '退出码: 0 成功 / 1 参数错误或目标已存在 / 2 模板缺失',
   ].join('\n')
@@ -112,7 +115,24 @@ export function initDocs(options, env = checkEnv()) {
   const original = readFileSync(progressPath, 'utf8')
   writeFileSync(progressPath, insertSnapshot(original, snapshotLines(env)), 'utf8')
 
-  return { ok: true, code: 0, lang, docsDir, written, snapshotted: progressPath }
+  // AGENTS.md 只在用户明确同意时生成（--agents-md）；已有 AGENTS.md 或 CLAUDE.md 时不覆盖——
+  // 那是用户自己的仓库约定，改它比不生成危险得多。
+  let agentsMd = null
+  if (options.agentsMd) {
+    const rootDir = resolve(options.dir)
+    const agentsPath = join(rootDir, 'AGENTS.md')
+    const claudePath = join(rootDir, 'CLAUDE.md')
+    if (existsSync(agentsPath) || existsSync(claudePath)) {
+      agentsMd = { written: false, reason: (existsSync(agentsPath) ? 'AGENTS.md' : 'CLAUDE.md') + ' 已存在，未修改' }
+    } else {
+      const source = join(templates, 'AGENTS.md.tpl')
+      if (!existsSync(source)) return { ok: false, code: 2, message: '模板缺失: ' + source }
+      copyFileSync(source, agentsPath)
+      agentsMd = { written: true, path: agentsPath }
+    }
+  }
+
+  return { ok: true, code: 0, lang, docsDir, written, snapshotted: progressPath, agentsMd }
 }
 
 if (process.argv[1]?.endsWith('init-docs.js')) {
@@ -125,6 +145,10 @@ if (process.argv[1]?.endsWith('init-docs.js')) {
     if (result.ok) {
       process.stdout.write(`已生成 ${result.written.length} 份文档到 ${result.docsDir}\n`)
       for (const file of result.written) process.stdout.write('  - ' + file + '\n')
+      if (result.agentsMd) {
+        if (result.agentsMd.written) process.stdout.write('已生成 AGENTS.md: ' + result.agentsMd.path + '\n')
+        else process.stdout.write('未生成 AGENTS.md: ' + result.agentsMd.reason + '\n')
+      }
       process.exitCode = 0
     } else {
       process.stderr.write(result.message + '\n')

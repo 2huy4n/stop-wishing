@@ -1,6 +1,6 @@
 # stop-wishing · portable edition (full text + hard-constraint quick reference + script usage)
 
-> Generated 2026-10-23T12:36+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
+> Generated 2026-10-23T14:17+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
 > This file = the full SKILL.md body (including §9) + the quick reference below + script usage.
 > The three satellite skills (review / audit / debt) are separate directories under `skills/`.
 
@@ -72,6 +72,16 @@ Judged by **ambiguity, not change size**: one CSS line can be heavy; a 20-file r
 Seven fields: 1. **Goal** — whose problem, what it becomes. 2. **Users and scenario** — who, when, how often. 3. **Input/output** — in/out, format, example. 4. **Scope and boundaries** — included **and explicitly not done**. 5. **Acceptance** — command, screenshot, comparison or sign-off. 6. **Constraints** — stack, untouchables, budget/time, compliance. 7. **Delivery form** — **prototype** (rough OK) or **production** (maintainable, tested, documented).
 
 Plus **Assumptions** (value + reason + cost if wrong) and **Open questions** (not blocking; when each must be decided). Light: verbal. **Medium/heavy: `docs/project.md`; confirm before starting.**
+
+### AGENTS.md — ask before writing
+
+When `docs/` is created or first used in a repo, add one opening question:
+
+> "Do you want a repo-root `AGENTS.md` pointing to these docs, so any agent working here reads them automatically?"
+
+- **Only write after an explicit yes** — run `init-docs.js --agents-md`. Silence, "maybe" or a changed subject is **no**.
+- **Never overwrite** an existing `AGENTS.md` or `CLAUDE.md`: it is the user's own steering file. Offer to append a short `## Project docs` block instead; if they decline, skip.
+- Keep it to **pointers only** (5–10 lines). Never paste the documents into it: it sits in every future conversation and costs tokens.
 
 ## 6) Defaults
 
