@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 2026-10-23T14:50+08:00 · 改动：扩到六个技能（新增 spec / tickets）并给主技能加 check-tickets 脚本；原因：新增两条工作流技能；回滚：git checkout pre-tickets-20261023-1445
+// 2026-10-23T15:46+08:00 · 改动：扩到七个技能（新增 setup）并给主技能加 setup 脚本；原因：新增初始化工作流；回滚：git checkout pre-setup-20261023-1528
 //
 // 为什么默认不覆盖：用户的 skills 目录里可能已经有改过的版本，「安装」把它冲掉是典型的
 // 不可逆操作（SKILL.md §9 要求人批）。
@@ -19,7 +19,7 @@ const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-/
 const NOTICE_FILES = ['LICENSE', 'THIRD-PARTY-NOTICES.md']
 
 export const TOOL_ORDER = ['dsh', 'claude', 'codex', 'trae']
-/** 每个工具对应的 skills 根目录（六个技能会作为子目录放在这里）。 */
+/** 每个工具对应的 skills 根目录（七个技能会作为子目录放在这里）。 */
 export const TOOL_TARGETS = {
   dsh: ['.agents', 'skills'],
   codex: ['.agents', 'skills'],
@@ -27,9 +27,9 @@ export const TOOL_TARGETS = {
   claude: ['.claude', 'skills'],
 }
 
-export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets']
+export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
 export const MAIN_SKILL = 'stop-wishing'
-export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'build-portable', 'check-tickets']
+export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'build-portable', 'check-tickets', 'setup']
 export const TEMPLATE_NAMES = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
 export const TEMPLATE_LANGS = ['zh', 'en']
 
@@ -63,7 +63,7 @@ export function usage() {
   return [
     '用法: node install.js [--tool <dsh|claude|codex|trae>] [--dest <skills根目录>] [--verify] [--dry-run] [--force] [--target <base>]',
     '',
-    '  安装 skills/ 下的全部六个技能：stop-wishing、stop-wishing-review、stop-wishing-audit、stop-wishing-debt、stop-wishing-spec、stop-wishing-tickets。',
+    '  安装 skills/ 下的全部七个技能：stop-wishing、stop-wishing-review、stop-wishing-audit、stop-wishing-debt、stop-wishing-spec、stop-wishing-tickets、stop-wishing-setup。',
     '',
     '  --tool    按用户所用工具选 skills 根目录（推荐 AI 用这个）：',
     '              dsh / codex / trae -> ~/.agents/skills',
@@ -71,11 +71,11 @@ export function usage() {
     '  --dest    【skills 根目录】装成 <目录>/stop-wishing、<目录>/stop-wishing-review、<目录>/stop-wishing-audit、<目录>/stop-wishing-debt、<目录>/stop-wishing-spec、<目录>/stop-wishing-tickets',
     '              例: --dest <目录>  →  <目录>/stop-wishing/SKILL.md + 五个卫星技能目录',
     '  --verify  安装后自检：逐个技能校验 SKILL.md 存在、front-matter name 与目录名一致、与源 hash 一致；',
-    '              主技能额外校验 scripts/ 5 个、templates/{zh,en} 各 7 份、LICENSE。',
+    '              主技能额外校验 scripts/ 6 个、templates/{zh,en} 各 7 份、LICENSE。',
     '              [PASS] 齐全且与源一致 / [WARN] 齐全但内容落后于源（退出码 4）/ [FAIL] 缺失或不一致（退出码 3）',
     '  --dry-run 只打印会复制什么、将校验什么，不写盘',
     '  --force   目标已存在时覆盖（默认拒绝）',
-    '  --target  【兼容旧用法】只给 base 目录，六个技能装到 <base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets}',
+    '  --target  【兼容旧用法】只给 base 目录，七个技能装到 <base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup}',
     '',
     '不给 --tool/--dest/--target 时默认 ~/.agents/skills（等价 --tool dsh）。',
     '退出码: 0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 自检失败（缺失或不一致） / 4 自检告警（内容落后于源）',
@@ -121,7 +121,7 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     { label: `SKILL.md exists and name: ${skillName}`, files: ['SKILL.md'], requireName: skillName },
   ]
   if (skillName === MAIN_SKILL) {
-    groups.push({ label: 'scripts/ five scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
+    groups.push({ label: 'scripts/ six scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
     groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
     groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
   }
@@ -184,7 +184,7 @@ export function collectFiles(root) {
   return files.sort()
 }
 
-/** 源文件完整性：六个技能的 SKILL.md 都必须存在。 */
+/** 源文件完整性：七个技能的 SKILL.md 都必须存在。 */
 export function missingSources() {
   return SKILL_NAMES.filter(name => !existsSync(join(SKILLS_ROOT, name, 'SKILL.md')))
 }
@@ -241,7 +241,7 @@ export function install(options, home = homedir()) {
       files,
       plan,
       defaultHint,
-      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 5 个、templates/{zh,en} 各 7 份；不一致报 WARN 并退出 4',
+      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 6 个、templates/{zh,en} 各 7 份；不一致报 WARN 并退出 4',
     }
   }
 

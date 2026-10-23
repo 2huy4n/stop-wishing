@@ -37,7 +37,7 @@ function frontMatter(text) {
   return fields
 }
 
-test('六个技能目录都存在，且各有 SKILL.md', () => {
+test('七个技能目录都存在，且各有 SKILL.md', () => {
   for (const name of SKILL_NAMES) {
     assert.equal(existsSync(join(SKILLS_DIR, name, 'SKILL.md')), true, `缺 skills/${name}/SKILL.md`)
   }
