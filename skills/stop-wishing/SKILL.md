@@ -84,6 +84,15 @@ When `docs/` is created or first used in a repo, add one opening question:
 - **Never overwrite** an existing `AGENTS.md` or `CLAUDE.md`: it is the user's own steering file. Offer to append a short `## Project docs` block instead; if they decline, skip.
 - Keep it to **pointers only** (5–10 lines). Never paste the documents into it: it sits in every future conversation and costs tokens.
 
+### Next steps (offer once)
+
+After the card is confirmed, offer the next step **once**, in plain language — one offer, not a menu:
+
+- **Card confirmed:** "The card is confirmed. Want me to turn it into a spec? I'll only assemble what you already told me — no new questions."
+- **Spec saved:** "Spec saved to `docs/specs/<id>.md`. Want me to split it into tickets? Each ticket gets its dependency order and a verify command."
+
+Details: `stop-wishing-spec` writes the spec, `stop-wishing-tickets` splits it (both in §17). Offer each **once**; if the user skips, declines or changes the subject, record it in the closing `Skipped:` line (§15) and **do not ask again**. A spec or a ticket set is never a precondition for work the user already approved.
+
 ## 6) Defaults
 
 "Don't know / you decide / anything": give **one recommendation** (not a menu), **one plain reason**, **record it in Assumptions**, continue — not a failed question. Never read "you decide" as scope expansion; never decide outside Assumptions.
@@ -174,7 +183,7 @@ Never trade for speed or scope — even in lite: validation; error handling that
 
 ## 17) Satellite skills
 
-**stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers.
+**stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers. **stop-wishing-spec** — turn the requirement card into one written spec (synthesise what was said; never re-interview). **stop-wishing-tickets** — split a spec into tracer-bullet tickets with an explicit dependency DAG.
 
 ## Bundled scripts
 

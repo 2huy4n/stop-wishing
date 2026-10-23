@@ -59,7 +59,7 @@ node install.js --tool claude --verify
 node skills/stop-wishing/scripts/build-portable.js
 \`\`\`
 
-Satellite skills are documented separately: \`skills/stop-wishing-review\`, \`skills/stop-wishing-audit\`, \`skills/stop-wishing-debt\`.
+Satellite skills are documented separately: \`skills/stop-wishing-review\`, \`skills/stop-wishing-audit\`, \`skills/stop-wishing-debt\`, \`skills/stop-wishing-spec\`, \`skills/stop-wishing-tickets\`.
 `
 
 export function buildPortable(root = ROOT) {
@@ -73,7 +73,7 @@ export function buildPortable(root = ROOT) {
     '',
     '> Generated ' + stamp() + ' from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).',
     '> This file = the full SKILL.md body (including §9) + the quick reference below + script usage.',
-    '> The three satellite skills (review / audit / debt) are separate directories under `skills/`.',
+    '> The five satellite skills (review / audit / debt / spec / tickets) are separate directories under `skills/`.',
     '',
   ].join('\n')
   const quick = ['## Hard constraints quick reference (condensed from §9; the body above is authoritative)', '', ...hardRules, ''].join('\n')

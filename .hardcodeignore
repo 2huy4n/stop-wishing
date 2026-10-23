@@ -26,3 +26,5 @@ test/*.mjs : magic-number : 子进程超时与阈值参数，测试用例明确�
 THIRD-PARTY-NOTICES.md : url : ponytail 来源与 MIT 许可要求的归属链接，不是可配置端点
 THIRD-PARTY-NOTICES.md : magic-number : MIT 版权行里的年份（2026），许可证要求保留
 README.md : magic-number : 文档里说明 ponytail 版权年份（2026），非可配置常量
+# 工单编号上限是规格说明（4 位全局单调，超过 9999 报错），不是可配置的业务常量
+skills/stop-wishing-tickets/SKILL.md : magic-number : 文档里写明的 4 位编号上限 9999，属规格约束，非可配置常量
