@@ -1,6 +1,6 @@
 # stop-wishing · portable edition (full text + hard-constraint quick reference + script usage)
 
-> Generated 2026-10-23T14:52+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
+> Generated 2026-10-23T15:06+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
 > This file = the full SKILL.md body (including §9) + the quick reference below + script usage.
 > The five satellite skills (review / audit / debt / spec / tickets) are separate directories under `skills/`.
 

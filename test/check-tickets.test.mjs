@@ -121,3 +121,31 @@ test('--json：结构化输出 errors/warnings/counts', () => {
   assert.equal(typeof parsed.counts.tickets, 'number')
   assert.ok(Array.isArray(parsed.errors) && parsed.errors.some(item => item.code === 'E9'))
 })
+
+test('带引号的数组元素按无引号处理，不误报 E8 / W3', () => {
+  const hash = projectHash(PROJECT_MD)
+  const quoted = (id, title, blocked) => `---\nid: "${id}"\ntitle: ${title}\nspec: 2026-10-23-login\nstatus: todo\nblocked_by: ${blocked}\nacceptance:\n  - "能用邮箱登录"\nverify:\n  - "node --test"\nestimate: S\n---\n\n# ${id}\n`
+  const dir = buildProject({
+    'docs/project.md': PROJECT_MD,
+    'docs/specs/2026-10-23-login.md': specFile(hash),
+    'docs/tickets/0001-login.md': quoted('0001', '登录', '[]'),
+    'docs/tickets/0002-login-ui.md': quoted('0002', '登录页', '["0001"]'),
+  })
+  const out = run(['--dir', dir])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  assert.doesNotMatch(out.stdout, /E8/, '带引号的 blocked_by 不应被判为票不存在')
+  assert.doesNotMatch(out.stdout, /W3/, '带引号的 verify 不应被误判为非命令')
+})
+
+test('自依赖只报 E9，不重复报 E10 假环', () => {
+  const hash = projectHash(PROJECT_MD)
+  const dir = buildProject({
+    'docs/project.md': PROJECT_MD,
+    'docs/specs/2026-10-23-login.md': specFile(hash),
+    'docs/tickets/0001-login.md': ticket({ blockedBy: ['0001'] }),
+  })
+  const out = run(['--dir', dir])
+  assert.equal(out.status, 1)
+  assert.match(out.stdout, /E9/)
+  assert.doesNotMatch(out.stdout, /E10/, '自依赖不应再报一条 0001 -> 0001 的假环')
+})

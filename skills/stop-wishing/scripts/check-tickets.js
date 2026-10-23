@@ -43,6 +43,15 @@ function usage() {
   ].join('\n')
 }
 
+/** 去掉一层成对引号：票里的 id 写成 "0007" 是为了让 YAML 别当八进制，校验时按 0007 处理。 */
+function unquote(text) {
+  const value = String(text).trim()
+  if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
+    return value.slice(1, -1)
+  }
+  return value
+}
+
 /** 极简 front-matter 解析：`---` 块内 key: value；数组支持 [a, b] 与后续 `- item`。 */
 export function parseFrontMatter(text) {
   const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/)
@@ -67,21 +76,17 @@ export function parseFrontMatter(text) {
       if (!lastKey) return { ok: false, fields, error: `第 ${lineNo} 行：列表项没有归属的 key` }
       const entry = fields.get(lastKey)
       if (!Array.isArray(entry.value)) entry.value = []
-      entry.value.push(item[1].trim())
+      entry.value.push(unquote(item[1]))
       continue
     }
     const kv = /^([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(raw)
     if (!kv) return { ok: false, fields, error: `第 ${lineNo} 行无法解析（应为 key: value）` }
     const key = kv[1]
-    let value = kv[2].trim()
-    // 去引号：票里的 id 写成 "0007" 是为了让 YAML 别当八进制，校验时按 0007 处理。
-    if (value.length >= 2 && ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))) {
-      value = value.slice(1, -1)
-    }
+    let value = unquote(kv[2])
     let parsed = value
     if (value.startsWith('[') && value.endsWith(']')) {
       const inner = value.slice(1, -1).trim()
-      parsed = inner === '' ? [] : inner.split(',').map(part => part.trim()).filter(Boolean)
+      parsed = inner === '' ? [] : inner.split(',').map(part => unquote(part)).filter(Boolean)
     } else if (value === '') {
       parsed = []
     }
@@ -226,6 +231,8 @@ export function checkTickets(options) {
     state.set(ticket.id, 'visiting')
     stack.push(ticket.id)
     for (const dep of ticket.blockedBy) {
+      // 自依赖已由 E9 单独报告，这里跳过，避免再报一条 "0001 -> 0001" 的假环。
+      if (dep === ticket.id) continue
       const next = byId.get(dep)
       if (!next) continue
       if (state.get(next.id) === 'visiting') {

@@ -13,7 +13,7 @@
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | 把已确认的需求卡写成带验收标准的 spec 卡，并维护 `card_sha256` 与 `docs/project.md` 的一致性 | 需求谈完、要落成文档时 |
 | [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | 把 spec 拆成 tracer-bullet 票，维护 `blocked_by` 依赖 DAG 与状态 | 一个 spec 一次做不完、要排顺序时 |
 
-主技能正文为英文（`description` 中英双语，中文触发词保留），原中文版备份在 `skills/stop-wishing/SKILL.md.bak-20261023-1220`（已被 `.gitignore` 忽略）。
+主技能正文为英文（`description` 中英双语，中文触发词保留）。原中文版只保留在本地备份，**不入库**（`*.bak-*` 已被 `.gitignore` 忽略）；如需追溯，见提交 `e428327`。
 
 ## 怎么装
 
