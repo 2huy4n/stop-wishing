@@ -6,7 +6,7 @@ import test from 'node:test'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const SKILLS_DIR = join(ROOT, 'skills')
-const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets']
+const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
 
 function readSkill(name) {
   return readFileSync(join(SKILLS_DIR, name, 'SKILL.md'), 'utf8')

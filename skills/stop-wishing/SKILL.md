@@ -183,8 +183,8 @@ Never trade for speed or scope — even in lite: validation; error handling that
 
 ## 17) Satellite skills
 
-**stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers. **stop-wishing-spec** — turn the requirement card into one written spec (synthesise what was said; never re-interview). **stop-wishing-tickets** — split a spec into tracer-bullet tickets with an explicit dependency DAG.
+**stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers. **stop-wishing-spec** — turn the requirement card into one written spec (synthesise what was said; never re-interview). **stop-wishing-tickets** — split a spec into tracer-bullet tickets with an explicit dependency DAG. **stop-wishing-setup** — configure a repo's first run: issue tracker, triage labels, domain docs, and the `AGENTS.md` pointer block.
 
 ## Bundled scripts
 
-`scripts/` contains `check-env.js`, `init-docs.js`, `check-hardcode.js` and `build-portable.js` (zero dependencies). `install.js` installs all four skills (`--tool`/`--dest`/`--target`/`--verify`/`--dry-run`/`--force`; exit 0/1/2/3/4). Usage details: `README.md` and `node install.js --help`.
+`scripts/` contains `check-env.js`, `init-docs.js`, `check-hardcode.js`, `build-portable.js`, `check-tickets.js` and `setup.js` (zero dependencies). `install.js` installs all seven skills (`--tool`/`--dest`/`--target`/`--verify`/`--dry-run`/`--force`; exit 0/1/2/3/4). Usage details: `README.md` and `node install.js --help`.

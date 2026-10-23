@@ -37,6 +37,12 @@ test('空目录首次运行 → 三个文件创建，标记段存在，exit 0', 
     assert.ok(read(root, rel).includes(BEGIN) && read(root, rel).includes(END), `${rel} 缺标记段`)
   }
   assert.match(out.stdout, /created\tdocs\/agents\/issue-tracker\.md/)
+  // 语义：本地 issue 放 docs/issues/；docs/tickets/ 是我们自己的工作切片，两者分开。
+  const tracker = read(root, 'docs/agents/issue-tracker.md')
+  assert.match(tracker, /- \*\*Where:\*\* `docs\/issues\/`/, 'Where 行应指向 docs/issues/')
+  assert.match(tracker, /- \*\*Create:\*\* 在 `docs\/issues\/` 新建/, 'Create 行应指向 docs/issues/')
+  assert.match(tracker, /- \*\*Read:\*\* 读 `docs\/issues\/\*\.md`/, 'Read 行应指向 docs/issues/')
+  assert.doesNotMatch(tracker, /Create:\*\* 在 `docs\/tickets\/`/, 'Create 不得再写 docs/tickets/')
 })
 
 test('再跑一次 → 全部 unchanged，且文件字节不变', () => {

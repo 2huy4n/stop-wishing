@@ -53,7 +53,7 @@ export function usage() {
     '用法: node setup.js --dir <项目根> [--issue-tracker local|github|other] [--labels default|none] [--layout single|multi] [--agents-md] [--dry-run] [--json]',
     '',
     '  --dir            项目根目录（必填）',
-    '  --issue-tracker  票放在哪：local=docs/tickets/（默认）/ github=GitHub Issues / other=自定义（会在问题里列出）',
+    '  --issue-tracker  外部 issue 放在哪：local=docs/issues/（默认）/ github=GitHub Issues / other=自定义（会在问题里列出）',
     '  --labels         是否生成五角色标签映射：default（默认）/ none',
     '  --layout         单包 single（默认）/ 多包 monorepo multi',
     '  --agents-md      若 AGENTS.md（优先）或 CLAUDE.md 已存在，在末尾维护 ## Project docs 段；绝不创建它们',
@@ -72,17 +72,17 @@ function assertEnum(value, allowed, name) {
 
 export function issueTrackerContent(options) {
   const where = {
-    local: '`docs/tickets/`（本地 Markdown 票，配合 `stop-wishing-tickets`）',
+    local: '`docs/issues/`（本地 issue = 外部反馈；我们自己的工作切片在 `docs/tickets/`，两者分开）',
     github: 'GitHub Issues（用 `gh issue list` / `gh issue create` 读写）',
     other: '由用户指定（见 questions）',
   }[options.issueTracker]
   const create = {
-    local: '在 `docs/tickets/` 新建 `<NNNN>-<slug>.md`，遵循 `stop-wishing-tickets` 的 front-matter',
+    local: '在 `docs/issues/` 新建 `<NNNN>-<slug>.md`，一条外部反馈一份',
     github: '`gh issue create --title <title> --body-file <file>`',
     other: '由用户指定（见 questions）',
   }[options.issueTracker]
   const read = {
-    local: '读 `docs/tickets/*.md` 与 `docs/specs/*.md`',
+    local: '读 `docs/issues/*.md`；需要转成工作计划时再到 `docs/tickets/`',
     github: '`gh issue list --state all`，单票 `gh issue view <n>`',
     other: '由用户指定（见 questions）',
   }[options.issueTracker]
