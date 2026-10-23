@@ -1,28 +1,32 @@
 #!/usr/bin/env node
-// 2026-10-20T20:18+08:00 · 改动：--verify 改为逐文件 hash 比对（PASS/WARN/FAIL，落后于源退出 4）、usage 补 --tool/--dest 并写明 --target 为兼容旧用法；原因：外部 AI 实测反馈 #1/#2；回滚：git checkout pre-verify-hash-20261020-2016
+// 2026-10-23T12:20+08:00 · 改动：从单技能安装改为安装 skills/ 下四个技能（stop-wishing + review/audit/debt）；--dest/--target 改为 skills 根目录语义；--verify 逐技能校验 front-matter name 与 hash；原因：仓库拆分为四技能；回滚：git checkout pre-split-20261023-1220
 //
 // 为什么默认不覆盖：用户的 skills 目录里可能已经有改过的版本，「安装」把它冲掉是典型的
 // 不可逆操作（SKILL.md §9 要求人批）。
 // 为什么 --verify 要比 hash：只数文件「齐不齐」会骗人——旧版本文件齐全但内容落后，
 // 用户以为装对了、其实没用上修复。
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)))
+const SKILLS_ROOT = join(ROOT, 'skills')
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'test', 'tmp', '.tmp', 'dist', 'coverage'])
 const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-/
 
 export const TOOL_ORDER = ['dsh', 'claude', 'codex', 'trae']
+/** 每个工具对应的 skills 根目录（四个技能会作为子目录放在这里）。 */
 export const TOOL_TARGETS = {
-  dsh: ['.agents', 'skills', 'stop-wishing'],
-  codex: ['.agents', 'skills', 'stop-wishing'],
-  trae: ['.agents', 'skills', 'stop-wishing'],
-  claude: ['.claude', 'skills', 'stop-wishing'],
+  dsh: ['.agents', 'skills'],
+  codex: ['.agents', 'skills'],
+  trae: ['.agents', 'skills'],
+  claude: ['.claude', 'skills'],
 }
 
+export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt']
+export const MAIN_SKILL = 'stop-wishing'
 export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'build-portable']
 export const TEMPLATE_NAMES = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
 export const TEMPLATE_LANGS = ['zh', 'en']
@@ -55,26 +59,34 @@ export function parseArgs(argv) {
 
 export function usage() {
   return [
-    '用法: node install.js [--tool <dsh|claude|codex|trae>] [--dest <目录>] [--verify] [--dry-run] [--force] [--target <base>]',
+    '用法: node install.js [--tool <dsh|claude|codex|trae>] [--dest <skills根目录>] [--verify] [--dry-run] [--force] [--target <base>]',
     '',
-    '  --tool    按用户所用工具选目标（推荐 AI 用这个）：',
-    '              dsh / codex / trae -> ~/.agents/skills/stop-wishing',
-    '              claude             -> ~/.claude/skills/stop-wishing',
-    '  --dest    【精确目标目录】直接装进这个目录（优先级最高；测试/自定义安装用）',
-    '              例: --dest <目录>  →  <目录>/SKILL.md',
-    '  --verify  安装后自检：逐文件与源做 hash 比对',
+    '  安装 skills/ 下的全部四个技能：stop-wishing、stop-wishing-review、stop-wishing-audit、stop-wishing-debt。',
+    '',
+    '  --tool    按用户所用工具选 skills 根目录（推荐 AI 用这个）：',
+    '              dsh / codex / trae -> ~/.agents/skills',
+    '              claude             -> ~/.claude/skills',
+    '  --dest    【skills 根目录】装成 <目录>/stop-wishing、<目录>/stop-wishing-review、<目录>/stop-wishing-audit、<目录>/stop-wishing-debt',
+    '              例: --dest <目录>  →  <目录>/stop-wishing/SKILL.md + 三个卫星技能目录',
+    '  --verify  安装后自检：逐个技能校验 SKILL.md 存在、front-matter name 与目录名一致、与源 hash 一致；',
+    '              主技能额外校验 scripts/ 4 个、templates/{zh,en} 各 7 份、LICENSE。',
     '              [PASS] 齐全且与源一致 / [WARN] 齐全但内容落后于源（退出码 4）/ [FAIL] 缺失或不一致（退出码 3）',
     '  --dry-run 只打印会复制什么、将校验什么，不写盘',
     '  --force   目标已存在时覆盖（默认拒绝）',
-    '  --target  【兼容旧用法】只给 base 目录，实际装到 <base>/stop-wishing',
-    '              例: --target <base>  →  <base>/stop-wishing/SKILL.md',
+    '  --target  【兼容旧用法】只给 base 目录，四个技能装到 <base>/stop-wishing{,-review,-audit,-debt}',
     '',
-    '不给 --tool/--dest 时默认 ~/.agents/skills/stop-wishing（等价 --tool dsh）。',
+    '不给 --tool/--dest/--target 时默认 ~/.agents/skills（等价 --tool dsh）。',
     '退出码: 0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 自检失败（缺失或不一致） / 4 自检告警（内容落后于源）',
   ].join('\n')
 }
 
-/** 解析目标目录列表。home 可注入，便于测试不碰真实家目录。 */
+function isInside(child, parent) {
+  const target = resolve(child)
+  const base = resolve(parent)
+  return target === base || target.startsWith(base + sep)
+}
+
+/** 解析目标 skills 根目录列表。home 可注入，便于测试不碰真实家目录。 */
 export function resolveDestinations(options, home = homedir()) {
   if (options.dest) return [resolve(options.dest)]
   if (options.tool) {
@@ -83,8 +95,8 @@ export function resolveDestinations(options, home = homedir()) {
     return [join(home, ...parts)]
   }
   const base = options.target ? resolve(options.target) : join(home, '.agents', 'skills')
-  const destinations = [join(base, 'stop-wishing')]
-  if (options.claude) destinations.push(join(home, '.claude', 'skills', 'stop-wishing'))
+  const destinations = [base]
+  if (options.claude) destinations.push(join(home, '.claude', 'skills'))
   return destinations
 }
 
@@ -92,15 +104,26 @@ function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex')
 }
 
+/** 只读 front-matter 里的 name，避免把正文里的示例当成真的 name。 */
+export function frontMatterName(text) {
+  const block = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text.replace(/^\uFEFF/, ''))
+  if (!block) return null
+  const line = /^name:\s*(.+?)\s*$/m.exec(block[1])
+  return line ? line[1].replace(/^["']|["']$/g, '') : null
+}
+
 /** 自检：逐文件与源 hash 比对，输出 PASS / WARN（落后于源）/ FAIL（缺失或不一致）。 */
-export function verifyInstall(dir, sourceRoot = ROOT) {
+export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
+  const sourceDir = join(sourceRoot, 'skills', skillName)
   const groups = [
-    { label: 'SKILL.md 存在且含 name: stop-wishing', files: ['SKILL.md'], requireName: true },
-    { label: 'scripts/ 下四个脚本齐全', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) },
-    { label: 'templates/zh/ 各 7 份', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) },
-    { label: 'templates/en/ 各 7 份', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) },
-    { label: 'LICENSE 存在', files: ['LICENSE'] },
+    { label: `SKILL.md exists and name: ${skillName}`, files: ['SKILL.md'], requireName: skillName },
   ]
+  if (skillName === MAIN_SKILL) {
+    groups.push({ label: 'scripts/ four scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
+    groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
+    groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
+    groups.push({ label: 'LICENSE present', files: ['LICENSE'] })
+  }
 
   const results = []
   for (const group of groups) {
@@ -108,7 +131,9 @@ export function verifyInstall(dir, sourceRoot = ROOT) {
     const stale = []
     for (const file of group.files) {
       const target = join(dir, file)
-      const source = join(sourceRoot, file)
+      const source = file === 'LICENSE' && skillName === MAIN_SKILL && !existsSync(join(sourceDir, file))
+        ? join(sourceRoot, 'LICENSE')
+        : join(sourceDir, file)
       if (!existsSync(target)) {
         missing.push(file)
         continue
@@ -125,10 +150,10 @@ export function verifyInstall(dir, sourceRoot = ROOT) {
       detail = '内容落后于源（建议 --force 更新）: ' + stale.join(', ')
     }
     if (group.requireName && status !== 'FAIL') {
-      const text = readFileSync(join(dir, 'SKILL.md'), 'utf8')
-      if (!/^name:\s*stop-wishing\s*$/m.test(text)) {
+      const name = frontMatterName(readFileSync(join(dir, 'SKILL.md'), 'utf8'))
+      if (name !== group.requireName) {
         status = 'FAIL'
-        detail = 'front-matter 里没有 name: stop-wishing'
+        detail = `front-matter name 是 ${name ?? '缺失'}，应为 ${group.requireName}`
       }
     }
     results.push({ label: group.label, status, detail })
@@ -136,10 +161,10 @@ export function verifyInstall(dir, sourceRoot = ROOT) {
 
   const hasFail = results.some(item => item.status === 'FAIL')
   const hasWarn = results.some(item => item.status === 'WARN')
-  return { dir, results, ok: !hasFail && !hasWarn, code: hasFail ? 3 : hasWarn ? 4 : 0 }
+  return { dir, skill: skillName, results, ok: !hasFail && !hasWarn, code: hasFail ? 3 : hasWarn ? 4 : 0 }
 }
 
-/** 收集要复制的文件（相对路径），排除 .git/node_modules/test/临时文件。 */
+/** 收集一个技能目录下要复制的文件（相对路径），排除 .git/node_modules/test/临时文件。 */
 export function collectFiles(root) {
   const files = []
   const walk = dir => {
@@ -157,28 +182,50 @@ export function collectFiles(root) {
   return files.sort()
 }
 
+/** 源文件完整性：四个技能的 SKILL.md 都必须存在。 */
+export function missingSources() {
+  return SKILL_NAMES.filter(name => !existsSync(join(SKILLS_ROOT, name, 'SKILL.md')))
+}
+
 export function install(options, home = homedir()) {
-  if (!existsSync(join(ROOT, 'SKILL.md'))) {
-    return { ok: false, code: 2, message: '源文件缺失: ' + join(ROOT, 'SKILL.md') }
+  const missing = missingSources()
+  if (missing.length > 0) {
+    return { ok: false, code: 2, message: '源文件缺失: ' + missing.map(name => join(SKILLS_ROOT, name, 'SKILL.md')).join(', ') }
   }
   if (options.unknown?.length) {
     return { ok: false, code: 1, message: '未知参数: ' + options.unknown.join(' ') + '\n\n' + usage() }
   }
   const destinations = resolveDestinations(options, home)
   if (!Array.isArray(destinations)) return { ok: false, code: 1, message: destinations.error + '\n\n' + usage() }
-  for (const dest of destinations) {
-    if (resolve(dest).startsWith(ROOT)) {
-      return { ok: false, code: 2, message: '目标目录不能是源目录本身: ' + dest }
+  for (const root of destinations) {
+    if (isInside(root, ROOT)) {
+      return { ok: false, code: 2, message: '目标目录不能位于源仓库内: ' + root }
     }
   }
 
-  const files = collectFiles(ROOT)
-  const plan = destinations.map(dest => ({
-    dest,
-    exists: existsSync(dest),
-    // --verify 且目标已存在、又没要求覆盖：只做校验，不重装（用于「装完坏了/装旧了」的自检）。
-    action: !existsSync(dest) ? '创建' : options.verify && !options.force ? '仅校验（已存在，未覆盖）' : options.force ? '覆盖' : '拒绝（已存在，加 --force）',
-  }))
+  const files = SKILL_NAMES.flatMap(name => {
+    const list = collectFiles(join(SKILLS_ROOT, name))
+    if (name === MAIN_SKILL) list.push('LICENSE')
+    return list.map(file => `${name}/${file}`)
+  })
+  const plan = []
+  for (const root of destinations) {
+    const rootHasInstall = SKILL_NAMES.some(name => existsSync(join(root, name)))
+    for (const skill of SKILL_NAMES) {
+      const dest = join(root, skill)
+      const exists = existsSync(dest)
+      // --verify 且已经装过至少一个技能：只校验，不补装缺失的技能——否则「缺失」永远发现不了。
+      const verifyOnly = options.verify && !options.force && rootHasInstall
+      const action = verifyOnly
+        ? '仅校验（已存在，未覆盖）'
+        : !exists
+          ? '创建'
+          : options.force
+            ? '覆盖'
+            : '拒绝（已存在，加 --force）'
+      plan.push({ root, skill, dest, exists, action })
+    }
+  }
   const defaultHint = !options.tool && !options.dest && !options.target && !options.claude
     ? '提示：可用 --tool dsh|claude|codex|trae 选择目标（默认等价 dsh）'
     : null
@@ -192,7 +239,7 @@ export function install(options, home = homedir()) {
       files,
       plan,
       defaultHint,
-      verifyPlan: '将校验（逐文件 hash 比对）：SKILL.md 含 name: stop-wishing · scripts/ 四个脚本 · templates/{zh,en} 各 7 份 · LICENSE；与源不一致报 WARN 并退出 4',
+      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；主技能另查 scripts/ 4 个、templates/{zh,en} 各 7 份、LICENSE；不一致报 WARN 并退出 4',
     }
   }
 
@@ -203,16 +250,22 @@ export function install(options, home = homedir()) {
 
   for (const item of plan) {
     if (item.action.startsWith('仅校验')) continue
-    for (const file of files) {
+    const sourceDir = join(SKILLS_ROOT, item.skill)
+    const skillFiles = collectFiles(sourceDir)
+    if (item.skill === MAIN_SKILL) skillFiles.push('LICENSE')
+    for (const file of skillFiles) {
+      const from = file === 'LICENSE' && item.skill === MAIN_SKILL && !existsSync(join(sourceDir, file))
+        ? join(ROOT, 'LICENSE')
+        : join(sourceDir, file)
       const target = join(item.dest, file)
       mkdirSync(dirname(target), { recursive: true })
-      copyFileSync(join(ROOT, file), target)
+      copyFileSync(from, target)
     }
   }
 
   let verification = null
   if (options.verify) {
-    verification = plan.map(item => verifyInstall(item.dest))
+    verification = plan.map(item => verifyInstall(item.dest, item.skill))
     const failing = verification.filter(item => !item.ok)
     if (failing.length > 0) {
       const code = verification.some(item => item.code === 3) ? 3 : 4
@@ -225,7 +278,7 @@ export function install(options, home = homedir()) {
 
 function printVerification(verification) {
   for (const item of verification) {
-    process.stdout.write(`自检目标: ${item.dir}\n`)
+    process.stdout.write(`自检目标: ${item.dir} (${item.skill})\n`)
     for (const result of item.results) {
       process.stdout.write(`  [${result.status}] ${result.label} — ${result.detail}\n`)
     }

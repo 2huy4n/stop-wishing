@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import { checkEnv, envPaths, PROBE_TIMEOUT_MS } from '../scripts/check-env.js'
+import { checkEnv, envPaths, PROBE_TIMEOUT_MS } from '../skills/stop-wishing/scripts/check-env.js'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 
@@ -26,7 +26,7 @@ test('check-env：模块输出的字段结构完整', () => {
 })
 
 test('check-env：CLI 输出可解析 JSON，退出码与 ok 一致', () => {
-  const out = cli(['scripts/check-env.js'])
+  const out = cli(['skills/stop-wishing/scripts/check-env.js'])
   assert.equal(out.status, 0)
   const parsed = JSON.parse(out.stdout)
   assert.equal(parsed.ok, true)

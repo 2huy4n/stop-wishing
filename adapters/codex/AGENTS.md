@@ -6,8 +6,9 @@ user-invocable: true
 
 # stop-wishing · 摘要（Codex / AGENTS.md 适配层）
 
-这个文件是给「只读 AGENTS.md 的编辑器」看的摘要。**唯一的真源是仓库根目录的 `SKILL.md`**，
-本文件只负责把「什么时候该读它」说清楚。
+这个文件是给「只读 AGENTS.md 的编辑器」看的摘要。**唯一的真源是 `skills/stop-wishing/SKILL.md`**，
+本文件只负责把「什么时候该读它」说清楚。仓库另有 `stop-wishing-review` / `stop-wishing-audit` /
+`stop-wishing-debt` 三个卫星技能，分别用于审查改动、全仓审计和技术债台账。
 
 ## 什么时候必须先读 SKILL.md
 
@@ -27,4 +28,4 @@ user-invocable: true
 
 需求卡（七字段）→ 搜索留痕 → 先解释并等确认 → 备份 → 最小差异实现 → 验证留证据 → 更新 project/progress/todo → 汇报。
 
-细节、术语对照表、许可证矩阵、三列表证据格式、逃生门，全部在 `SKILL.md`（同仓库根目录）。
+细节、术语对照表、许可证矩阵、三列表证据格式、逃生门，全部在 `skills/stop-wishing/SKILL.md`。

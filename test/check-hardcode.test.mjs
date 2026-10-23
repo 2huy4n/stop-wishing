@@ -9,7 +9,7 @@ import test from 'node:test'
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 
 function cli(args) {
-  return spawnSync(process.execPath, ['scripts/check-hardcode.js', ...args], {
+  return spawnSync(process.execPath, ['skills/stop-wishing/scripts/check-hardcode.js', ...args], {
     cwd: ROOT,
     encoding: 'utf8',
     windowsHide: true,

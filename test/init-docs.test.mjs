@@ -5,13 +5,13 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import { insertSnapshot, snapshotLines } from '../scripts/init-docs.js'
+import { insertSnapshot, snapshotLines } from '../skills/stop-wishing/scripts/init-docs.js'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const DOCS = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
 
 function cli(args) {
-  return spawnSync(process.execPath, ['scripts/init-docs.js', ...args], {
+  return spawnSync(process.execPath, ['skills/stop-wishing/scripts/init-docs.js', ...args], {
     cwd: ROOT,
     encoding: 'utf8',
     windowsHide: true,

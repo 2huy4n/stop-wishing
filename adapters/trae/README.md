@@ -5,23 +5,26 @@
 ## 方式 A：项目级 `.trae/skills`
 
 1. 在**项目根**建目录：`.trae/skills/stop-wishing`
-2. 把本 skill 的内容复制进去（至少 `SKILL.md`；建议整目录）：
+2. 把四个技能目录复制进去（至少 `SKILL.md`；建议整目录）：
    ```bash
-   mkdir -p .trae/skills/stop-wishing
-   cp -R . .trae/skills/stop-wishing
+   mkdir -p .trae/skills
+   cp -R skills/stop-wishing         .trae/skills/stop-wishing
+   cp -R skills/stop-wishing-review  .trae/skills/stop-wishing-review
+   cp -R skills/stop-wishing-audit   .trae/skills/stop-wishing-audit
+   cp -R skills/stop-wishing-debt    .trae/skills/stop-wishing-debt
    ```
 3. 在 Trae 设置里确认「项目技能 / Project Skills」是打开的（不同版本叫法不同：`Skills`、`Rules & Skills`、`Agent Skills`）。
-4. 反安装：删掉 `.trae/skills/stop-wishing`。
+4. 反安装：删掉 `.trae/skills/` 下这四个目录。
 
 ## 方式 B：用户级 `~/.agents/skills`（与 Codex/Claude 共用一套）
 
-1. 跑安装器（默认就是装到 `~/.agents/skills/stop-wishing`）：
+1. 跑安装器（默认装四个技能到 `~/.agents/skills/`）：
    ```bash
    node install.js --dry-run   # 先看计划
    node install.js             # 真装（确认目标路径后再跑）
    ```
 2. 确认 Trae 的「Agents 开关 / 用户技能」指向 `~/.agents/skills`。
-3. 反安装：删掉 `~/.agents/skills/stop-wishing`。
+3. 反安装：删掉 `~/.agents/skills/` 下的 `stop-wishing`、`stop-wishing-review`、`stop-wishing-audit`、`stop-wishing-debt`。
 
 ## 两个开关的坑
 

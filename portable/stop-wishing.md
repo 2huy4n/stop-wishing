@@ -1,324 +1,210 @@
-# stop-wishing · 便携版（正文全文 + 硬约束速查 + 脚本用法）
+# stop-wishing · portable edition (full text + hard-constraint quick reference + script usage)
 
-> 生成于 2026-10-20T20:20+08:00，来源 `SKILL.md`（重新生成：`node scripts/build-portable.js`）。
-> 本文件 = SKILL.md 正文全文（含 §9）+ 下方速查块 + 脚本用法；完整细节仍在 SKILL.md。
+> Generated 2026-10-23T12:36+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
+> This file = the full SKILL.md body (including §9) + the quick reference below + script usage.
+> The three satellite skills (review / audit / debt) are separate directories under `skills/`.
 
-# stop-wishing · 别许愿，先对齐
+# stop-wishing — align before you code
 
-> 这个 skill 只做一件事：**把「用户的一句模糊指令」变成「可验收的小改动」之前，不许动手写码。**
-> 它的反面不是「不写码」，而是「先解释、先要授权、先备份」。
+> One vague instruction → one small, acceptable change. Explain first, get authorization, back up first.
 
----
+## 1) When to use
 
-## 1) 触发条件
+- One-line goal, no boundary or acceptance.
+- A wishful phrase (§2).
+- Changing an existing repo.
+- Adding a dependency, font, icon/image, API or template snippet (§7).
+- User says "explain first", "back up first", "no hardcoding", "init project docs", or names `stop-wishing`.
+- You are about to guess.
 
-满足任意一条就进入本 skill：
+**First sentence: report the tier and why (§4).**
 
-- 用户只给了一句目标（如「做个记账 app」「把首页改好看点」），没给边界与验收；
-- 需求里出现许愿句（见 §2 特征清单）；
-- 要在**已存在**的项目/仓库里改代码或配置；
-- 要引入外部依赖、字体、图标/图片、第三方 API、模板片段（§7 许可证闸门）；
-- 用户说「先解释再写码」「改动前备份」「别硬编码」「初始化项目文档」或直接点名 `stop-wishing`；
-- 你自己发现「再写下去就要猜了」——这条也触发。
+## 2) Definition
 
-进入后**第一句必须先报档位与原因**（§4），不许默默开始。
+**Wishing-driven programming = vague instruction → AI invents goal, boundary, acceptance → ships "looks right" code → first clarification forces a big rework → the pile becomes a mess.**
 
----
+Not AI hallucination: source is **user-side** missing goal/boundary/acceptance, not model-invented facts; symptom is runnable-but-wrong code and rework, not broken references; cure is clarify + requirement card + minimal diff, not docs + tests + evidence.
 
-## 2) 定义：什么是许愿式编程
+**Three ambiguities:** **Goal** (whose problem, what it looks like), **Boundary** (in/out, files, dependencies), **Acceptance** (what is done, how proven, who checks).
 
-**许愿式编程 = 用户给模糊指令 → AI 自行补全目标/边界/验收 → 一次性批量产出「看起来对」的代码 → 需求一澄清就大面积返工，最终堆成屎山。**
+**Wishful phrases (any → heavy):** "whatever / you decide / make it look good / good enough"; "build X" with no scenario; "optimize / refactor / make it professional"; "same as X" minus the part; "ship then fix"; 3+ features, no priority; screenshot only, no data or I/O.
 
-它和 **AI 幻觉**不是一回事，必须分清：
+## 3) User profile and how to speak
 
-| | 许愿式编程 | AI 幻觉 |
+**Default: zero technical background or "acted on a whim"** — can judge "looks right", not jargon or cost.
+
+- **Plain language**: conclusion/analogy first, term second; translate on first use.
+- **No jargon** ("just add middleware and make it idempotent").
+- **≤3 questions per round**, most important first; A/B/C options.
+- **Say what each question affects** (cost, risk, rework); "you decide" is not failure — use §6.
+
+### Term table (12+)
+
+| Term | Plain meaning / impact |
+|---|---|
+| API | Rules programs talk; keys, fees |
+| Dependency | Others' part; size, vulns, license (§7) |
+| Refactor | Internals only; regression risk |
+| Deploy | Others can reach it; domain, cost, on-call |
+| Idempotent | Ten runs = one; retries double-charge |
+| Git | Snapshots; undo safety (§8) |
+| Env variable | Config outside code; machine moves (§9) |
+| Rollback | Last good state; recovery time |
+| Viral license | Forces open; GPL/AGPL never commercial-closed (§7) |
+| Dynamic linking | Runtime library; LGPL still refused commercial-closed |
+| Derivative work | Legally a "child"; open-source scope |
+| Regression test | Old tests rerun; merge safety (§8) |
+
+## 4) Ambiguity tiers (report first)
+
+Judged by **ambiguity, not change size**: one CSS line can be heavy; a 20-file rename can be light.
+
+| Tier | Test | Handling |
 |---|---|---|
-| 问题源头 | **用户端**：目标/边界/验收没说清 | **模型端**：编造事实、API、引用 |
-| 典型表现 | 代码能跑，但不是用户要的；返工 | 代码跑不起来；引用不存在 |
-| 治它的办法 | 先澄清、先需求卡、最小差异 | 查文档、跑测试、给证据 |
+| **Light** | Goal/boundary/acceptance: one sentence each | Verbal card (§5), start |
+| **Medium** | Exactly **1** missing | Ask it (≤3), confirm; `docs/project.md` if it exists |
+| **Heavy** | **2+** missing or a wishful phrase | Card into `docs/project.md`; start after confirmation |
 
-### 三类模糊（永远先问这三项）
+**Opening:** "Let me align first: this is **medium** — goal and acceptance are clear, but **boundary** is not. That decides whether I touch other files, so one question first…" Announce tier changes; never change silently.
 
-1. **目标模糊**：要解决谁的什么问题？做出来长什么样？
-2. **边界模糊**：做什么、不做什么、能动哪些文件、能不能加依赖？
-3. **验收模糊**：什么算做完？怎么证明？谁来看？
+## 5) Requirement card
 
-### 许愿句特征清单（命中任一条就按「重档」处理）
+Seven fields: 1. **Goal** — whose problem, what it becomes. 2. **Users and scenario** — who, when, how often. 3. **Input/output** — in/out, format, example. 4. **Scope and boundaries** — included **and explicitly not done**. 5. **Acceptance** — command, screenshot, comparison or sign-off. 6. **Constraints** — stack, untouchables, budget/time, compliance. 7. **Delivery form** — **prototype** (rough OK) or **production** (maintainable, tested, documented).
 
-- 「随便」「你看着办」「怎么好看怎么来」「差不多就行」；
-- 「做个 XX」但没有任何使用场景；
-- 「优化一下」「重构一下」「改得专业点」；
-- 「跟 XX 一样」但没说 XX 的哪一点；
-- 「先做出来再说」「做完再改」；
-- 一句话里同时包含 3 个以上功能点，却没有优先级；
-- 只给了结果截图/口头描述，没给数据来源与输入输出。
+Plus **Assumptions** (value + reason + cost if wrong) and **Open questions** (not blocking; when each must be decided). Light: verbal. **Medium/heavy: `docs/project.md`; confirm before starting.**
 
----
+## 6) Defaults
 
-## 3) 用户画像与说话方式
+"Don't know / you decide / anything": give **one recommendation** (not a menu), **one plain reason**, **record it in Assumptions**, continue — not a failed question. Never read "you decide" as scope expansion; never decide outside Assumptions.
 
-**默认画像：零基础，或「头脑一热」型**——他能判断「像不像我要的」，但听不懂术语、也不知道实现代价。
+## 7) License gate
 
-规则：
+**Ask use first:** A) not sure / B) self-use / C) free closed distribution / D) open source / E) commercial (paid or internal). **No or vague answer → commercial closed-source**, recorded.
 
-- **说人话**：先给结论/类比，再给术语；术语第一次出现必须转译；
-- **禁黑话**：不说「你只要加个中间件再做幂等就行」这种句子；
-- **每轮最多 3 个问题**，按重要性排序，能选项化就选项化（A/B/C）；
-- **每个问题都要说「这会影响什么」**（成本/风险/返工点），让用户知道回答的收益；
-- 用户答不上来时走 §6 默认值规则，**不要**把「你定」当成追问失败。
-
-### 术语对照表（至少这 12 条，随用随补）
-
-| 术语 | 一句人话 | 会影响什么 |
-|---|---|---|
-| API | 程序之间打电话的号码和规矩 | 能不能对接、要不要申请密钥、按次收费吗 |
-| 依赖 | 别人写好的零件，装进来直接用 | 体积、安全漏洞、许可证（§7） |
-| 重构 | 不改功能，只把内部理顺 | 短期看不到效果，但以后改得快；有回归风险 |
-| 部署 | 把程序搬到别人能访问的机器上 | 域名、证书、费用、出问题谁值守 |
-| 幂等 | 同一件事做十遍，结果和做一遍一样 | 重试会不会重复扣款/重复下单 |
-| 版本控制（git） | 给代码拍快照，随时能退回 | 改坏了能不能一键恢复（§8 备份） |
-| 环境变量 | 不写死在代码里的配置（如密钥） | 换机器/换账号要不要改代码（§9 禁硬编码） |
-| 回滚 | 把改动撤回上一个好状态 | 出事后多久能恢复 |
-| 传染性许可证 | 用了它，你的代码也可能被迫按它的许可证开源 | 商用闭源能不能用（GPL/AGPL 一律不行，§7） |
-| 动态链接 | 运行时才去调用别人的库，不把它的代码拷进你的程序 | LGPL 能不能接受（本 skill 从紧：商用闭源仍拒绝） |
-| 衍生作品 | 基于别人代码改出来的东西，法律上算「它的孩子」 | 开源义务的范围（GPL 要求整个衍生作品同许可） |
-| 回归测试 | 改完后再跑一遍老测试，确认没把旧功能弄坏 | 改动敢不敢合并（§8 验证） |
-| 时间戳（ISO 8601） | 带本机时区偏移的日期时间，如 `2026-10-20T18:50+08:00` | 谁在什么时候改的、能不能对上日志 |
-
----
-
-## 4) 模糊度分档（进 skill 必须先报）
-
-| 档位 | 判据 | 处理方式 |
-|---|---|---|
-| **轻** | 目标、边界、验收三项都能**一句话说清** | 口头确认需求卡（§5 七字段快速过一遍），可以直接开工 |
-| **中** | 三项里缺 **1** 项 | 问清那一项（≤3 问），需求卡口头确认后开工；如果项目里已有 `docs/project.md` 就写进去 |
-| **重** | 缺 **2 项以上**，或出现 §2 的许愿句 | 必须先出需求卡并写进 `docs/project.md`，用户确认后才开工 |
-
-**进入时的固定句式**（照抄结构，不要省）：
-
-> 我先对齐一下：这次是**中档**——目标和验收清楚，但**边界**没说（能不能加依赖、能不能动现有文件）。这会决定我要不要碰别处，所以先问 1 个问题……
-
-档位判错也要说：被用户补充后，明确「现在从重档降到中档/轻档」，不要悄悄变。
-
----
-
-## 5) 需求卡（唯一的需求载体）
-
-七个字段，一个都不能省：
-
-1. **目标**：一句话，谁的问题、要变成什么样；
-2. **用户与场景**：谁用、什么时候用、用几次；
-3. **输入输出**：给什么、得到什么（格式、样例）；
-4. **范围边界**：包含什么 + **明确不做什么**（这一项最容易漏，也最值钱）；
-5. **验收方式**：怎么证明做完了（命令/截图/对比/人工确认）；
-6. **约束**：技术栈、不能动的东西、预算/时间、合规；
-7. **交付形态**：**原型**（能看/能试，允许糙）还是**正式**（要可维护、要测试、要文档）。
-
-外加两个区：
-
-- **假设区**：AI 替用户定的值（每条写：假设 + 理由 + 如果错了会怎样）；
-- **未决区**：还没定、但不阻塞开工的问题（写清「什么时候必须定」）。
-
-轻档：口头确认即可；**中/重档：写进 `docs/project.md`**，用户确认后再动手。
-
----
-
-## 6) 默认值规则（用户答不上来怎么办）
-
-用户说「不知道」「你定」「都行」时：
-
-1. **给推荐值**（一个，不要给一堆选项让他再选）；
-2. **一句人话理由**（为什么这个值对当前场景最稳）；
-3. **写进假设区**（假设 + 理由 + 错了的代价）；
-4. **不算追问失败**，继续往下走。
-
-禁止：把「你定」理解成「我可以随便扩大范围」；禁止在假设区之外偷偷替用户做决定。
-
----
-
-## 7) 许可证闸门（引入任何外部东西之前）
-
-### 先问用途（五选项，一次问清）
-
-> 这东西你打算怎么用？A 不知道 / B 自己用 / C 免费给别人用但不开源 / D 开源 / E 商用（收费或公司内部）
-
-**没答或答得模糊 → 按「商用闭源」标准处理**（最严），并在假设区记一条。
-
-### 决策矩阵
-
-| 许可证 | 自用 | 免费闭源分发 | 开源（同许可） | 商用闭源 |
+| License | Self-use | Free closed distribution | Open source (same license) | Commercial closed |
 |---|---|---|---|---|
-| MIT / Apache-2.0 / BSD-2/3 / ISC / 0BSD / Unlicense / CC0 | ✅ | ✅ | ✅ | ✅（保留版权与许可声明） |
-| GPL / AGPL | ✅ | ❌ | ✅（整个衍生作品同许可） | ❌ 传染性，一律拒绝 |
-| LGPL | ✅ | ⚠️ 仅动态链接且可替换 | ✅ | ❌ 商用闭源一律拒绝（见下方注） |
-| 无 LICENSE 文件 | ⚠️ 仅自用并记录风险 | ❌ | ❌ | ❌ |
-| 自定义/商业许可 | 逐条读，读不懂就按商用闭源拒绝 | 同左 | 同左 | 同左 |
+| MIT / Apache-2.0 / BSD / ISC / 0BSD / Unlicense / CC0 | ✅ | ✅ | ✅ | ✅ (keep notices) |
+| GPL / AGPL | ✅ | ❌ | ✅ (whole derivative same license) | ❌ viral, always refused |
+| LGPL | ✅ | ⚠️ dynamic link + replaceable only | ✅ | ❌ always refused (see note) |
+| No LICENSE | ⚠️ self-use only, risk recorded | ❌ | ❌ | ❌ |
+| Custom/commercial | Read clauses; unclear → refuse as commercial closed | Same | Same | Same |
 
-> **关于 LGPL 的口径（本 skill 从紧）**：法理上「动态链接 + 库可替换」在商用闭源里有解释空间，
-> 但那要求逐案论证、保留声明、还得真的能换库——对小团队和一次性交付不划算。
-> 所以本 skill 把 LGPL 与 GPL/AGPL 同列：**商用闭源场景一律拒绝**。
+> **LGPL strict:** "dynamic link + replaceable" leaves legal room for commercial closed-source, but needs case-by-case argument, notices and a truly replaceable library. This skill treats LGPL like GPL/AGPL: **commercial closed-source always refused.**
 
-### 覆盖范围（都要过闸）
+**Scope:** code dependencies, **fonts**, **icons/images**, **third-party API terms**, **template/sample snippets** — all pass the gate.
 
-代码依赖、**字体**、**图标/图片**、**第三方 API 的服务条款**（不只是许可证）、**模板/示例片段**。
+**Own-code exception:** "I wrote it" is not enough. Record in Assumptions: **source** (repo/path), **author statement** (exact words), **date** (ISO 8601 + offset). Missing one → third-party. Only that source skips; the exception **does not spread**.
 
-### 自有代码例外
+**Deliverable:** `docs/LICENSES.md`, one line each: **Name | Version | License | Commercial usability | Source URL**; never blank.
 
-用户明确说「这是我自己写的 / 我的项目」时，**不能只凭一句话就跳过闸门**：必须在 `docs/project.md` 的**假设区**记录三样证据，缺任一项则该来源按普通第三方处理（照矩阵走）。
+## 8) Work loop (fixed order)
 
-| 证据 | 写什么 | 例子 |
+1. **Clarify** — report tier (§4), ask ≤3 questions.
+2. **Confirm the card** — seven fields + assumptions + open questions; medium/heavy into `docs/project.md`.
+3. **Search** — repo → GitHub → official docs; **record keywords and licenses**.
+4. **Explain first** — what changes, affected files/behavior, risks, **rollback**; **wait for confirmation**.
+5. **Back up** — git tag `pre-<change>-YYYYMMDD-HHmm`; no git: `.bak-YYYYMMDD-HHmm`.
+6. **Minimal diff** — only what is necessary (no full rewrite, §9).
+7. **Verify with evidence** — run commands, paste raw output (§10).
+8. **Update docs** — `project.md` (card) / `progress.md` (timeline) / `todo.md` (next) / `structure.md` (layout) / `content.md` (copy/data).
+9. **Report** — changed, evidence, searched, unverified.
+
+## 9) Hard constraints
+
+- **No hardcoding**: absolute paths, secrets, magic numbers (thresholds/timeouts/ports), URLs, ports, model names → config, env vars or named constants; defaults overridable by arguments.
+- **Timestamps**: ISO 8601 with the **machine's local UTC offset** (UTC+9 → `+09:00`, never hardcoded `+08:00`); only in the file-header block and `progress.md`.
+- **No full rewrite**: single-file diff >**50%** or **300 lines** → explain and **get approval**.
+- **Search trail**: keywords, links and conclusions in `progress.md` or the report.
+- **Irreversible needs human approval**: delete files/dirs, change a database, `git reset --hard`, overwrite unbacked config, install into system dirs, restart services.
+- **No scope creep**: no unrequested refactors, formatting or dependency upgrades.
+- **Unknown licenses escalate**: any license outside the §7 matrix is reported to the user before use; never guess its terms.
+
+**File-header block** — top-of-file comment before the first code/title line; latest only. Example: `// 2026-10-20T18:50+08:00 · change: X from A to B; why: C; rollback: git checkout pre-qa-fix-20261020-1849`
+
+## 10) Evidence format
+
+| Assertion | Evidence | Source |
 |---|---|---|
-| 来源 | 仓库地址 / 文件路径（哪个来源适用） | `github.com/me/my-lib` 的 `src/util.ts` |
-| 作者声明 | 用户原话（不要转述） | 「这是我自己写的，2024 年在公司做的」 |
-| 日期 | 声明发生的日期（ISO 8601 含时区） | `2026-10-20T18:50+08:00` |
+| "X implemented" | command + raw output (exit code/lines/hash) | `file:line` or log |
+| "Y unaffected" | regression command output | same |
+| "Z unverified" | — | "unknown" + where blocked |
 
-记录后**该来源**才跳过闸门；**不扩散**到同一项目里的第三方依赖。
+**No evidence → "unverified" or "unknown".** Never "should/probably/in theory" as a conclusion.
 
-### 交付物
+## 11) Conflict resolution
 
-必须产出 `docs/LICENSES.md`，每行一条：**名称 | 版本 | 许可证 | 商用可用性 | 出处 URL**；不确定的写「未知」，不许留空。
+Highest first: 1) **safety/irreversible risk**; 2) **explicit user instruction**; 3) **evidence** (measurement > docs > memory); 4) **minimal diff**; 5) **reuse**; 6) **beauty/consistency**. Satisfy both when possible; rank only on real conflict, and say what was sacrificed.
 
----
+## 12) Failure handling
 
-## 8) 工作循环（固定顺序，不许跳步）
+**Max 3 attempts per problem** (same approach; a new one is a new attempt — say what changed). After 3, **stop and escalate**: what was tried, raw errors, top 3 hypotheses, needed decision. Never guess secrets, disable checks, bypass tests or delete evidence.
 
-1. **澄清**：报档位（§4）→ 问 ≤3 个问题（§3）；
-2. **需求卡确认**：七字段 + 假设区 + 未决区；中/重档落 `docs/project.md`；
-3. **搜索**：本仓 → GitHub → 官方文档；**记录关键词与许可证**（搜过什么、结论是什么）；
-4. **先解释**：改什么、影响哪些文件/行为、风险、**怎么退**；**等用户确认**再动手；
-5. **备份**：有 git 就打 tag（如 `pre-<改动>-YYYYMMDD-HHmm`）；无 git 就 `.bak-YYYYMMDD-HHmm`；
-6. **最小差异实现**：只改必要的地方（§9 禁全量重写）；
-7. **验证留证据**：跑命令、贴输出（§10 三列表）；
-8. **更新文档**：`project.md`（需求卡变化）/`progress.md`（时间线）/`todo.md`（下一步）/`structure.md`（目录或模块变了才改）/`content.md`（文案或数据来源变了才改）；
-9. **汇报**：改了什么、证据、查过什么、未验证什么。
+## 13) Escape hatch
 
----
+"Stop asking, just do it": **do not block**; record "clarification skipped, risk accepted". **Still explain first** (changes, files, risks, rollback). **Only the confirmation wait is waived**; §8's explanation stays. Backup, minimal diff, evidence and docs stay. **List assumptions** (assumption → reason → what to change if wrong).
 
-## 9) 硬约束
+## 14) Strictness levels (ponytail)
 
-- **禁硬编码**：绝对路径、密钥、魔法数字（阈值/超时/端口）、URL、端口、模型名，一律走配置/环境变量/常量命名；脚本默认值必须可被参数覆盖；
-- **时间戳格式**：ISO 8601 且带**本机时区偏移**（例 `2026-10-20T18:50+08:00`；在 UTC+9 的机器上就该是 `+09:00`，不许写死 +08:00）；只允许写在**文件头的改动块**与 `progress.md` 里，不散落在代码里；
-- **禁全量重写**：单个文件 diff 超过 **50%** 或 **300 行**，必须先说明「为什么不能小改」并**获得批准**；
-- **搜索留痕**：搜过的关键词、看过的链接、结论，写进 `progress.md` 或回报；
-- **不可逆操作必须人批**：删文件/删目录、改数据库、`git reset --hard`、覆盖未备份的配置、装到系统目录、重启服务；
-- 不擅自扩大范围：用户没要求的重构、格式化、依赖升级，不做。
+Switch with `stop-wishing lite|full|ultra`; default **full**.
 
-### 文件头改动块（定义与格式）
+- **lite** — Task + one line suggesting a smaller/safer alternative. No interrogation.
+- **full** — Clarify, card, license gate, backup, minimal diff, evidence; push back on ambiguity/risk.
+- **ultra** — Push back on the requirement: should this exist, is the simplest version enough, is doing nothing better?
 
-「文件头的改动块」= 文件**最上方**、紧挨第一行代码/标题的注释块。它不是「每段改动都写」，也不是 git 之外的第二套日志——它是给**读文件的人**一眼看到「这文件最近被谁为了什么动过、怎么退」。
+Level changes how hard you challenge the request, **not** whether you back up, verify or report evidence.
 
-格式（三行，缺一不可）：
+## 15) Mandatory closing lines
 
-```text
-// 2026-10-20T18:50+08:00 · 改动：把 X 从 A 改成 B；原因：C；回滚：git checkout pre-qa-fix-20261020-1849
-```
+End **every** delivery with 1–2 lines: `Skipped: <what was not done>. Unverified: <what was not tested>. Risk: <main residual risk>.` If none, `Skipped: nothing`. Never end with a bare "done".
 
-- 时间用 ISO 8601 + 本机时区偏移；改动、原因、回滚各一句；
-- 同一文件多次改动只保留**最新一块**，旧的进 `progress.md` 时间线；
-- 语言不同就用该语言注释符（`#`、`//`、`<!-- -->`）；
-- `templates/zh|en/progress.md` 里有同格式的样例块，可直接照抄。
+## 16) Never cut
+
+Never trade for speed or scope — even in lite: validation; error handling that prevents data loss; security; accessibility; hardware calibration; anything the user explicitly asked for. If a request requires cutting one, stop and say so.
+
+## 17) Satellite skills
+
+**stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers.
+
+## Bundled scripts
+
+`scripts/` contains `check-env.js`, `init-docs.js`, `check-hardcode.js` and `build-portable.js` (zero dependencies). `install.js` installs all four skills (`--tool`/`--dest`/`--target`/`--verify`/`--dry-run`/`--force`; exit 0/1/2/3/4). Usage details: `README.md` and `node install.js --help`.
 
 ---
 
-## 10) 证据格式
+## Hard constraints quick reference (condensed from §9; the body above is authoritative)
 
-交付里必须有一张**三列表**：
-
-| 断言 | 证据 | 来源 |
-|---|---|---|
-| 「X 已实现」 | 命令 + 原始输出（退出码/行数/hash） | `文件:行号` 或日志路径 |
-| 「Y 没影响」 | 回归命令的原始输出 | 同上 |
-| 「Z 未验证」 | —— | 写「未知」并说明卡在哪 |
-
-**没有证据的断言，一律写「未验证」或「未知」**；不许用「应该」「大概」「理论上」当结论。
+- **No hardcoding**: absolute paths, secrets, magic numbers (thresholds/timeouts/ports), URLs, ports, model names → config, env vars or named constants; defaults overridable by arguments.
+- **Timestamps**: ISO 8601 with the **machine's local UTC offset** (UTC+9 → `+09:00`, never hardcoded `+08:00`); only in the file-header block and `progress.md`.
+- **No full rewrite**: single-file diff >**50%** or **300 lines** → explain and **get approval**.
+- **Search trail**: keywords, links and conclusions in `progress.md` or the report.
+- **Irreversible needs human approval**: delete files/dirs, change a database, `git reset --hard`, overwrite unbacked config, install into system dirs, restart services.
+- **No scope creep**: no unrequested refactors, formatting or dependency upgrades.
+- **Unknown licenses escalate**: any license outside the §7 matrix is reported to the user before use; never guess its terms.
 
 ---
 
-## 11) 冲突裁决
+## Script usage (zero dependencies, Node.js)
 
-优先级（从高到低）：
-
-1. **安全 / 不可逆风险**（可能删数据、泄密钥、装到系统目录）
-2. **用户明确指令**（他说要 A，就不要自作主张给 B）
-3. **证据**（实测 > 文档 > 记忆）
-4. **最小差异**（能改一行不改十行）
-5. **复用**（能复用现有实现就不新造）
-6. **美观 / 一致性**
-
-**能兼顾就兼顾**：只有真冲突时才按上表排序，并在回报里说明「牺牲了哪一条、为什么」。
-
----
-
-## 12) 失败处理
-
-- 同一个问题**最多试 3 次**（3 次是指同一思路的修正；换思路算新的一次，但要说明换了什么）；
-- 3 次仍失败 → **停下来升级给人**：说清「试了什么、每次的错误原文、你怀疑的 3 个可能、需要人做什么决定」；
-- 不许硬闯：不猜密钥、不关校验、不绕过测试、不删证据。
-
----
-
-## 13) 逃生门（用户要求跳过澄清）
-
-用户明确说「别问了，直接做」时：
-
-- **不硬拦**：记一条「本次跳过澄清，风险自担」；
-- **仍要先解释**：动手前必须说清「改什么 / 影响哪些文件与行为 / 风险 / 怎么退」；
-- **只是不再等确认**：与 §8 不冲突——§8 要求「先解释**且**等确认」，逃生门只取消后半句，**不取消先解释**；
-- **其余照旧**：备份、最小差异、验证留证据、更新文档一个都不能少；
-- **交付时列出**：你替他假设了什么（逐条：假设 → 理由 → 如果错了要改哪里）。
-
----
-
-## 脚本（配套，零第三方依赖）
-
-| 脚本 | 用途 | 退出码 |
-|---|---|---|
-| `scripts/check-env.js` | 探测 git / bash / node / 是否 git 仓库，输出 JSON 并建议备份方式；候选路径与超时可用 `SW_GIT_PATHS` / `SW_BASH_PATHS` / `SW_PROBE_TIMEOUT_MS` 覆盖 | 0 就绪，1 缺关键项 |
-| `scripts/init-docs.js` | 从 `templates/<lang>/` 生成 7 份项目文档到 `<dir>/docs/`（含 `LICENSES.md`）；`progress.md` 首行是 H1，环境快照紧随其后 | 0 成功；1 参数错误 / 已存在且无 `--force`；2 模板缺失 |
-| `scripts/check-hardcode.js` | 扫绝对路径/密钥/URL/端口/魔法数字；支持 `.hardcodeignore`（`glob : 类型 : 理由`，理由必填） | 0 干净（或全部被抑制）；2 有未抑制命中 / `.hardcodeignore` 非法 |
-| `scripts/build-portable.js` | 把 SKILL.md 正文 + 精简硬约束 + 脚本用法拼成单文件（正文只保留一份 §9） | 0 成功，2 `SKILL.md` 缺失 |
-| `install.js` | 复制到 `~/.agents/skills/stop-wishing`（`--claude` 时加 `~/.claude/skills`）；`--tool dsh\|claude\|codex\|trae` 选目标、`--dest <目录>` 精确目标、`--target <base>`【兼容旧用法】装到 `<base>/stop-wishing`、`--verify` 逐文件 hash 比对、`--dry-run`/`--force` | 0 成功或 dry-run；1 参数或覆盖冲突；2 源文件缺失；3 自检失败（缺失或不一致）；4 自检告警（内容落后于源） |
-
-用法示例（在 skill 根目录下）：
+Run from the repository root:
 
 ```bash
-node scripts/check-env.js
-node scripts/init-docs.js --lang zh --dir .
-node scripts/check-hardcode.js --path . --threshold 1000
-node scripts/build-portable.js
+# 1) Readiness: git / bash / node / git repo; exit 0 ready, 1 missing a critical item
+node skills/stop-wishing/scripts/check-env.js
+
+# 2) Generate the 7 project docs (zh/en, including LICENSES.md); exit 0 OK, 1 bad args or exists, 2 template missing
+node skills/stop-wishing/scripts/init-docs.js --lang zh --dir .
+
+# 3) Scan hardcoding: absolute paths / secrets / URLs / ports / magic numbers; supports .hardcodeignore
+#    exit 0 clean (or all suppressed), 2 unsuppressed hits or invalid ignore file
+node skills/stop-wishing/scripts/check-hardcode.js --path . --threshold 1000
+
+# 4) Install all four skills into a skills root (default: ~/.agents/skills)
 node install.js --dry-run
+node install.js --tool dsh --verify
+node install.js --tool claude --verify
+
+# 5) Regenerate this portable file
+node skills/stop-wishing/scripts/build-portable.js
 ```
 
----
-
-## 硬约束速查（摘自 §9，正文里已有完整版）
-
-- **禁硬编码**：绝对路径、密钥、魔法数字（阈值/超时/端口）、URL、端口、模型名，一律走配置/环境变量/常量命名；脚本默认值必须可被参数覆盖；
-- **时间戳格式**：ISO 8601 且带**本机时区偏移**（例 `2026-10-20T18:50+08:00`；在 UTC+9 的机器上就该是 `+09:00`，不许写死 +08:00）；只允许写在**文件头的改动块**与 `progress.md` 里，不散落在代码里；
-- **禁全量重写**：单个文件 diff 超过 **50%** 或 **300 行**，必须先说明「为什么不能小改」并**获得批准**；
-- **搜索留痕**：搜过的关键词、看过的链接、结论，写进 `progress.md` 或回报；
-- **不可逆操作必须人批**：删文件/删目录、改数据库、`git reset --hard`、覆盖未备份的配置、装到系统目录、重启服务；
-
----
-
-## 脚本用法（零依赖，Node.js）
-
-```bash
-# 1) 体检：git / bash / node / 是否 git 仓库；退出码 0 就绪，1 缺关键项
-node scripts/check-env.js
-
-# 2) 初始化 7 份项目文档（中/英，含 LICENSES.md）：退出码 0 成功，1 参数错误或已存在（无 --force），2 模板缺失
-node scripts/init-docs.js --lang zh --dir .
-
-# 3) 扫硬编码：绝对路径/密钥/URL/端口/魔法数字；支持 .hardcodeignore（glob : 类型 : 理由）
-#    退出码 0 干净（或全部被抑制），2 有未抑制命中 / .hardcodeignore 非法
-node scripts/check-hardcode.js --path . --threshold 1000
-
-# 4) 复制到用户级 skills 目录（默认不覆盖）
-node install.js --dry-run
-node install.js --claude
-
-# 5) 重新生成本文件
-node scripts/build-portable.js
-```
+Satellite skills are documented separately: `skills/stop-wishing-review`, `skills/stop-wishing-audit`, `skills/stop-wishing-debt`.

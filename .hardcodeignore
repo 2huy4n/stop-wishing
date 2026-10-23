@@ -5,20 +5,24 @@
 # LICENSE 是 AGPL-3.0 标准全文，必须逐字保持：自带的年份、法条编号与 gnu.org/fsf.org 官方链接不是硬编码
 LICENSE : * : AGPL 标准全文自带的年份/法条编号与官方链接，属许可证正文，禁止改动
 # 环境探测的候选路径（Git / Bash 的常见安装位置）——这是探测目标，不是资源定位
-scripts/check-env.js : abs-path : 环境探测候选路径，按常见安装位置列常量，可用 SW_GIT_PATHS / SW_BASH_PATHS 覆盖
+skills/stop-wishing/scripts/check-env.js : abs-path : 环境探测候选路径，按常见安装位置列常量，可用 SW_GIT_PATHS / SW_BASH_PATHS 覆盖
 # 检查器自身的阈值默认值（1000 毫秒 / 1000 阈值 / 1024 字节）
-scripts/check-hardcode.js : magic-number : 检查器自身的默认阈值与体积上限常量
+skills/stop-wishing/scripts/check-hardcode.js : magic-number : 检查器自身的默认阈值与体积上限常量
 # 检查器注释里记录被修复的历史现象（C:/Program Files 被空格截断）
-scripts/check-hardcode.js : abs-path : 注释里复述历史 bug 的现象，不是配置路径
+skills/stop-wishing/scripts/check-hardcode.js : abs-path : 注释里复述历史 bug 的现象，不是配置路径
 # SKILL.md 里的文档示例值：年份文本（如 2024 年）与 --threshold 1000
-SKILL.md : magic-number : 文档与注释中的年份/日期文本（如「2024 年」）与命令行示例值（--threshold 1000），均非可配置常量
+skills/stop-wishing/SKILL.md : magic-number : 文档与注释中的年份/日期文本与命令行示例值，均非可配置常量
 # 便携版由 SKILL.md 生成，同样带示例阈值与年份文本
 portable/*.md : magic-number : 便携版里的年份文本与命令行示例值（源出 SKILL.md），非可配置常量
 # build-portable 里的脚本用法示例同样带 --threshold 1000
-scripts/build-portable.js : magic-number : SCRIPT_USAGE 字符串里的示例命令行阈值
+skills/stop-wishing/scripts/build-portable.js : magic-number : SCRIPT_USAGE 字符串里的示例命令行阈值
 # 测试里的负样例（假绝对路径 / 假密钥 / 假 URL / 假端口）与超时参数
 test/*.mjs : abs-path : 负样例：假绝对路径，用于证明 abs-path 规则能命中
 test/*.mjs : secret : 负样例：假密钥，用于证明 secret 规则能命中
 test/*.mjs : url : 负样例：假 URL，用于证明 url 规则能命中
 test/*.mjs : port : 负样例：假端口，用于证明 port 规则能命中
 test/*.mjs : magic-number : 子进程超时与阈值参数，测试用例明确写出便于阅读
+# 第三方归属与版权年份：MIT 许可要求保留版权行；来源 URL 是归属证据，不是业务硬编码
+THIRD-PARTY-NOTICES.md : url : ponytail 来源与 MIT 许可要求的归属链接，不是可配置端点
+THIRD-PARTY-NOTICES.md : magic-number : MIT 版权行里的年份（2026），许可证要求保留
+README.md : magic-number : 文档里说明 ponytail 版权年份（2026），非可配置常量

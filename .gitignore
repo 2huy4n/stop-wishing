@@ -1,6 +1,6 @@
 # stop-wishing · 本仓库忽略清单
 # 原则：只忽略「本机产物 / 依赖 / 密钥 / 编辑器状态」，任何交付物都不忽略。
-# 必读：LICENSE、README.md、SKILL.md、templates/、test/、adapters/、portable/stop-wishing.md 必须保持可提交。
+# 必读：LICENSE、README.md、skills/*/SKILL.md、templates/、test/、adapters/、portable/stop-wishing.md 必须保持可提交。
 
 # ── 依赖与构建产物 ─────────────────────────────────────────────
 node_modules/
