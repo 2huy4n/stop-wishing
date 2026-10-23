@@ -125,6 +125,7 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
     groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
   }
+  groups.push({ label: 'agents/openai.yaml present', files: ['agents/openai.yaml'] })
   groups.push({ label: 'license and third-party notices', files: NOTICE_FILES })
 
   const results = []
@@ -247,7 +248,23 @@ export function install(options, home = homedir()) {
 
   const conflict = plan.find(item => item.action.startsWith('拒绝'))
   if (conflict) {
-    return { ok: false, code: 1, message: `目标已存在且未加 --force: ${conflict.dest}`, plan, files, defaultHint }
+    // 已存在时不只报「拒绝」：列出与源相比哪些文件缺失/落后，用户才知道该不该 --force。
+    const sourceDir = join(SKILLS_ROOT, conflict.skill)
+    const list = collectFiles(sourceDir)
+    for (const notice of NOTICE_FILES) if (!list.includes(notice)) list.push(notice)
+    const diffs = []
+    for (const file of list) {
+      const target = join(conflict.dest, file)
+      const source = NOTICE_FILES.includes(file) && !existsSync(join(sourceDir, file))
+        ? join(ROOT, file)
+        : join(sourceDir, file)
+      if (!existsSync(target)) diffs.push(`缺失 ${file}`)
+      else if (existsSync(source) && sha256(target) !== sha256(source)) diffs.push(`落后 ${file}`)
+    }
+    const detail = diffs.length === 0
+      ? '与源一致，无需更新；确要重装再加 --force'
+      : `与源比较：${diffs.length} 个文件不同\n` + diffs.slice(0, 10).map(item => '  - ' + item).join('\n') + (diffs.length > 10 ? `\n  ... 其余 ${diffs.length - 10} 个` : '')
+    return { ok: false, code: 1, message: `目标已存在且未加 --force: ${conflict.dest}\n${detail}`, plan, files, defaultHint }
   }
 
   for (const item of plan) {

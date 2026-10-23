@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stop Wishing Debt"
+  short_description: "Build a debt ledger from shortcut markers"

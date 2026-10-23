@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stop Wishing Tickets"
+  short_description: "Split a spec into ordered tracer-bullet tickets"

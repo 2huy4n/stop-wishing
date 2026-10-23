@@ -49,6 +49,7 @@ stop-wishing/
 │   ├── stop-wishing/                 # 主技能
 │   │   ├── SKILL.md                  # 英文正文（17 章）
 │   │   ├── SKILL.md.bak-20261023-1220# 原中文版备份（git 忽略）
+│   │   ├── agents/openai.yaml        # Codex 元数据（展示名/简介）
 │   │   ├── scripts/
 │   │   │   ├── check-env.js          # git/bash/node/仓库探测 → JSON + 备份建议
 │   │   │   ├── init-docs.js          # 生成 7 份项目文档到 <dir>/docs/
@@ -65,6 +66,8 @@ stop-wishing/
 │   └── stop-wishing-setup/SKILL.md   # 初始化项目协作约定（票在哪/术语/标签）
 ├── LICENSE                           # AGPL-3.0-or-later 全文
 ├── THIRD-PARTY-NOTICES.md            # ponytail (MIT) 的版权与许可声明
+├── CHANGELOG.md                      # 版本与变更记录
+├── VERSION                           # 当前版本号（0.4.0）
 ├── install.js                        # 安装七个技能（--dry-run / --force / --tool / --dest / --target / --verify）
 ├── adapters/                         # 各编辑器接入说明
 ├── portable/                         # 便携单文件（由 build-portable.js 生成）
@@ -87,6 +90,12 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 - 只放指针，不搬正文——它会常驻每次对话，塞多了是负担。
 
 技能本身也会在开头提问时问一次：「要不要放一个 AGENTS.md 指向这些文档？」回答不是明确的「要」，就不写。
+
+## 多工具元数据与版本
+
+- 每个技能自带 `agents/openai.yaml`（`display_name` / `short_description`），Codex 等工具按此显示；`stop-wishing-setup` 额外写 `allow_implicit_invocation: false`，因为它只应在用户明确要求时运行。
+- 版本见 `VERSION` 与 `CHANGELOG.md`。版本号不写进 SKILL.md，避免改一次文档就要同步多处。
+- 重装到已存在的目录时，安装器不再只报「已存在」：会列出具体哪些文件**缺失**或**落后**；完全一致时提示无需更新。
 
 ## 给 AI 看：用户不会装时按此执行
 

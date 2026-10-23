@@ -263,3 +263,13 @@ test('债务技能：grep 命令、输出格式、计数结尾、只读', () => 
   assert.ok(text.includes('upgrade: no-trigger'))
   assert.ok(text.includes('<N> markers, <M> with no trigger.'))
 })
+
+test('每个技能都有 agents/openai.yaml（display_name + short_description）', () => {
+  for (const name of SKILL_NAMES) {
+    const file = join(SKILLS_DIR, name, 'agents', 'openai.yaml')
+    assert.equal(existsSync(file), true, `缺 ${name}/agents/openai.yaml`)
+    const text = readFileSync(file, 'utf8')
+    assert.match(text, /display_name:\s*".+"/, `${name} 缺 display_name`)
+    assert.match(text, /short_description:\s*".+"/, `${name} 缺 short_description`)
+  }
+})

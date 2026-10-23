@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stop Wishing"
+  short_description: "Clarify a vague request before writing code"

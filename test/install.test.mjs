@@ -42,13 +42,26 @@ test('install：真实复制七个技能到 --target，含主技能脚本/模板
   assert.equal(existsSync(join(base, 'stop-wishing-review', 'scripts')), false, '卫星技能不带主技能脚本')
 })
 
-test('install：默认不覆盖（exit 1），--force 才覆盖', () => {
+test('install：默认不覆盖，并报告与源的差异；--force 才覆盖', () => {
   const base = mkdtempSync(join(tmpdir(), 'sw-install-force-'))
   assert.equal(cli(['--target', base]).status, 0)
-  const second = cli(['--target', base])
-  assert.equal(second.status, 1)
-  assert.match(second.stderr, /--force/)
+
+  // 完全一致时：说明无需更新，而不是只甩一句「已存在」。
+  const same = cli(['--target', base])
+  assert.equal(same.status, 1)
+  assert.match(same.stderr, /--force/)
+  assert.match(same.stderr, /与源一致/)
+
+  // 改一个文件后再装：应指出哪个文件落后。
+  const skill = join(base, 'stop-wishing', 'SKILL.md')
+  appendFileSync(skill, '\nstale\n')
+  const stale = cli(['--target', base])
+  assert.equal(stale.status, 1)
+  assert.match(stale.stderr, /落后|缺失/)
+  assert.match(stale.stderr, /个文件不同/)
+
   assert.equal(cli(['--target', base, '--force']).status, 0)
+  assert.equal(cli(['--target', base, '--force', '--verify']).status, 0)
 })
 
 test('--dest：作为 skills 根目录，安装七个子目录', () => {

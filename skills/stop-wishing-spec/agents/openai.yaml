@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stop Wishing Spec"
+  short_description: "Turn a requirement card into a written spec"

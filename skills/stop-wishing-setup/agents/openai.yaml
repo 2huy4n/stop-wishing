@@ -1,0 +1,5 @@
+interface:
+  display_name: "Stop Wishing Setup"
+  short_description: "Configure a repo for this skill family"
+policy:
+  allow_implicit_invocation: false
