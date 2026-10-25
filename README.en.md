@@ -144,7 +144,7 @@ node skills/stop-wishing/scripts/setup.js --dir <project> \
 
 ## Bonus: Vibe Coding glossary
 
-[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) is a **147-term** glossary written for non-programmers: 9 categories, 10 commonly confused pairs, 5 pitfalls, a "search by situation" entry (change a page / install dependencies / deploy / something broke), and every term marked **must-know** or **advanced**. Search works over Chinese, English and error codes.
+[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) is a **147-term** glossary written for non-programmers: 9 categories, 10 commonly confused pairs, 5 pitfalls, a "search by situation" entry (change a page / install dependencies / deploy / something broke), and every term marked **must-know** or **advanced**. Each entry pairs the Chinese explanation with its **English translation**, for both the definition and the analogy. Search works over Chinese, English and error codes.
 
 Open it in any browser — no network, no installation. It is **not part of the installer** (which ships only the seven skills); it is a bonus primer kept in the repo.
 

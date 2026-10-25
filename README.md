@@ -142,7 +142,7 @@ node skills/stop-wishing/scripts/setup.js --dir <项目根> \
 
 ## 附赠：Vibe Coding 名词速查表
 
-[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) 是给零基础用户的 **147 词**速查表：9 个分类、10 组易混词、5 个常见坑；支持「按场景查」（改页面 / 装依赖 / 部署上线 / 报错了），每条标了「必记」或「进阶」，中英文和报错代码都能搜。
+[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) 是给零基础用户的 **147 词**速查表：9 个分类、10 组易混词、5 个常见坑；支持「按场景查」（改页面 / 装依赖 / 部署上线 / 报错了），每条标了「必记」或「进阶」。**每个词都有中文解释 + 英文对照**（定义与比方各一行），中英文和报错代码都能搜。
 
 用浏览器直接打开即可，不需要联网或安装任何东西。它**不属于安装内容**（安装器只装七个技能），是随仓库附赠的入门读物。
 

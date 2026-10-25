@@ -1,0 +1,737 @@
+[
+  {
+    "zh": "模型",
+    "de": "A specific version of an AI model, such as different GPT, Claude or DeepSeek releases. Versions from the same vendor differ in capability and price.",
+    "ae": "Different trims of the same car: same brand, different engine and fuel economy."
+  },
+  {
+    "zh": "推理",
+    "de": "The act of the model generating a reply. Every message you send triggers one inference, billed by tokens.",
+    "ae": "Pressing the start-thinking button; you pay per press."
+  },
+  {
+    "zh": "温度",
+    "de": "Controls randomness. Low is steadier, more conservative and reproducible; high is more varied, creative and easier to derail. Code usually wants low.",
+    "ae": "Cooking heat: low is steady, high burns the dish."
+  },
+  {
+    "zh": "流式输出",
+    "de": "The AI streams words as it generates them instead of waiting to finish everything. That is why text appears piece by piece.",
+    "ae": "Pouring beer gradually rather than serving the whole glass at once."
+  },
+  {
+    "zh": "限流",
+    "de": "The maximum number of calls allowed per unit of time; beyond it you wait. Free and paid tiers differ a lot.",
+    "ae": "A scenic spot only lets a fixed number of visitors in per hour."
+  },
+  {
+    "zh": "额度",
+    "de": "How much you have left to use, usually counted in tokens or calls. When it runs out you wait for a reset or top up.",
+    "ae": "A phone data plan: once used up, the speed is throttled."
+  },
+  {
+    "zh": "提示词工程",
+    "de": "The craft of stating a request precisely: give context, examples, acceptance criteria, and what must not change.",
+    "ae": "Learning how to order so nothing surprises you: say allergies, taste and portion size."
+  },
+  {
+    "zh": "零样本 / 少样本",
+    "de": "Let the AI do it with no examples (zero-shot), or show a few examples to copy (few-shot). Examples usually work better.",
+    "ae": "Write three more like this beats a vague description."
+  },
+  {
+    "zh": "思维链",
+    "de": "Ask the AI to write its reasoning step by step before concluding. On complex problems accuracy improves noticeably.",
+    "ae": "Math homework that requires showing the work: easier to spot which step went wrong."
+  },
+  {
+    "zh": "上下文压缩",
+    "de": "When a conversation nears the window limit, earlier content is condensed into a summary to free space. Compression loses detail, so re-paste what matters.",
+    "ae": "Cramming a stack of notes onto one page: portable, but the detail is gone."
+  },
+  {
+    "zh": "子代理",
+    "de": "A helper the main AI dispatches to do a subtask and report back. Good for independent jobs such as going through a repository.",
+    "ae": "A boss sends an assistant to look something up and report back without blocking."
+  },
+  {
+    "zh": "技能",
+    "de": "A pre-written capability pack or playbook. When the AI meets the matching task it follows the steps instead of improvising.",
+    "ae": "An SOP for new hires: follow it and you will not go wrong."
+  },
+  {
+    "zh": "钩子",
+    "de": "A script that fires automatically before or after an action, for example check formatting on every save.",
+    "ae": "A little automation such as auto-backup on save."
+  },
+  {
+    "zh": "工具调用",
+    "de": "The AI actively calls tools such as search, reading a file or running a command instead of inventing an answer.",
+    "ae": "Making the intern actually look it up rather than guess from memory."
+  },
+  {
+    "zh": "检索增强生成",
+    "de": "First retrieve relevant passages from your own documents, then have the AI answer from those passages. It cuts fabrication a lot.",
+    "ae": "An open-book exam: find the page first, then answer."
+  },
+  {
+    "zh": "向量 / 嵌入",
+    "de": "Turning a piece of text into a list of numbers (a vector) so similarity of meaning can be measured. Semantic search relies on it.",
+    "ae": "Giving every sentence coordinates: nearby points mean similar meaning."
+  },
+  {
+    "zh": "向量数据库",
+    "de": "A database built to store those coordinates and search by similarity.",
+    "ae": "A library shelved by meaning rather than by keyword."
+  },
+  {
+    "zh": "微调",
+    "de": "Continue training a model on your own data so it understands your domain or voice better. Far more expensive than prompting.",
+    "ae": "Special training for an existing employee: cheaper than explaining every time, but costly up front."
+  },
+  {
+    "zh": "代码",
+    "de": "Instructions for a computer written in a programming language. It follows them literally and never fills in the spirit.",
+    "ae": "A recipe: one wrong step ruins the dish, and it will not guess what you meant."
+  },
+  {
+    "zh": "HTML",
+    "de": "The skeleton of a web page: which blocks exist, such as headings, paragraphs, buttons and images.",
+    "ae": "The walls and room layout of a house, before decoration."
+  },
+  {
+    "zh": "CSS",
+    "de": "The styling of a page: colors, sizes, spacing and position.",
+    "ae": "Interior design: paint, furniture placement and lighting."
+  },
+  {
+    "zh": "JavaScript",
+    "de": "The behavior of a page: what happens on click and how data changes.",
+    "ae": "Plumbing and switches that make a house alive."
+  },
+  {
+    "zh": "TypeScript",
+    "de": "JavaScript plus type checking, catching a class of errors before the code runs.",
+    "ae": "Precise blueprints before renovating, so mismatched dimensions show up early."
+  },
+  {
+    "zh": "框架",
+    "de": "A foundation that dictates structure and flow; you fill in content following its rules. It calls your code.",
+    "ae": "An IKEA kitchen set: cabinet positions are fixed, you assemble per the plan."
+  },
+  {
+    "zh": "库",
+    "de": "Someone else's toolbox that you call when needed. You decide whether and how to use it.",
+    "ae": "A wrench from the hardware store: keep it in the box, take it out when needed."
+  },
+  {
+    "zh": "package.json",
+    "de": "The manifest listing which dependencies the project uses and which commands it offers. It is how others install your dependencies.",
+    "ae": "The ingredient list plus instructions printed on the package."
+  },
+  {
+    "zh": "组件",
+    "de": "A reusable UI piece such as a button, card or nav bar. Change it once and every place using it updates.",
+    "ae": "A Lego brick that can go into many builds."
+  },
+  {
+    "zh": "函数",
+    "de": "A named block of code you can call repeatedly. Wrap repeated work and call it by name.",
+    "ae": "The quick-wash button on a washing machine: press once and the whole cycle runs."
+  },
+  {
+    "zh": "变量",
+    "de": "A name for a value so you can reuse and change it.",
+    "ae": "A label on a drawer: say the label and everyone knows which drawer."
+  },
+  {
+    "zh": "数组",
+    "de": "An ordered list of values, reachable by position.",
+    "ae": "A queue of people: the third one is the third one."
+  },
+  {
+    "zh": "对象",
+    "de": "A set of name-to-value pairs describing one thing and its properties.",
+    "ae": "The fields on an ID card: name, birthday, address."
+  },
+  {
+    "zh": "布尔值",
+    "de": "Only true or false. Every condition ultimately reduces to it.",
+    "ae": "A switch: on or off."
+  },
+  {
+    "zh": "字符串",
+    "de": "A piece of text wrapped in quotes.",
+    "ae": "A sentence stored exactly as written."
+  },
+  {
+    "zh": "循环",
+    "de": "Repeat the same code many times instead of writing it out again and again.",
+    "ae": "An assembly line: the same motion until the batch is done."
+  },
+  {
+    "zh": "条件判断",
+    "de": "Do one thing when a condition holds, otherwise do another.",
+    "ae": "Take an umbrella if it rains, skip it if not."
+  },
+  {
+    "zh": "JSON",
+    "de": "A data format that is reasonably readable for both humans and machines, common for passing data between front end and back end.",
+    "ae": "A filled-in form where each field is obvious at a glance."
+  },
+  {
+    "zh": "注释",
+    "de": "Notes for humans that the machine skips. They explain why the code is written this way.",
+    "ae": "A sticky note in the margin; it does not change the text."
+  },
+  {
+    "zh": "目录 / 路径",
+    "de": "Where a file sits on the computer. A wrong path means the program cannot find the file.",
+    "ae": "Building 3, cabinet 2, slot 5: miss one level and you never arrive."
+  },
+  {
+    "zh": "根目录",
+    "de": "The outermost level of the project. Relative paths start from it.",
+    "ae": "The main entrance of a building; every room is found from there."
+  },
+  {
+    "zh": ".env 文件",
+    "de": "A local file holding environment variables; normally excluded from version control and never committed.",
+    "ae": "A personal password book you keep on you, not in the public filing cabinet."
+  },
+  {
+    "zh": "魔法数字",
+    "de": "A number that appears in code with no explanation, so nobody, including you in three months, knows why it is that value.",
+    "ae": "A recipe that says add 37 grams of salt without saying why 37."
+  },
+  {
+    "zh": "接口",
+    "de": "An agreed ordering window between two systems: you send a request per the contract and it returns data per the contract; neither side cares how the other is built.",
+    "ae": "A restaurant service window: order from the menu, never enter the kitchen."
+  },
+  {
+    "zh": "端点",
+    "de": "One specific address in an API for one operation, for example get-user-info is one endpoint.",
+    "ae": "A numbered dish on the menu."
+  },
+  {
+    "zh": "请求 / 响应",
+    "de": "What you send is the request; what comes back is the response. One interaction is one question and one answer.",
+    "ae": "An order slip and the receipt."
+  },
+  {
+    "zh": "状态码",
+    "de": "A three-digit number for the result: 200 success, 404 not found, 401 not logged in, 403 forbidden, 500 the server itself failed.",
+    "ae": "The restaurant number board: ready, no such dish, you did not pay, the kitchen caught fire."
+  },
+  {
+    "zh": "本地地址",
+    "de": "Means your own computer. Used for local preview during development; only you can open it.",
+    "ae": "Tasting the dish at home; nobody else can eat it."
+  },
+  {
+    "zh": "端口",
+    "de": "A door number for different services on the same machine, like 3000, 5173 or 8080: the number after the colon.",
+    "ae": "Different room numbers in the same building."
+  },
+  {
+    "zh": "数据库",
+    "de": "A place to store data long-term and in structure: users, orders, articles.",
+    "ae": "The archive room: filed by category and retrievable anytime."
+  },
+  {
+    "zh": "SQL",
+    "de": "The dedicated language for talking to a relational database: query, insert, update and delete data.",
+    "ae": "The search language used when pulling files from the archive."
+  },
+  {
+    "zh": "表 / 字段",
+    "de": "Tables in a database: one row is a record, one column (field) is one kind of attribute.",
+    "ae": "A spreadsheet and its column headers."
+  },
+  {
+    "zh": "增删改查",
+    "de": "Create, Read, Update, Delete. Most back-end features are combinations of these four.",
+    "ae": "Filing, retrieving, amending and destroying records."
+  },
+  {
+    "zh": "构建",
+    "de": "Turning source code into files that can run in a browser or on a server. Many errors actually happen at this step.",
+    "ae": "Turning flour into bread before you can sell it."
+  },
+  {
+    "zh": "打包",
+    "de": "Combining many loose files into a few, cutting requests and speeding up loading.",
+    "ae": "Packing loose luggage into cases so it moves faster."
+  },
+  {
+    "zh": "静态站点",
+    "de": "A site made of plain files with no back end. Easiest and cheapest to deploy, and fastest.",
+    "ae": "A printed brochure: everyone gets the same thing."
+  },
+  {
+    "zh": "域名",
+    "de": "The memorable part of a URL, like example.com. It points at some server IP.",
+    "ae": "A shop name: easy to remember and easy to find."
+  },
+  {
+    "zh": "域名解析",
+    "de": "The system that translates a domain into a server IP. If resolution has not propagated, the domain will not open.",
+    "ae": "A phone book that turns a name into a number."
+  },
+  {
+    "zh": "IP 地址",
+    "de": "A server address on the network, like 192.168.1.1. Domains ultimately point at it.",
+    "ae": "Latitude and longitude: precise, but nobody remembers them."
+  },
+  {
+    "zh": "HTTPS / 证书",
+    "de": "HTTPS is encrypted HTTP; the certificate proves you are really connected to this site and not an impostor.",
+    "ae": "A courier parcel with a tamper seal: you can tell if it was opened."
+  },
+  {
+    "zh": "内容分发网络",
+    "de": "Copies static files to nodes near users, shipping from the closest warehouse for faster loading.",
+    "ae": "Chain stores ship locally instead of everything from headquarters."
+  },
+  {
+    "zh": "缓存",
+    "de": "Store what was computed or downloaded so the next use is instant. When the cache is stale you get I-changed-it-but-the-page-did-not.",
+    "ae": "Keep frequently used files on the desktop instead of digging through folders."
+  },
+  {
+    "zh": "跨域资源共享",
+    "de": "A browser rule about which site may call which API. Misconfigured, an API that works still throws a CORS error.",
+    "ae": "Building access control: cards for different blocks have different permissions."
+  },
+  {
+    "zh": "响应式设计",
+    "de": "One page automatically adapts to phone, tablet and desktop widths.",
+    "ae": "One garment that fits different body sizes."
+  },
+  {
+    "zh": "版本管理",
+    "de": "A tool on your own machine that records every code change and lets you return to any past version.",
+    "ae": "A game save system that also lets you load any earlier save."
+  },
+  {
+    "zh": "代码托管平台",
+    "de": "A website hosting Git repositories; beyond storage it offers collaboration, issues and code review.",
+    "ae": "Cloud saves plus a player community: backup and conversation."
+  },
+  {
+    "zh": "仓库",
+    "de": "All of a project's code plus its complete change history.",
+    "ae": "The whole filing cabinet for a project, not a single folder."
+  },
+  {
+    "zh": "克隆",
+    "de": "Copy an entire remote repository to your machine, history included.",
+    "ae": "Moving the whole cabinet home, old files and all."
+  },
+  {
+    "zh": "合并",
+    "de": "Bring the changes on one branch back into another, usually the main line.",
+    "ae": "Adding a tested new dish to the official menu."
+  },
+  {
+    "zh": "冲突",
+    "de": "Two people changed the same spot and Git does not know whose version wins, so it stops and asks you. Not an error, a request for a ruling.",
+    "ae": "Two people editing the same sentence: only a human can decide which version stands."
+  },
+  {
+    "zh": "议题",
+    "de": "An entry recording a bug or a feature request; it can be discussed, assigned and closed.",
+    "ae": "A repair ticket: describe the problem and wait for handling."
+  },
+  {
+    "zh": "复刻",
+    "de": "Copy someone's repository under your own account and change it freely without touching the original.",
+    "ae": "Photocopying a borrowed book: scribble on the copy, the original is unaffected."
+  },
+  {
+    "zh": "回滚",
+    "de": "Return to the state of an earlier commit and undo what came after.",
+    "ae": "Loading an earlier save."
+  },
+  {
+    "zh": "标签",
+    "de": "Give a commit a version name, like v1.0.0, so the release build can be found later.",
+    "ae": "Sticking a release label on a save file."
+  },
+  {
+    "zh": "忽略清单",
+    "de": "Tells Git which files not to track: dependency folders, secret files, build output.",
+    "ae": "A do-not-file-this notice on a cabinet slot."
+  },
+  {
+    "zh": "调试",
+    "de": "The process of finding and fixing a bug: reproduce, locate, change, verify.",
+    "ae": "An autopsy to find the cause; only then can you treat it."
+  },
+  {
+    "zh": "日志",
+    "de": "The running record a program writes itself; after a problem it is how you reconstruct what happened.",
+    "ae": "A dashcam: you can replay it afterwards."
+  },
+  {
+    "zh": "控制台",
+    "de": "A window for logs, commands and errors. In a browser, F12 opens the console inside developer tools.",
+    "ae": "The dashboard area: fuel level and fault codes are read here."
+  },
+  {
+    "zh": "断点",
+    "de": "Pause the program at a certain line so you can inspect the variables at that moment.",
+    "ae": "Pausing a recording to examine it frame by frame."
+  },
+  {
+    "zh": "静态检查",
+    "de": "Automatically check style and a class of low-level mistakes, such as using an undefined variable.",
+    "ae": "Spell check: it does not guarantee good writing, but catches obvious errors."
+  },
+  {
+    "zh": "测试",
+    "de": "Use code to verify code. Run it after a change and you immediately know whether something else broke.",
+    "ae": "Factory quality control: every unit goes through."
+  },
+  {
+    "zh": "单元测试",
+    "de": "A test for one small part only, without involving the whole system.",
+    "ae": "Testing a single bulb on its own."
+  },
+  {
+    "zh": "回归问题",
+    "de": "A new change broke something that used to work. This is exactly why tests are run.",
+    "ae": "Fixing the plumbing and cutting the power."
+  },
+  {
+    "zh": "超时",
+    "de": "Give up and error out after waiting too long. Network requests and database queries set timeouts.",
+    "ae": "Cancel the delivery order after forty minutes."
+  },
+  {
+    "zh": "边界情况",
+    "de": "Extreme inputs: empty values, zero, negatives, very long text, concurrency. Normal data works; edges crash.",
+    "ae": "The elevator limit is 1000 jin: what happens at exactly 1000 deserves its own thought."
+  },
+  {
+    "zh": "竞态条件",
+    "de": "Two things happen at once, the order is not guaranteed, so the result is sometimes right and sometimes wrong. The hardest bugs to reproduce.",
+    "ae": "Two people grabbing the last seat; who sits depends on who is faster."
+  },
+  {
+    "zh": "内存泄漏",
+    "de": "Memory that should be freed is not, so the program slows down and eventually crashes.",
+    "ae": "A pool with an inlet and no outlet: it will overflow."
+  },
+  {
+    "zh": "令牌",
+    "de": "A string proving you are logged in and authorized, like a GitHub ghp_ token. It is equivalent to a password; giving it away hands over the account. Note it shares the English word token with the AI billing unit, but they are unrelated.",
+    "ae": "A wristband that opens doors; lose it and someone else can enter."
+  },
+  {
+    "zh": "API 密钥",
+    "de": "A secret string proving a third-party request came from you. In front-end code it is public: anyone can read it in the browser.",
+    "ae": "An office access card taped to the notice board: everyone can get in."
+  },
+  {
+    "zh": "认证",
+    "de": "Confirming who you are. Logging in, typing a password, scanning a code: all authentication.",
+    "ae": "The guard checking your identity at the gate."
+  },
+  {
+    "zh": "授权",
+    "de": "Confirming what you may do. The same person can see some pages and not others; that is authorization. Authenticate first, then authorize.",
+    "ae": "You are inside the building, but only the owner card opens your floor."
+  },
+  {
+    "zh": "会话 / Cookie",
+    "de": "After login the server remembers you through a small credential stored in the browser, so you do not log in on every click. That credential is the cookie.",
+    "ae": "A theme-park wristband: come and go all day without showing a ticket each time."
+  },
+  {
+    "zh": "令牌过期",
+    "de": "Tokens usually expire; after that every request is rejected, usually with 401. GitHub tokens can be set to 30 days, 90 days or never.",
+    "ae": "A monthly pass expires at month end; next month needs a new one."
+  },
+  {
+    "zh": "最小权限原则",
+    "de": "Give only the minimum permission needed for the task, nothing extra. Then even a leak has limited damage.",
+    "ae": "Give the cleaner access to the lobby and hallway, not the safe."
+  },
+  {
+    "zh": "原型",
+    "de": "An early version that clicks and looks right but is rough inside, used to confirm the direction.",
+    "ae": "A cardboard model to check proportions; it need not be livable."
+  },
+  {
+    "zh": "样板代码",
+    "de": "Framework boilerplate every project rewrites, with little creativity but no way around it.",
+    "ae": "The same form you fill out for every errand."
+  },
+  {
+    "zh": "脚手架",
+    "de": "A tool that generates a project skeleton in one command, with folders and base config in place.",
+    "ae": "A bare apartment with walls and wiring done, ready for renovation."
+  },
+  {
+    "zh": "重构",
+    "de": "Tidy the inside of the code without changing external behavior, so it is easier to read and change.",
+    "ae": "Reorganizing without replacing furniture: same room, better storage."
+  },
+  {
+    "zh": "祖传代码",
+    "de": "Old code left by predecessors that nobody can explain and nobody dares touch. Back it up before changing it.",
+    "ae": "Hidden wiring in an old house: the blueprint is lost, touch it and the breaker trips."
+  },
+  {
+    "zh": "面条代码",
+    "de": "Logic tangled so that one pull moves everything; adding a feature means editing ten places.",
+    "ae": "A knotted earphone cable: the more you pull, the tighter it gets."
+  },
+  {
+    "zh": "死代码",
+    "de": "Code that never runs; deleting it changes nothing and keeping it only misleads.",
+    "ae": "A sealed door still on the wall that leads nowhere."
+  },
+  {
+    "zh": "优雅降级",
+    "de": "Handle failure gracefully, with a message or a fallback, instead of a blank crash.",
+    "ae": "An elevator that levels and opens on a power cut instead of trapping people."
+  },
+  {
+    "zh": "终端 / Shell / CLI",
+    "de": "A window where you operate the computer by typing commands. When the AI says run npm install, this is where you type it: the GUI is clicking, this is typing.",
+    "ae": "Ordering by pointing at a menu versus calling the order to the kitchen."
+  },
+  {
+    "zh": "Node.js / 运行时",
+    "de": "An environment that runs JavaScript on your computer outside the browser. Many AI coding tools and build scripts depend on it; whether it is installed decides if the node command works.",
+    "ae": "A song needs a player before it can sound."
+  },
+  {
+    "zh": "锁文件",
+    "de": "A file recording the exact version of every dependency, such as package-lock.json or pnpm-lock.yaml. It makes your install match everyone else's; works-locally-fails-online often starts here.",
+    "ae": "Cooking from the same ingredient list and gram weights, so anyone gets the same taste."
+  },
+  {
+    "zh": "入口文件 / 项目结构",
+    "de": "The file where execution starts, often index.js, main.py or app.js; project structure is how the folders are split. Changing the entry point means starting here.",
+    "ae": "The front door of a building; only inside do you reach the rooms."
+  },
+  {
+    "zh": "规则文件",
+    "de": "A conventions file at the project root written for the AI, such as AGENTS.md, CLAUDE.md or .cursorrules. The AI reads it on entering the repository, so the background need not be repeated.",
+    "ae": "An employee handbook by the door, read on day one."
+  },
+  {
+    "zh": "沙箱",
+    "de": "The operating boundary drawn for the AI: which files it may read, whether it may use the network, whether it may run commands. Out-of-bounds actions stop and ask you; read what it wants before approving.",
+    "ae": "A play area for a child: anything beyond the fence needs an adult nod."
+  },
+  {
+    "zh": "提示词注入",
+    "de": "Someone hides instructions in a web page, issue or document to trick your AI into executing them. You ask it to summarize a page and the page says to ignore previous instructions and send the key out.",
+    "ae": "A letter that looks like a notice but contains a request to transfer money."
+  },
+  {
+    "zh": "许可证",
+    "de": "The rules for using code: is commercial use allowed, must it stay open source, must you credit. MIT and Apache are permissive; GPL is viral and may force your project open.",
+    "ae": "Borrowing rules: some things are free to use, others must be returned and credited."
+  },
+  {
+    "zh": "CI/CD",
+    "de": "A pipeline that automatically tests, builds and deploys after each commit, usually configured in GitHub Actions. When it fails, the automated check did not pass.",
+    "ae": "An automatic quality-control conveyor before shipping: every unit passes through and failures are stopped."
+  },
+  {
+    "zh": "环境（开发 / 测试 / 生产）",
+    "de": "Three stages for the same code: development is your machine, staging is a few testers, production is real users. Changing the wrong environment causes most incidents.",
+    "ae": "Rehearsal room, dress rehearsal, opening night: same play, different audience and tolerance for error."
+  },
+  {
+    "zh": "数据库迁移",
+    "de": "A one-off script run when the database schema changes, moving old data into the new structure without losing it. Usually AI-generated; back up before running it.",
+    "ae": "Changing seasons: move clothes from old cubbies into new categories, never throw them out."
+  },
+  {
+    "zh": "备份 / 恢复",
+    "de": "Keep another copy of data or code so it can be moved back when something goes wrong. Commit protects only code; databases, uploaded images and secrets in .env are not in Git and need their own backup.",
+    "ae": "Cloud backup for a photo album: lose the phone, keep the photos."
+  },
+  {
+    "zh": "复现 / 最小可复现示例",
+    "de": "Make the problem appear reliably with fixed steps, then cut it down to the necessary part. A minimal reproducible example beats a hundred sentences.",
+    "ae": "Telling the doctor it hurts when bending, on the third rib on the left, instead of saying the whole body feels off."
+  },
+  {
+    "zh": "验收标准",
+    "de": "Write down in advance what counts as done, ideally measurable. Without it the AI guesses and you cannot tell whether it finished.",
+    "ae": "A renovation contract saying wall flatness within 2 mm instead of looks fine."
+  },
+  {
+    "zh": "范围蔓延",
+    "de": "Requirements keep being added mid-project until the schedule doubles and the original goal suffers. For every addition, ask what this round does and does not include.",
+    "ae": "Going out for soy sauce and pushing a full cart to the checkout."
+  },
+  {
+    "zh": "人机回环",
+    "de": "Let the AI stop for human confirmation before key actions instead of running to the end. Irreversible operations such as delete, deploy or database changes especially need it.",
+    "ae": "The final human go or no-go before launching a rocket, never handed to an automatic program."
+  },
+  {
+    "zh": "上下文工程",
+    "de": "Beyond prompting: deciding which files, history and rules the AI sees this time, and what it does not. Precision beats volume.",
+    "ae": "Choosing the right documents before leaving the house instead of stuffing the whole drawer into a bag."
+  },
+  {
+    "zh": "规格驱动开发",
+    "de": "Write the requirements as a spec with acceptance criteria first, then have the AI implement and verify against it. It turns wishing into building to contract.",
+    "ae": "Blueprints before construction, instead of changing the floor plan while laying bricks."
+  },
+  {
+    "zh": "热重载",
+    "de": "After a code change the page refreshes or updates itself without a manual restart. It is the change-a-bit, look-at-it feedback loop.",
+    "ae": "A mirror that turns with you while trying on clothes, instead of walking back to the fitting room."
+  },
+  {
+    "zh": "端口占用",
+    "de": "The port your service needs is already taken by another program. The usual error is EADDRINUSE; stop the old process or pick another port.",
+    "ae": "Someone else's car is in your parking spot: find another spot or move that car."
+  },
+  {
+    "zh": "编辑器 / IDE",
+    "de": "Software for writing code, such as VS Code or Cursor. It is not the browser: edit code in the editor and view the page in the browser.",
+    "ae": "A desk for writing versus a gallery for displaying the work."
+  },
+  {
+    "zh": "氛围编程",
+    "de": "Describe what you want in natural language and let the AI write the code without reviewing every implementation detail. The point is that it feels right, not that you understand every line.",
+    "ae": "Ordering something mild and good with rice instead of cooking it yourself."
+  },
+  {
+    "zh": "大语言模型",
+    "de": "A model trained on enormous amounts of text that understands and generates natural language and code. It is the brain behind every AI coding tool.",
+    "ae": "An intern who has read the whole library and can both converse and write."
+  },
+  {
+    "zh": "词元",
+    "de": "The smallest unit for AI billing and memory length. One Chinese character is roughly one to two tokens; code uses more. Both the bill and how much it can remember are counted in tokens.",
+    "ae": "The little digit clicking over on a taxi meter."
+  },
+  {
+    "zh": "上下文",
+    "de": "Everything the model can see this time: what you said, its earlier replies, the files and errors you pasted. It cannot see what you did not give it.",
+    "ae": "Papers spread on the desk: what is not on the desk is invisible to it."
+  },
+  {
+    "zh": "上下文窗口",
+    "de": "The upper limit of the context. Exceed it and the earliest content is dropped or compressed into a summary. A larger window handles more code at once and costs more.",
+    "ae": "The desktop is only so big; when papers fill it, some must be cleared away."
+  },
+  {
+    "zh": "幻觉",
+    "de": "The AI confidently invents things that do not exist: function names, libraries, code that looks plausible but will not run. The flaw to watch most.",
+    "ae": "Someone giving directions with great confidence to a street that does not exist."
+  },
+  {
+    "zh": "提示词",
+    "de": "The message you send to the AI. The more specific it is, the less the AI guesses and the closer the result is to what you want.",
+    "ae": "A brief for a designer: make it look nice guarantees it will not be what you wanted."
+  },
+  {
+    "zh": "系统提示词",
+    "de": "A background setting given to the AI in advance, for example you are a rigorous code reviewer. It outranks what you say in the moment.",
+    "ae": "The employee handbook: more binding than the boss verbal aside."
+  },
+  {
+    "zh": "模型上下文协议",
+    "de": "A standard interface that lets the AI connect to external tools and data. With it the AI can read your files, query databases and call third-party services.",
+    "ae": "A universal USB port for the AI: any device can plug in."
+  },
+  {
+    "zh": "智能体",
+    "de": "An AI that can break a task down, execute multiple steps and call tools: not just chat, but run errands itself.",
+    "ae": "An assistant who can go out and finish the errand, not a support bot that only answers questions."
+  },
+  {
+    "zh": "依赖",
+    "de": "Things written by others that your project uses. More dependencies mean slower installs and a wider surface for problems.",
+    "ae": "Outside ingredients a dish needs; buy them all before cooking."
+  },
+  {
+    "zh": "包管理器",
+    "de": "A tool that downloads, upgrades and manages dependencies.",
+    "ae": "A grocery app: one tap orders everything on the ingredient list."
+  },
+  {
+    "zh": "环境变量",
+    "de": "Configuration values kept in the system rather than in code, such as keys and database addresses. Code references the name, never the value.",
+    "ae": "Passwords in a safe, not taped to the door, but retrievable when needed."
+  },
+  {
+    "zh": "硬编码",
+    "de": "Writing values that should be configurable, such as prices, addresses or keys, directly into code. Changing one means editing code and redeploying.",
+    "ae": "Painting prices onto the sign: changing one means repainting the whole thing."
+  },
+  {
+    "zh": "前端",
+    "de": "The part users see and click: pages, buttons, animations. It runs in the user browser.",
+    "ae": "The storefront, the window display, the menu board."
+  },
+  {
+    "zh": "后端",
+    "de": "The part users cannot see, running on the server: storing data, computing logic, checking permissions.",
+    "ae": "The kitchen and storeroom: invisible to guests, but the food comes from there."
+  },
+  {
+    "zh": "部署",
+    "de": "Putting the finished program on a server so others can reach it by URL.",
+    "ae": "Serving the finished dish at the table so guests can order it."
+  },
+  {
+    "zh": "提交",
+    "de": "Take a snapshot of this batch of changes into history with a note on what changed. Your most important safety net.",
+    "ae": "Saving the game with a note: beat the first boss."
+  },
+  {
+    "zh": "分支",
+    "de": "A parallel timeline split from the main line. Change anything there without affecting main; merge back once tested.",
+    "ae": "Cooking a trial dish on a copy, adding it to the menu only if it works."
+  },
+  {
+    "zh": "推送 / 拉取",
+    "de": "Sending local commits to the remote is push; bringing remote changes down is pull.",
+    "ae": "Uploading a save or downloading someone else save."
+  },
+  {
+    "zh": "拉取请求",
+    "de": "I want these changes merged into the main line, please review. Discussion, edits and checks happen before merging.",
+    "ae": "Submitting work for review; it goes on the wall only after approval."
+  },
+  {
+    "zh": "缺陷",
+    "de": "A flaw in the code that makes results wrong or crashes the program. It may not throw at all; wrong-but-silent is worse.",
+    "ae": "A hair in the dish: you may not spit it out on the spot, but it is still wrong."
+  },
+  {
+    "zh": "报错 / 异常",
+    "de": "A signal thrown when the program cannot continue, usually with a message and a location. Do not fear it; it is telling you what is wrong.",
+    "ae": "A red light on the dashboard: a warning, not a punishment."
+  },
+  {
+    "zh": "堆栈",
+    "de": "That long which-file, which-line, called-by-whom trail in an error. The top few lines are usually enough to locate it.",
+    "ae": "A parcel transfer record, traced back to the station where it went wrong."
+  },
+  {
+    "zh": "最小可用产品",
+    "de": "Build only the least that tests the idea, ship it, watch the reaction, then decide whether to add more.",
+    "ae": "Start with a three-dish stall to test the waters instead of opening a restaurant."
+  },
+  {
+    "zh": "技术债",
+    "de": "A compromise taken to hit a deadline that costs extra time later. The more you owe, the more painful every change.",
+    "ae": "Taping something together for now; sooner or later it needs a real repair."
+  }
+]
