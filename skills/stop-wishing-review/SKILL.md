@@ -27,10 +27,13 @@ A change can pass one axis and fail the other: code that follows every rule but 
 
 ### Find the spec, in this order
 
-1. `docs/project.md` — the requirement card (goal, scope, acceptance). This is the normal source in a stop-wishing project.
-2. Issue references in commit messages (`#123`, `Closes #45`, `!67`).
-3. A spec file or path the user names (`docs/`, `specs/`, `.scratch/`).
-4. Ask the user. If they say there is no spec, **skip this axis** and write `Intent: no spec available — not reviewed`. Never invent requirements.
+1. `docs/specs/*.md` — a spec written by `stop-wishing-spec` for this change. Match its slug or `title` against the branch name, the commit subjects and the files touched. If several match, take the newest and say which. Read its `status` and `card_sha256`.
+2. `docs/project.md` — the requirement card (goal, scope, acceptance). The normal source when no spec exists.
+3. Issue references in commit messages (`#123`, `Closes #45`, `!67`).
+4. A spec file or path the user names (`docs/`, `specs/`, `.scratch/`).
+5. Ask the user. If they say there is no spec, **skip this axis** and write `Intent: no spec available — not reviewed`. Never invent requirements.
+
+**Spec drift check.** Recompute the card hash exactly as `stop-wishing-spec` defines it — read `docs/project.md` as UTF-8, drop every line matching `^>\s*最后更新：`, join the rest with `\n`, SHA-256 over the UTF-8 bytes, lowercase hex — and compare it with the spec's `card_sha256`. If they differ, write `Spec drift: card changed since the spec was written` and mark Intent findings **provisional**: the spec may describe an older requirement. A spec whose `status` is `draft` is provisional for the same reason. Report the fact; never silently pick one side, and never re-interview the user.
 
 ### Then check exactly three things
 
@@ -112,7 +115,7 @@ Then two sections, in this order:
 
 ```text
 ## Intent (vs spec)
-Spec source: <docs/project.md | issue #123 | path | none>
+Spec source: <docs/specs/<file>.md (card matches | drift | draft) | docs/project.md | issue #123 | path | none>
 
 I1. <title>
     What this is: <one sentence.>

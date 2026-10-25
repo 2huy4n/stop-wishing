@@ -211,6 +211,9 @@ test('审查技能：两轴（Intent / Engineering）、六维、12 条坏味道
   assert.match(text, /Intent/)
   assert.match(text, /Engineering/)
   assert.match(text, /docs\/project\.md/)
+  assert.match(text, /docs\/specs\//, '审查应先找 stop-wishing-spec 写的规格')
+  assert.match(text, /card_sha256/, '审查应读取规格的卡片哈希')
+  assert.match(text, /Spec drift/, '审查应报告卡片漂移')
   assert.match(text, /Scope creep/)
   assert.match(text, /Looks done, is wrong/)
   const smells = ['Mysterious Name', 'Duplicated Code', 'Repeated Switches', 'Feature Envy', 'Data Clumps', 'Message Chains', 'Primitive Obsession', 'Speculative Generality', 'Refused Bequest', 'Middle Man', 'Shotgun Surgery', 'Divergent Change']
