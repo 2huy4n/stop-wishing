@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
-const HTML = join(ROOT, 'glossary', 'vibe-coding-glossary.html')
-const EN = join(ROOT, 'glossary', 'en.json')
+const HTML = join(ROOT, 'skills', 'stop-wishing', 'assets', 'vibe-coding-glossary.html')
+const EN = join(ROOT, 'skills', 'stop-wishing', 'assets', 'en.json')
 
 function load() {
   const html = readFileSync(HTML, 'utf8')

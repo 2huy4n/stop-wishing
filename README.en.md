@@ -100,7 +100,9 @@ If the user does not know how to install a skill, follow these steps:
 
    Exit codes: 0 success or dry-run / 1 bad arguments or overwrite conflict / 2 missing source files / 3 missing or mismatched files / 4 outdated files (add `--force`).
 
-5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/` and `stop-wishing-setup/`, each with a `SKILL.md`; the main skill also has `scripts/` (6), `templates/zh` and `templates/en` (7 each) and `LICENSE`. Only a fully PASSing `--verify` counts as installed.
+5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/` and `stop-wishing-setup/`, each with a `SKILL.md`; the main skill also has `scripts/` (6), `templates/zh` and `templates/en` (7 each), `assets/vibe-coding-glossary.html`, `assets/en.json` and `LICENSE`. Only a fully PASSing `--verify` counts as installed.
+
+   **Term questions work right after install**: when the user asks what "MVP" means, look in `<skills root>/stop-wishing/assets/vibe-coding-glossary.html` for `zh:'<term>'` or `en:'<term>'`, explain with that entry's `d`/`de`, give the analogy from `a`/`ae`, and add the `#term-<slug>` deep link (slug = English name lowercased, non-alphanumerics turned into `-`). Only search the web when the local glossary has no entry. Do not open a browser window automatically, and never paste the whole glossary.
 6. **If writing is denied** (sandbox or permissions): do not retry in a loop. Tell the user it needs one manual command and give a copy-paste one:
 
    ```bash
@@ -146,9 +148,9 @@ node skills/stop-wishing/scripts/setup.js --dir <project> \
 
 ## Bonus: Vibe Coding glossary
 
-[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) is a **147-term** glossary written for non-programmers: 9 categories, 10 commonly confused pairs, 5 pitfalls, a "search by situation" entry (change a page / install dependencies / deploy / something broke), and every term marked **must-know** or **advanced**. Each entry pairs the Chinese explanation with its **English translation**, for both the definition and the analogy. Search works over Chinese, English and error codes.
+[`skills/stop-wishing/assets/vibe-coding-glossary.html`](skills/stop-wishing/assets/vibe-coding-glossary.html) is a **147-term** glossary written for non-programmers: 9 categories, 10 commonly confused pairs, 5 pitfalls, a "search by situation" entry (change a page / install dependencies / deploy / something broke), and every term marked **must-know** or **advanced**. Each entry pairs the Chinese explanation with its **English translation**, for both the definition and the analogy. Search works over Chinese, English and error codes.
 
-Open it in any browser — no network, no installation. It is **not part of the installer** (which ships only the seven skills); it is a bonus primer kept in the repo.
+It **ships with the skill** at `<skills root>/stop-wishing/assets/`, so it works offline and always matches the installed version; you can also open it straight from the repo. After install, the AI checks this local glossary first when a term comes up (see step 5 above).
 
 ## License
 

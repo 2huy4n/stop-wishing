@@ -1,6 +1,6 @@
 # stop-wishing · portable edition (full text + hard-constraint quick reference + script usage)
 
-> Generated 2026-10-23T17:48+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
+> Generated 2026-10-25T18:53+08:00 from `skills/stop-wishing/SKILL.md` (regenerate: `node skills/stop-wishing/scripts/build-portable.js`).
 > This file = the full SKILL.md body (including §9) + the quick reference below + script usage.
 > The six satellite skills (review / audit / debt / spec / tickets / setup) are separate directories under `skills/`.
 
@@ -16,6 +16,7 @@
 - Adding a dependency, font, icon/image, API or template snippet (§7).
 - User says "explain first", "back up first", "no hardcoding", "init project docs", or names `stop-wishing`.
 - You are about to guess.
+- The user asks what a term means (MVP, RAG, MCP, token…) — answer from the bundled glossary (§18).
 
 **First sentence: report the tier and why (§4).**
 
@@ -183,6 +184,16 @@ Never trade for speed or scope — even in lite: validation; error handling that
 ## 17) Satellite skills
 
 **stop-wishing-review** — review one change (diff + callers + tests). **stop-wishing-audit** — audit a whole repo. **stop-wishing-debt** — ledger from `shortcut:` markers. **stop-wishing-spec** — turn the requirement card into one written spec (synthesise what was said; never re-interview). **stop-wishing-tickets** — split a spec into tracer-bullet tickets with an explicit dependency DAG. **stop-wishing-setup** — configure a repo's first run: issue tracker, triage labels, domain docs, and the `AGENTS.md` pointer block.
+
+## 18) Explaining a term
+
+When the user asks what a term means ("what is MVP?", "MCP 是什么?"):
+
+- **Local first.** The glossary ships inside this skill at `assets/vibe-coding-glossary.html`, next to this `SKILL.md`. Search that file for `zh:'<term>'` or `en:'<term>'` and read only the matching object — never load the whole file into context.
+- **Answer from the entry.** Use `d`/`de` for the explanation and `a`/`ae` for the analogy. Quote or lightly adapt; do not invent a second definition.
+- **Hand over the deep link.** Entries have stable anchors: `assets/vibe-coding-glossary.html#term-<slug>`, where the slug is the English name lowercased with every run of non-alphanumerics turned into `-` (`MVP` → `#term-mvp`, `Context Window` → `#term-context-window`; duplicates get `-2`). Give it as a `file://` link; do not open a browser window yourself.
+- **If the term is absent**, say the bundled glossary has no entry, then use web search if available; otherwise answer from general knowledge and mark it unverified. Never pretend the glossary covered it.
+- **Never dump the glossary.** It has 147 entries; the user asked about one.
 
 ## Bundled scripts
 

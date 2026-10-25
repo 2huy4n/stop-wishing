@@ -98,7 +98,9 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 
    `--verify` 逐文件与源做 hash 比对：`[PASS] 齐全且与源一致` / `[WARN] 齐全但内容落后于源（退出码 4，建议加 --force 更新）` / `[FAIL] 缺失或不一致（退出码 3）`。总体退出码：0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 缺失或不一致 / 4 落后于源。
 
-5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/` 七个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（6 个）、`templates/zh` 与 `templates/en`（各 7 份）、`LICENSE`。`--verify` 全 PASS 才算装好。
+5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/` 七个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（6 个）、`templates/zh` 与 `templates/en`（各 7 份）、`assets/vibe-coding-glossary.html` 与 `assets/en.json`、`LICENSE`。`--verify` 全 PASS 才算装好。
+
+   **术语问答，装好即用**：用户问「MVP 是什么」这类词时，先查 `<skills 根>/stop-wishing/assets/vibe-coding-glossary.html` 中的 `zh:'<词>'` 或 `en:'<词>'`，用该词条的 `d`/`de` 解释、`a`/`ae` 打比方，并附 `#term-<slug>` 深链（slug = 英文名小写、非字母数字转 `-`）；本地没有这个词再联网搜索。不要自动弹浏览器，也不要把整份词表贴出来。
 6. **失败处理**：若写入被沙箱/权限拒绝，**不要反复重试**，直接告诉用户「需要你手动执行」，并给出可直接复制的命令：
 
    ```bash
@@ -144,9 +146,9 @@ node skills/stop-wishing/scripts/setup.js --dir <项目根> \
 
 ## 附赠：Vibe Coding 名词速查表
 
-[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) 是给零基础用户的 **147 词**速查表：9 个分类、10 组易混词、5 个常见坑；支持「按场景查」（改页面 / 装依赖 / 部署上线 / 报错了），每条标了「必记」或「进阶」。**每个词都有中文解释 + 英文对照**（定义与比方各一行），中英文和报错代码都能搜。
+[`skills/stop-wishing/assets/vibe-coding-glossary.html`](skills/stop-wishing/assets/vibe-coding-glossary.html) 是给零基础用户的 **147 词**速查表：9 个分类、10 组易混词、5 个常见坑；支持「按场景查」（改页面 / 装依赖 / 部署上线 / 报错了），每条标了「必记」或「进阶」。**每个词都有中文解释 + 英文对照**（定义与比方各一行），中英文和报错代码都能搜。
 
-用浏览器直接打开即可，不需要联网或安装任何东西。它**不属于安装内容**（安装器只装七个技能），是随仓库附赠的入门读物。
+它**随技能一起安装**到 `<skills 根>/stop-wishing/assets/`，离线可用、版本与技能一致；也可以直接在仓库里打开。装好之后，AI 遇到术语问题会先查这份本地词表（见上文「给 AI 看」第 5 步）。
 
 ## 许可证
 

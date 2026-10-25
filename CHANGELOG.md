@@ -3,6 +3,11 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## 0.6.0 — 2026-10-25
+
+- **Bundled glossary**: `assets/vibe-coding-glossary.html` and `assets/en.json` now live inside `stop-wishing`, so `install.js` copies them and `--verify` checks their hashes. New `SKILL.md` §18 tells the agent to look up `zh:'<term>'` / `en:'<term>'` locally, answer from that entry, hand over the `#term-<slug>` deep link, and fall back to web search only when the entry is missing.
+- **README**: the install steps and the bonus section now describe the glossary as installed (not downloaded), and explain the local-first lookup.
+
 ## 0.5.1 — 2026-10-25
 
 - **Glossary links and printing**: every term now has a stable `#term-<slug>` anchor (147 unique, shareable), and a print stylesheet drops the search bar, scene chips and anchor marks, switches to one column and keeps cards from breaking across pages.

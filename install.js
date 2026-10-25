@@ -131,6 +131,7 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     groups.push({ label: 'scripts/ six scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
     groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
     groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
+    groups.push({ label: 'assets/ glossary and translations', files: ['assets/vibe-coding-glossary.html', 'assets/en.json'] })
   }
   groups.push({ label: 'agents/openai.yaml present', files: ['agents/openai.yaml'] })
   groups.push({ label: 'license and third-party notices', files: NOTICE_FILES })

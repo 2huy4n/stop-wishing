@@ -60,9 +60,9 @@ for (const name of SKILL_NAMES) {
 
 const MAIN = readSkill('stop-wishing')
 
-test('主技能：17 个章节齐全（原 13 章 + ponytail 4 项）', () => {
+test('主技能：18 个章节齐全（原 13 章 + ponytail 4 项 + 术语表 1 项）', () => {
   const headings = [...MAIN.matchAll(/^## (\d+)\)/gm)].map(match => Number(match[1]))
-  assert.deepEqual(headings, Array.from({ length: 17 }, (_, i) => i + 1))
+  assert.deepEqual(headings, Array.from({ length: 18 }, (_, i) => i + 1))
 })
 
 test('主技能：定义、三类模糊、许愿句清单、非幻觉区分', () => {
@@ -279,4 +279,12 @@ test('每个技能都有 agents/openai.yaml（display_name + short_description�
 
 test('技能互引：setup 用完整名字提到 stop-wishing-debt', () => {
   assert.match(readSkill('stop-wishing-setup'), /stop-wishing-debt/)
+})
+
+test('主技能：内置术语表，本地优先、缺失再联网', () => {
+  const text = readSkill('stop-wishing')
+  assert.match(text, /assets\/vibe-coding-glossary\.html/)
+  assert.match(text, /#term-/)
+  assert.match(text, /web search/)
+  assert.match(text, /Never dump the glossary/)
 })
