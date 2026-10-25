@@ -142,6 +142,12 @@ node skills/stop-wishing/scripts/setup.js --dir <project> \
 # 0 = ok (including unchanged); 1 = bad arguments; 2 = IO
 ```
 
+## Bonus: Vibe Coding glossary
+
+[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) is a **136-term** glossary written for non-programmers: 8 categories, 10 commonly confused pairs, 5 pitfalls, and for every term a plain-language explanation plus an everyday analogy. Search works over both the Chinese and English names.
+
+Open it in any browser — no network, no installation. It is **not part of the installer** (which ships only the seven skills); it is a bonus primer kept in the repo.
+
 ## License
 
 This repository is released under **AGPL-3.0-or-later**; the full text is in [`LICENSE`](LICENSE).

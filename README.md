@@ -140,6 +140,12 @@ node skills/stop-wishing/scripts/setup.js --dir <项目根> \
 # 0 = 成功（含 unchanged）；1 = 参数错误；2 = IO 错误
 ```
 
+## 附赠：Vibe Coding 名词速查表
+
+[`glossary/vibe-coding-glossary.html`](glossary/vibe-coding-glossary.html) 是给零基础用户的 **136 词**速查表：8 个分类、10 组易混词、5 个常见坑，每个词都有「人话解释 + 生活比方」，支持中英文搜索。
+
+用浏览器直接打开即可，不需要联网或安装任何东西。它**不属于安装内容**（安装器只装七个技能），是随仓库附赠的入门读物。
+
 ## 许可证
 
 本仓库自身以 **AGPL-3.0-or-later**（GNU Affero General Public License v3.0 或更高版本）发布，全文见仓库根目录的 [`LICENSE`](LICENSE)。
