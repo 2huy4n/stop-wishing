@@ -1,0 +1,38 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node ${{ matrix.node }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['18', '20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Node version
+        run: node --version
+
+      - name: Unit tests
+        run: node --test
+
+      - name: Install into a temp skills root and verify
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/skills"
+          node install.js --dest "$RUNNER_TEMP/skills" --verify
