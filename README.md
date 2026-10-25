@@ -1,5 +1,7 @@
 # stop-wishing
 
+**中文** | [English](README.en.md)
+
 治「许愿式编程」的技能包：**用户给一句模糊指令，AI 别急着写码，先对齐目标/边界/验收、先解释、先备份，再最小差异动手。**
 
 仓库现在包含 **7 个并列技能**：主技能负责接需求与交付流程，六个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」「把需求写成 spec 卡」「把 spec 拆成有依赖顺序的票」「初始化项目文档与协作约定」。
@@ -40,40 +42,6 @@ node install.js --force
 `--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 6 个脚本、`templates/{zh,en}` 各 7 份、`LICENSE`。
 
 编辑器适配说明见 [`adapters/`](adapters/)：`claude-code/README.md`、`codex/AGENTS.md`、`trae/README.md`。
-
-## 目录说明
-
-```text
-stop-wishing/
-├── skills/
-│   ├── stop-wishing/                 # 主技能
-│   │   ├── SKILL.md                  # 英文正文（17 章）
-│   │   ├── SKILL.md.bak-20261023-1220# 原中文版备份（仅本地，不入库）
-│   │   ├── agents/openai.yaml        # Codex 元数据（展示名/简介）
-│   │   ├── scripts/
-│   │   │   ├── check-env.js          # git/bash/node/仓库探测 → JSON + 备份建议
-│   │   │   ├── init-docs.js          # 生成 7 份项目文档到 <dir>/docs/
-│   │   │   ├── check-hardcode.js     # 硬编码扫描（支持 .hardcodeignore）
-│   │   │   ├── check-tickets.js      # 校验 docs/tickets 与 docs/specs（13 错 5 警）
-│   │   │   ├── setup.js              # 生成 docs/agents 三份配置（幂等，不动段外内容）
-│   │   │   └── build-portable.js     # 生成 portable/stop-wishing.md
-│   │   └── templates/{zh,en}/        # 7 份项目文档模板
-│   ├── stop-wishing-review/SKILL.md  # 审查一次改动
-│   ├── stop-wishing-audit/SKILL.md   # 全仓审计
-│   ├── stop-wishing-debt/SKILL.md    # 技术债台账
-│   ├── stop-wishing-spec/SKILL.md    # 把需求写成 spec 卡
-│   ├── stop-wishing-tickets/SKILL.md # 把 spec 拆成票（依赖 DAG）
-│   └── stop-wishing-setup/SKILL.md   # 初始化项目协作约定（票在哪/术语/标签）
-├── LICENSE                           # AGPL-3.0-or-later 全文
-├── THIRD-PARTY-NOTICES.md            # ponytail (MIT) 的版权与许可声明
-├── CHANGELOG.md                      # 版本与变更记录
-├── VERSION                           # 当前版本号（0.4.0）
-├── install.js                        # 安装七个技能（--dry-run / --force / --tool / --dest / --target / --verify）
-├── adapters/                         # 各编辑器接入说明
-├── portable/                         # 便携单文件（由 build-portable.js 生成）
-├── test/                             # node --test 用例
-└── .hardcodeignore                   # 本仓自己的抑制清单（每条都要写理由）
-```
 
 ## 项目文档与 AGENTS.md（可选）
 
