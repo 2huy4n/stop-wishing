@@ -129,8 +129,8 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
   ]
   if (skillName === MAIN_SKILL) {
     groups.push({ label: 'scripts/ six scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
-    groups.push({ label: 'templates/zh/ seven files', files: TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`) })
-    groups.push({ label: 'templates/en/ seven files', files: TEMPLATE_NAMES.map(name => `templates/en/${name}.md`) })
+    groups.push({ label: 'templates/zh/ eight files', files: [...TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`), 'templates/zh/AGENTS.md.tpl'] })
+    groups.push({ label: 'templates/en/ eight files', files: [...TEMPLATE_NAMES.map(name => `templates/en/${name}.md`), 'templates/en/AGENTS.md.tpl'] })
     groups.push({ label: 'assets/ glossary and translations', files: ['assets/vibe-coding-glossary.html', 'assets/en.json'] })
   }
   groups.push({ label: 'agents/openai.yaml present', files: ['agents/openai.yaml'] })
