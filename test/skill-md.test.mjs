@@ -276,3 +276,7 @@ test('每个技能都有 agents/openai.yaml（display_name + short_description�
     assert.match(text, /short_description:\s*".+"/, `${name} 缺 short_description`)
   }
 })
+
+test('技能互引：setup 用完整名字提到 stop-wishing-debt', () => {
+  assert.match(readSkill('stop-wishing-setup'), /stop-wishing-debt/)
+})

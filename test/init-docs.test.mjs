@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -126,4 +126,19 @@ test('AGENTS.md：已存在 AGENTS.md / CLAUDE.md 时绝不覆盖', () => {
   writeFileSync(join(b, 'CLAUDE.md'), '# CLAUDE\n', 'utf8')
   assert.equal(cli(['--lang', 'zh', '--dir', b, '--agents-md']).status, 0)
   assert.equal(existsSync(join(b, 'AGENTS.md')), false, '有 CLAUDE.md 时不再建 AGENTS.md')
+})
+
+test('init-docs：模板缺失时整体失败，不留下半套文档', () => {
+  const skill = mkdtempSync(join(tmpdir(), 'sw-skill-missing-'))
+  cpSync(join(ROOT, 'skills', 'stop-wishing'), skill, { recursive: true })
+  rmSync(join(skill, 'templates', 'zh', 'discipline.md'))
+  const target = mkdtempSync(join(tmpdir(), 'sw-docs-partial-'))
+  const out = spawnSync(process.execPath, [join(skill, 'scripts', 'init-docs.js'), '--lang', 'zh', '--dir', target], {
+    encoding: 'utf8',
+    windowsHide: true,
+    timeout: 20000,
+  })
+  assert.equal(out.status, 2, out.stderr)
+  assert.match(out.stderr, /模板缺失/)
+  assert.equal(existsSync(join(target, 'docs')), false, '校验应先于任何写入')
 })

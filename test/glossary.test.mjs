@@ -22,13 +22,16 @@ function load() {
 }
 
 test('术语表：147 词、9 分类、每条都有中文与英文两段', () => {
-  const { cats, terms } = load()
+  const { html, cats, terms } = load()
   assert.equal(terms.length, 147, '词条总数变了：如果是有意新增，同步更新本断言与 en.json')
   assert.equal(cats.length, 9)
   for (const t of terms) {
     assert.ok(t.d && t.a, `${t.zh} 缺中文解释或中文比方`)
     assert.ok(t.de && t.ae, `${t.zh} 缺英文解释或英文比方`)
   }
+  assert.match(html, /<span class="en-line" lang="en">/, '英文行必须标 lang="en"')
+  assert.doesNotMatch(html, /<span class="en-line">/, '不允许有无 lang 的英文行')
+  assert.match(html, /\{ c:'web', zh:'接口'[^\n]*p:'p0'/, '接口应当标为必记')
 })
 
 test('术语表：无重复词条，分类计数与预期一致', () => {

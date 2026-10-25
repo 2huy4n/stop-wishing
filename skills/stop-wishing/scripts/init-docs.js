@@ -101,11 +101,13 @@ export function initDocs(options, env = checkEnv()) {
     }
   }
 
+  const missing = DOCS.map(name => join(templates, `${name}.md`)).filter(file => !existsSync(file))
+  if (missing.length > 0) return { ok: false, code: 2, message: '模板缺失: ' + missing.join(', ') }
+
   mkdirSync(docsDir, { recursive: true })
   const written = []
   for (const name of DOCS) {
     const source = join(templates, `${name}.md`)
-    if (!existsSync(source)) return { ok: false, code: 2, message: '模板缺失: ' + source }
     const target = join(docsDir, `${name}.md`)
     copyFileSync(source, target)
     written.push(target)

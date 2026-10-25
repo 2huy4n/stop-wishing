@@ -514,7 +514,7 @@ const TERMS = [
   // ========== 网站是怎么跑起来的 ==========
   { c:'web', zh:'前端', en:'Frontend', d:'用户能看到、能点击的那部分：页面、按钮、动画。跑在用户的浏览器里。', a:'店铺的门面、橱窗、菜单牌。', p:'p0', de:'The part users see and click: pages, buttons, animations. It runs in the user browser.', ae:'The storefront, the window display, the menu board.' },
   { c:'web', zh:'后端', en:'Backend', d:'用户看不到、在服务器上跑的那部分：存数据、算逻辑、校验权限。', a:'后厨和仓库，客人看不见但菜从这来。', p:'p0', de:'The part users cannot see, running on the server: storing data, computing logic, checking permissions.', ae:'The kitchen and storeroom: invisible to guests, but the food comes from there.' },
-  { c:'web', zh:'接口', en:'API', d:'两个系统之间约定好的"点菜窗口"：你按约定发请求，它按约定回数据，双方不用管对方内部怎么实现。', a:'餐厅的服务窗口，你按菜单点，不用进后厨。', de:'An agreed ordering window between two systems: you send a request per the contract and it returns data per the contract; neither side cares how the other is built.', ae:'A restaurant service window: order from the menu, never enter the kitchen.' },
+  { c:'web', zh:'接口', en:'API', d:'两个系统之间约定好的"点菜窗口"：你按约定发请求，它按约定回数据，双方不用管对方内部怎么实现。', a:'餐厅的服务窗口，你按菜单点，不用进后厨。', de:'An agreed ordering window between two systems: you send a request per the contract and it returns data per the contract; neither side cares how the other is built.', ae:'A restaurant service window: order from the menu, never enter the kitchen.', p:'p0' },
   { c:'web', zh:'端点', en:'Endpoint', d:'API 里具体的一个地址，对应一种操作，比如"获取用户信息"是一个端点。', a:'菜单上的某一号菜。', de:'One specific address in an API for one operation, for example get-user-info is one endpoint.', ae:'A numbered dish on the menu.' },
   { c:'web', zh:'请求 / 响应', en:'Request / Response', d:'你发过去的问话叫请求，对方回你的答案叫响应。一次交互就是一问一答。', a:'点单和小票。', de:'What you send is the request; what comes back is the response. One interaction is one question and one answer.', ae:'An order slip and the receipt.' },
   { c:'web', zh:'状态码', en:'Status Code', d:'三位数表示这次请求的结果。200 成功、404 找不到、401 没登录、403 没权限、500 服务器自己出错。', a:'餐厅的叫号牌：好了、没这道菜、你没付钱、后厨着火了。', de:'A three-digit number for the result: 200 success, 404 not found, 401 not logged in, 403 forbidden, 500 the server itself failed.', ae:'The restaurant number board: ready, no such dish, you did not pay, the kitchen caught fire.' },
@@ -686,8 +686,8 @@ function render(){
       html += '<article class="card">'
             + '<div class="term"><span class="zh">' + mark(t.zh, q) + '</span>' + (t.p ? '<span class="lv ' + t.p + '">' + (t.p === 'p0' ? '必记' : '进阶') + '</span>' : '')
             + '<span class="en">' + mark(t.en, q) + '</span></div>'
-            + '<p class="def">' + mark(t.d, q) + (t.de ? '<span class="en-line">' + mark(t.de, q) + '</span>' : '') + '</p>'
-            + '<p class="like">' + mark(t.a, q) + (t.ae ? '<span class="en-line">' + mark(t.ae, q) + '</span>' : '') + '</p>'
+            + '<p class="def">' + mark(t.d, q) + (t.de ? '<span class="en-line" lang="en">' + mark(t.de, q) + '</span>' : '') + '</p>'
+            + '<p class="like">' + mark(t.a, q) + (t.ae ? '<span class="en-line" lang="en">' + mark(t.ae, q) + '</span>' : '') + '</p>'
             + '</article>';
     }
 
