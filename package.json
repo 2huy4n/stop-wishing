@@ -1,0 +1,8 @@
+{
+  "name": "stop-wishing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
