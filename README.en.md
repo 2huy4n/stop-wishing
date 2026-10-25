@@ -2,6 +2,8 @@
 
 [中文](README.md) | **English**
 
+[![test](https://github.com/2huy4n/stop-wishing/actions/workflows/test.yml/badge.svg)](https://github.com/2huy4n/stop-wishing/actions/workflows/test.yml)
+
 A skill family against **wishing-driven programming**: the user gives one vague sentence, the AI invents the goal, the boundary and the acceptance criteria, ships code that "looks right", and the first real question forces a rewrite.
 
 The rule is simple: **align first, explain before writing, back up before changing, then make the smallest complete change.**

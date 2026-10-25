@@ -2,6 +2,8 @@
 
 **中文** | [English](README.en.md)
 
+[![test](https://github.com/2huy4n/stop-wishing/actions/workflows/test.yml/badge.svg)](https://github.com/2huy4n/stop-wishing/actions/workflows/test.yml)
+
 治「许愿式编程」的技能包：**用户给一句模糊指令，AI 别急着写码，先对齐目标/边界/验收、先解释、先备份，再最小差异动手。**
 
 仓库现在包含 **7 个并列技能**：主技能负责接需求与交付流程，六个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」「把需求写成 spec 卡」「把 spec 拆成有依赖顺序的票」「初始化项目文档与协作约定」。
