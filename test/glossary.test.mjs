@@ -32,6 +32,9 @@ test('术语表：147 词、9 分类、每条都有中文与英文两段', () =>
   assert.match(html, /<span class="en-line" lang="en">/, '英文行必须标 lang="en"')
   assert.doesNotMatch(html, /<span class="en-line">/, '不允许有无 lang 的英文行')
   assert.match(html, /\{ c:'web', zh:'接口'[^\n]*p:'p0'/, '接口应当标为必记')
+  assert.match(html, /class="anchor"/, '每个词条应有锚点链接')
+  assert.match(html, /SLUGS/, '锚点 id 应由 slug 生成')
+  assert.match(html, /@media print/, '应带打印样式')
 })
 
 test('术语表：无重复词条，分类计数与预期一致', () => {

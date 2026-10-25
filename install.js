@@ -12,6 +12,13 @@ import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)))
+const VERSION = (() => {
+  try {
+    return readFileSync(join(ROOT, 'VERSION'), 'utf8').trim()
+  } catch {
+    return 'unknown'
+  }
+})()
 const SKILLS_ROOT = join(ROOT, 'skills')
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'test', 'tmp', '.tmp', 'dist', 'coverage'])
 const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-/
@@ -314,11 +321,13 @@ if (process.argv[1]?.endsWith('install.js')) {
     if (result.defaultHint) process.stdout.write(result.defaultHint + '\n')
     if (!result.ok) {
       if (result.verification) printVerification(result.verification)
+      process.stdout.write(`版本: ${VERSION}（来自 VERSION）\n`)
       process.stderr.write((result.message ?? '安装失败') + '\n')
       process.exitCode = result.code
     } else {
       if (result.dryRun) process.stdout.write('[dry-run] 不会写盘\n')
       process.stdout.write(`源目录: ${result.root}\n`)
+      process.stdout.write(`版本: ${VERSION}（来自 VERSION）\n`)
       process.stdout.write(`文件数: ${result.files.length}\n`)
       for (const item of result.plan) {
         process.stdout.write(`  -> ${item.dest}  [${item.action}]\n`)

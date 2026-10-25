@@ -352,6 +352,18 @@
   .scenes p{color:#7a746a;margin:0 0 10px;font-size:13.5px;}
   .en-line{display:block;margin-top:6px;font-size:12.5px;line-height:1.55;color:#8a8377;}
   .like .en-line{color:#a39a8c;}
+  .anchor{margin-left:7px;color:#c6bdb0;text-decoration:none;font-size:12px;opacity:0;transition:opacity .15s}
+  .card:hover .anchor,.anchor:focus{opacity:1}
+  .card{scroll-margin-top:90px}
+  @media (hover:none){.anchor{opacity:.55}}
+  @media print{
+    .bar,.scenes,.anchor{display:none!important}
+    body{background:#fff;color:#000}
+    .wrap{max-width:none;padding:0}
+    .grid{display:block}
+    .card{box-shadow:none;border:1px solid #ddd;margin:0 0 10px;break-inside:avoid}
+    .flow,.confuse,.pit{break-inside:avoid}
+  }
 </style>
 </head>
 <body>
@@ -618,6 +630,17 @@ const TERMS = [
 
 ];
 
+const SLUGS = new Map();
+{
+  const used = new Map();
+  for(const t of TERMS){
+    const base = String(t.en).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'term';
+    const n = (used.get(base) ?? 0) + 1;
+    used.set(base, n);
+    SLUGS.set(t, n === 1 ? base : base + '-' + n);
+  }
+}
+
 const els = {
   q: document.getElementById('q'),
   terms: document.getElementById('terms'),
@@ -683,9 +706,10 @@ function render(){
           + '</div><div class="grid">';
 
     for(const t of list){
-      html += '<article class="card">'
+      html += '<article class="card" id="term-' + SLUGS.get(t) + '">'
             + '<div class="term"><span class="zh">' + mark(t.zh, q) + '</span>' + (t.p ? '<span class="lv ' + t.p + '">' + (t.p === 'p0' ? '必记' : '进阶') + '</span>' : '')
-            + '<span class="en">' + mark(t.en, q) + '</span></div>'
+            + '<span class="en">' + mark(t.en, q) + '</span>'
+            + '<a class="anchor" href="#term-' + SLUGS.get(t) + '" aria-label="链接到此词条">#</a></div>'
             + '<p class="def">' + mark(t.d, q) + (t.de ? '<span class="en-line" lang="en">' + mark(t.de, q) + '</span>' : '') + '</p>'
             + '<p class="like">' + mark(t.a, q) + (t.ae ? '<span class="en-line" lang="en">' + mark(t.ae, q) + '</span>' : '') + '</p>'
             + '</article>';

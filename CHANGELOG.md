@@ -3,6 +3,11 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## 0.5.1 — 2026-10-25
+
+- **Glossary links and printing**: every term now has a stable `#term-<slug>` anchor (147 unique, shareable), and a print stylesheet drops the search bar, scene chips and anchor marks, switches to one column and keeps cards from breaking across pages.
+- **Installer shows its version**: `node install.js --verify` prints `版本: <VERSION>` on both the success and the failure path, so a self-check result names the release it applies to.
+
 ## 0.5.0 — 2026-10-25
 
 - **Bilingual glossary**: `glossary/vibe-coding-glossary.html` — 147 terms, 9 categories, 10 confusion pairs, 5 pitfalls, search-by-situation (change a page / install dependencies / deploy / something broke), must-know and advanced marks, and Chinese plus English for every definition and analogy. `glossary/en.json` is the translation source of truth.
