@@ -36,3 +36,24 @@ jobs:
         run: |
           rm -rf "$RUNNER_TEMP/skills"
           node install.js --dest "$RUNNER_TEMP/skills" --verify
+
+  macos:
+    name: node 22 / macos-latest
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Node version
+        run: node --version
+
+      - name: Unit tests
+        run: node --test
+
+      - name: Install into a temp skills root and verify
+        run: |
+          rm -rf "$RUNNER_TEMP/skills"
+          node install.js --dest "$RUNNER_TEMP/skills" --verify

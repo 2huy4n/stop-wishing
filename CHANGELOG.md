@@ -6,7 +6,7 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 ## 0.5.0 — 2026-10-25
 
 - **Bilingual glossary**: `glossary/vibe-coding-glossary.html` — 147 terms, 9 categories, 10 confusion pairs, 5 pitfalls, search-by-situation (change a page / install dependencies / deploy / something broke), must-know and advanced marks, and Chinese plus English for every definition and analogy. `glossary/en.json` is the translation source of truth.
-- **CI**: GitHub Actions runs the test suite and a fresh `install --verify` on Node 18/20/22 × Ubuntu/Windows; badge in both READMEs. Root and main-skill `package.json` declare `"type": "module"`, because Node 18 does not sniff ESM the way 20+ does.
+- **CI**: GitHub Actions runs the test suite and a fresh `install --verify` on Node 18/20/22 × Ubuntu/Windows, plus a macOS runner on Node 22; badge in both READMEs. Root and main-skill `package.json` declare `"type": "module"`, because Node 18 does not sniff ESM the way 20+ does.
 - **Review reads specs**: the Intent axis now looks in `docs/specs/*.md` first and checks `card_sha256` drift, marking its findings provisional when the card changed or the spec is still `draft`.
 - **Docs**: English README (`README.en.md`), the directory tree removed from the Chinese README, and a `## Credits` section.
 - **Polish**: the API entry carries the must-know mark, English lines declare `lang="en"` for screen readers, setup names `stop-wishing-debt` in full, and `init-docs` validates every template before writing anything.
