@@ -3,6 +3,10 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## Unreleased
+
+- **Known debt — mechanical scope fence**: §9 forbids scope creep in prose, but nothing checks the diff mechanically. The deferred upgrade is `check-scope.js`: take `--allow <paths>` (recorded on the card as `Touched:`), run `git diff --name-only`, and exit 1 on out-of-scope files, new files or a new dependency. Trigger: two changes where unrelated files slipped into the diff. Deferred by the owner on 2026-10-26; do not build it before the trigger.
+
 ## 0.7.0 — 2026-10-26
 
 - **License scanner**: `skills/stop-wishing/scripts/check-licenses.js` reads `package-lock.json` (`lockfileVersion` ≥ 2) for the complete dependency set — transitive and nested packages included — and uses `node_modules` only to fill in missing licence fields. It parses SPDX expressions (`OR`, `AND`, `WITH`) and applies the §7 use matrix; flags are `--use` (defaults to `commercial`), `--dir`, `--prod-only`, `--strict`, `--json`, `--rows` (the five `docs/LICENSES.md` columns). Exit 0 = nothing forbidden, 1 = a forbidden licence or `unknown` under `--strict`, 2 = bad arguments or no input. In `open-source` mode a dependency stricter than the project's own licence is a `warn` (`dependency-stronger-than-project`) rather than a silent pass.
