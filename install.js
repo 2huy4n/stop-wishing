@@ -36,7 +36,7 @@ export const TOOL_TARGETS = {
 
 export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
 export const MAIN_SKILL = 'stop-wishing'
-export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'build-portable', 'check-tickets', 'setup']
+export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'check-licenses', 'build-portable', 'check-tickets', 'setup']
 export const TEMPLATE_NAMES = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
 export const TEMPLATE_LANGS = ['zh', 'en']
 
@@ -78,7 +78,7 @@ export function usage() {
     '  --dest    【skills 根目录】装成 <目录>/stop-wishing、<目录>/stop-wishing-review、<目录>/stop-wishing-audit、<目录>/stop-wishing-debt、<目录>/stop-wishing-spec、<目录>/stop-wishing-tickets',
     '              例: --dest <目录>  →  <目录>/stop-wishing/SKILL.md + 五个卫星技能目录',
     '  --verify  安装后自检：逐个技能校验 SKILL.md 存在、front-matter name 与目录名一致、与源 hash 一致；',
-    '              主技能额外校验 scripts/ 6 个、templates/{zh,en} 各 7 份、LICENSE。',
+    '              主技能额外校验 scripts/ 7 个、templates/{zh,en} 各 8 份（7 份文档 + AGENTS.md.tpl）、LICENSE。',
     '              [PASS] 齐全且与源一致 / [WARN] 齐全但内容落后于源（退出码 4）/ [FAIL] 缺失或不一致（退出码 3）',
     '  --dry-run 只打印会复制什么、将校验什么，不写盘',
     '  --force   目标已存在时覆盖（默认拒绝）',
@@ -128,7 +128,7 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     { label: `SKILL.md exists and name: ${skillName}`, files: ['SKILL.md'], requireName: skillName },
   ]
   if (skillName === MAIN_SKILL) {
-    groups.push({ label: 'scripts/ six scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
+    groups.push({ label: 'scripts/ seven scripts present', files: SCRIPT_NAMES.map(name => `scripts/${name}.js`) })
     groups.push({ label: 'templates/zh/ eight files', files: [...TEMPLATE_NAMES.map(name => `templates/zh/${name}.md`), 'templates/zh/AGENTS.md.tpl'] })
     groups.push({ label: 'templates/en/ eight files', files: [...TEMPLATE_NAMES.map(name => `templates/en/${name}.md`), 'templates/en/AGENTS.md.tpl'] })
     groups.push({ label: 'assets/ glossary and translations', files: ['assets/vibe-coding-glossary.html', 'assets/en.json'] })
@@ -250,7 +250,7 @@ export function install(options, home = homedir()) {
       files,
       plan,
       defaultHint,
-      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 6 个、templates/{zh,en} 各 7 份；不一致报 WARN 并退出 4',
+      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 7 个、templates/{zh,en} 各 8 份；不一致报 WARN 并退出 4',
     }
   }
 

@@ -3,6 +3,15 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## 0.7.0 — 2026-10-26
+
+- **License scanner**: `skills/stop-wishing/scripts/check-licenses.js` reads `package-lock.json` (`lockfileVersion` ≥ 2) for the complete dependency set — transitive and nested packages included — and uses `node_modules` only to fill in missing licence fields. It parses SPDX expressions (`OR`, `AND`, `WITH`) and applies the §7 use matrix; flags are `--use` (defaults to `commercial`), `--dir`, `--prod-only`, `--strict`, `--json`, `--rows` (the five `docs/LICENSES.md` columns). Exit 0 = nothing forbidden, 1 = a forbidden licence or `unknown` under `--strict`, 2 = bad arguments or no input. In `open-source` mode a dependency stricter than the project's own licence is a `warn` (`dependency-stronger-than-project`) rather than a silent pass.
+- **The matrix grew rows**: `MPL-2.0 / EPL-2.0 / EUPL-1.2` (file-level copyleft: ⚠️ for free closed distribution and commercial, never a blanket refusal), `SSPL-1.0 / BUSL-1.1`, `CC-BY-NC-*` and `UNLICENSED` (self-use only), and GPL linking exceptions such as `GPL-2.0 WITH Classpath-exception-2.0` (commercially linkable, confirmed by a human instead of refused as plain GPL). `SKILL.md`, the scanner and `test/check-licenses.test.mjs` are kept in parity, and the note under the table says changing one means changing all three.
+- **`SKILL.md` §7** now says when to run the scanner (a repo with `node_modules` or a lockfile), that `--use` must match the use recorded in Assumptions, how `forbidden` / `warn` / `unknown` are handled, that dev dependencies count by default and `--prod-only` is for preparing a distribution, and that the scanner reads metadata — never licence clauses — so custom and commercial terms still need a human.
+- **README / README.en**: a `check-licenses.js` row in the script table plus one usage line in the licence section.
+- **Installer**: `--verify` now counts seven scripts (including `check-licenses.js`) and both template sets as eight files each, so a missing scanner or `AGENTS.md.tpl` fails instead of shipping silently.
+- **Tests and CI**: `test/check-licenses.test.mjs` covers the MIT pass, GPL/AGPL refusal under `commercial`, the `self` allowance, `OR` pass, `AND` refusal, a missing licence as `unknown`, `--strict`, the `package-lock.json` path and exit 2 on missing input; the existing `node --test` workflow runs it on Node 18/20/22 without a new job.
+
 ## 0.6.1 — 2026-10-25
 
 - **Install check counted the wrong number of templates**: `templates/zh` and `templates/en` each hold eight files (seven docs plus `AGENTS.md.tpl`), but `--verify` and the README said seven. Both now check and document all eight, so a missing or stale `AGENTS.md.tpl` is caught instead of silently shipped.

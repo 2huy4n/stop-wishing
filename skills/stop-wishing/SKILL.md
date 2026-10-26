@@ -105,18 +105,27 @@ Details: `stop-wishing-spec` writes the spec, `stop-wishing-tickets` splits it (
 | License | Self-use | Free closed distribution | Open source (same license) | Commercial closed |
 |---|---|---|---|---|
 | MIT / Apache-2.0 / BSD / ISC / 0BSD / Unlicense / CC0 | ✅ | ✅ | ✅ | ✅ (keep notices) |
+| MPL-2.0 / EPL-2.0 / EUPL-1.2 | ✅ | ⚠️ file-level copyleft — modified files stay open | ✅ | ⚠️ compliance check, not a blanket refusal |
 | GPL / AGPL | ✅ | ❌ | ✅ (whole derivative same license) | ❌ viral, always refused |
+| GPL-2.0 WITH Classpath-exception-2.0 / GCC / OpenSSL-style linking exceptions | ✅ | ⚠️ link commercially if the exception covers your use | ✅ | ⚠️ human confirmation — never a plain GPL refusal |
 | LGPL | ✅ | ⚠️ dynamic link + replaceable only | ✅ | ❌ always refused (see note) |
-| No LICENSE | ⚠️ self-use only, risk recorded | ❌ | ❌ | ❌ |
+| SSPL-1.0 / BUSL-1.1 | ✅ | ❌ | ❌ | ❌ service/business-use restrictions |
+| CC-BY-NC-* | ✅ | ❌ non-commercial only | ❌ | ❌ |
+| No LICENSE | ⚠️ self-use only, risk recorded | ❌ | ❌ | ❌ (a missing metadata field is reported as `unknown`, not assumed unlicensed) |
+| UNLICENSED (proprietary) | ✅ only with the owner's permission | ❌ | ❌ | ❌ |
 | Custom/commercial | Read clauses; unclear → refuse as commercial closed | Same | Same | Same |
 
-> **LGPL strict:** "dynamic link + replaceable" leaves legal room for commercial closed-source, but needs case-by-case argument, notices and a truly replaceable library. This skill treats LGPL like GPL/AGPL: **commercial closed-source always refused.**
+> **LGPL strict:** "dynamic link + replaceable" leaves legal room for commercial closed-source, but needs case-by-case argument, notices and a truly replaceable library. This skill treats LGPL like GPL/AGPL: **commercial closed-source always refused.** An LGPL build that carries an explicit linking exception belongs to the exception row above; this refusal is for plain LGPL.
+
+**Script parity:** `check-licenses.js` implements this same matrix. Changing a row here means changing the script and `test/check-licenses.test.mjs` in the same change — a documented matrix and a coded matrix that disagree is not a licence gate.
 
 **Scope:** code dependencies, **fonts**, **icons/images**, **third-party API terms**, **template/sample snippets** — all pass the gate.
 
 **Own-code exception:** "I wrote it" is not enough. Record in Assumptions: **source** (repo/path), **author statement** (exact words), **date** (ISO 8601 + offset). Missing one → third-party. Only that source skips; the exception **does not spread**.
 
 **Deliverable:** `docs/LICENSES.md`, one line each: **Name | Version | License | Commercial usability | Source URL**; never blank.
+
+**Run the scanner when…** the repo has `node_modules/` or `package-lock.json`: `node skills/stop-wishing/scripts/check-licenses.js [--dir PATH] [--use self|free-closed|open-source|commercial] [--prod-only] [--strict] [--json] [--rows]`. It prefers `package-lock.json` (`lockfileVersion` ≥ 2) for the whole dependency set — transitive and nested packages included — and uses `node_modules` only to fill in missing licence fields; it parses SPDX (`OR`/`AND`/`WITH`) and applies the matrix above. `--use` defaults to `commercial` and must be the **same use recorded in Assumptions** — each column answers differently, so a different `--use` is a new question, not the same one. Dev dependencies count by default; add `--prod-only` when preparing a distribution. Then: `forbidden` **blocks the change** — report it, do not ship; `warn` (the ⚠️ cells — MPL under commercial, LGPL dynamic linking, a GPL linking exception, or in `open-source` mode a dependency stricter than the project's own licence) is recorded and confirmed by a human; `unknown` goes into `docs/LICENSES.md` marked unverified, and `--strict` makes it fail too. Exit 1 = a forbidden licence (or `unknown` under `--strict`); exit 2 = bad arguments or nothing to scan. `--rows` prints exactly the `docs/LICENSES.md` columns, so a blocked run still leaves a pasteable table. The scanner reads package metadata, never licence clauses: custom/commercial terms and a missing `LICENSE` still need a human.
 
 ## 8) Work loop (fixed order)
 
@@ -198,4 +207,4 @@ When the user asks what a term means ("what is MVP?", "MCP 是什么?"):
 
 ## Bundled scripts
 
-`scripts/` contains `check-env.js`, `init-docs.js`, `check-hardcode.js`, `build-portable.js`, `check-tickets.js` and `setup.js` (zero dependencies). `install.js` installs all seven skills (`--tool`/`--dest`/`--target`/`--verify`/`--dry-run`/`--force`; exit 0/1/2/3/4). Usage details: `README.md` and `node install.js --help`.
+`scripts/` contains `check-env.js`, `init-docs.js`, `check-hardcode.js`, `build-portable.js`, `check-tickets.js`, `setup.js` and `check-licenses.js` (zero dependencies). `install.js` installs all seven skills (`--tool`/`--dest`/`--target`/`--verify`/`--dry-run`/`--force`; exit 0/1/2/3/4). Usage details: `README.md` and `node install.js --help`.

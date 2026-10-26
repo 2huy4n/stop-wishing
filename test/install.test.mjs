@@ -81,7 +81,7 @@ test('--verify：七个技能逐个 PASS，退出码 0', () => {
   for (const skill of SKILL_NAMES) {
     assert.match(out.stdout, new RegExp(`\\[PASS\\] SKILL\\.md exists and name: ${skill}`))
   }
-  assert.match(out.stdout, /\[PASS\] scripts\/ six scripts present/)
+  assert.match(out.stdout, /\[PASS\] scripts\/ seven scripts present/)
   assert.match(out.stdout, /\[PASS\] templates\/zh\/ eight files/)
   assert.match(out.stdout, /\[PASS\] templates\/en\/ eight files/)
   assert.match(out.stdout, /\[PASS\] assets\/ glossary and translations/)
@@ -97,7 +97,7 @@ test('--verify：删掉主技能一个脚本后自检失败，退出码 3', () =
   rmSync(join(root, 'stop-wishing', 'scripts', 'check-env.js'))
   const out = cli(['--dest', root, '--verify'])
   assert.equal(out.status, 3, out.stdout + out.stderr)
-  assert.match(out.stdout, /\[FAIL\] scripts\/ six scripts present/)
+  assert.match(out.stdout, /\[FAIL\] scripts\/ seven scripts present/)
   assert.match(out.stdout, /check-env/)
 })
 

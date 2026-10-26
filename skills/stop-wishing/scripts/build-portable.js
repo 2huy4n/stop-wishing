@@ -50,12 +50,16 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir .
 #    exit 0 clean (or all suppressed), 2 unsuppressed hits or invalid ignore file
 node skills/stop-wishing/scripts/check-hardcode.js --path . --threshold 1000
 
-# 4) Install all four skills into a skills root (default: ~/.agents/skills)
+# 4) Licence scan: node_modules / package-lock.json against SKILL §7
+#    exit 0 clean, 1 forbidden (or unknown with --strict), 2 bad args / no input
+node skills/stop-wishing/scripts/check-licenses.js --use commercial
+
+# 5) Install all seven skills into a skills root (default: ~/.agents/skills)
 node install.js --dry-run
 node install.js --tool dsh --verify
 node install.js --tool claude --verify
 
-# 5) Regenerate this portable file
+# 6) Regenerate this portable file
 node skills/stop-wishing/scripts/build-portable.js
 \`\`\`
 
