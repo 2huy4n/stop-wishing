@@ -1,6 +1,6 @@
 # Files this skill owns
 
-Read only when writing or inspecting setup output. Two writers on one path is how documents start contradicting each other. The split is absolute, with one shared block: `init-docs.js` creates the `## Project docs` block, and this skill updates that same marked block. The generated strings below are the writer's authoritative text; use the same fields and markers if you must write by hand.
+Read only when writing or inspecting setup output. Two writers on one path is how documents start contradicting each other. The split is absolute, with one shared block: `init-docs.js` creates the `## Project docs` block, and this skill updates that same marked block. The field names and marker shape below are authoritative; `setup.js` generates the localized prose, so treat the examples as shape, not a word-for-word template.
 
 ## Ownership
 

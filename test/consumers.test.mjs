@@ -27,6 +27,8 @@ test('tickets 不把 issue tracker 当成 ticket 目录', () => {
   const text = readFileSync(join(ROOT, 'skills', 'stop-wishing-tickets', 'SKILL.md'), 'utf8')
   assert.match(text, /ticket files always stay in `docs\/tickets\/`/)
   assert.match(text, /issues are not tickets|Issues are not tickets/i)
+  assert.match(text, /Triage roles/)
+  assert.match(text, /Do not map a triage role onto a ticket status/i)
 })
 
 test('无 docs/agents 时五个技能都有文档化回退', () => {

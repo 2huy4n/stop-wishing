@@ -116,13 +116,14 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
    cp -R skills/stop-wishing-spec    ~/.agents/skills/stop-wishing-spec
    cp -R skills/stop-wishing-tickets ~/.agents/skills/stop-wishing-tickets
    cp -R skills/stop-wishing-setup   ~/.agents/skills/stop-wishing-setup
+   cp -R skills/stop-wishing-report  ~/.agents/skills/stop-wishing-report
 
    # Windows PowerShell
    New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
    Copy-Item skills\stop-wishing* "$env:USERPROFILE\.agents\skills\" -Recurse
    ```
 
-7. **装完告诉用户怎么触发**：输入 `/stop-wishing`，或直接说「用 stop-wishing 流程」（也可说「先解释再写码」「改动前备份」等触发词）。审查/审计/债务/写规格/拆票/初始化分别用 `/stop-wishing-review`、`/stop-wishing-audit`、`/stop-wishing-debt`、`/stop-wishing-spec`、`/stop-wishing-tickets`、`/stop-wishing-setup`。
+7. **装完告诉用户怎么触发**：输入 `/stop-wishing`，或直接说「用 stop-wishing 流程」（也可说「先解释再写码」「改动前备份」等触发词）。审查/审计/债务/写规格/拆票/初始化/报告分别用 `/stop-wishing-review`、`/stop-wishing-audit`、`/stop-wishing-debt`、`/stop-wishing-spec`、`/stop-wishing-tickets`、`/stop-wishing-setup`、`/stop-wishing-report`。
 
 ## 脚本（零第三方依赖）
 

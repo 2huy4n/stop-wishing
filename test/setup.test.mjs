@@ -342,6 +342,10 @@ test('FILES.md 的三个 docs/agents 模板都带 setup marker', () => {
   const text = readFileSync(join(ROOT, 'skills', 'stop-wishing-setup', 'FILES.md'), 'utf8')
   assert.ok((text.match(/stop-wishing-setup:begin/g) ?? []).length >= 3)
   assert.ok((text.match(/stop-wishing-setup:end/g) ?? []).length >= 3)
+  assert.match(text, /# Issue tracker/)
+  assert.match(text, /# Domain docs/)
+  assert.match(text, /# Triage labels/)
+  assert.match(text, /\*\*Ticket status:\*\* todo \/ doing \/ done \/ dropped/)
 })
 
 

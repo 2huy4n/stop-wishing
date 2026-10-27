@@ -29,12 +29,14 @@ Read-only for code. **Only `docs/tickets/` and the spec's `tickets:` array are w
 | Spec | Yes | `docs/specs/<id>.md` (or a path the user names) |
 | Existing tickets | No | `docs/tickets/` — for numbering and to avoid duplicates |
 | Issue tracker | No | `docs/agents/issue-tracker.md` — issues are not tickets; use it only to resolve inbound issue refs, while ticket files always stay in `docs/tickets/` |
-| Triage labels | No | `docs/agents/triage-labels.md` — role-to-status words; it never changes the ticket location |
+| Triage labels | No | `docs/agents/triage-labels.md` — only for describing an inbound issue's triage role; it never changes ticket status (`todo/doing/done/dropped`) or location |
 | Repo facts | Optional | to write real verify commands, never to invent scope |
 
 **No spec → ask, do not improvise.** "Point me at the spec, or run `stop-wishing-spec` first — I won't invent a scope to split."
 
 **Inbound issue refs.** If a ticket references `#123` or `!67`, resolve it through `docs/agents/issue-tracker.md` when present; otherwise look for `docs/issues/<n>.md` or a matching file under `docs/issues/`. Never copy an issue into `docs/tickets/` or treat the issue tracker as the ticket directory.
+
+**Triage roles.** If an issue quote uses a triage role (`needs-triage`, `ready`, `blocked`, `in-progress`, `done`), read `docs/agents/triage-labels.md` for the word the tracker actually uses. Do not map a triage role onto a ticket status; tickets stay `todo/doing/done/dropped`.
 
 ## 3) Tracer bullet first
 

@@ -98,7 +98,7 @@ If the user does not know how to install a skill, follow these steps:
 
    Flags: `--tool` / `--dest` / `--verify` / `--dry-run` / `--force` / `--target`.
 
-   - `--dest <skills root>`: used directly as the skills root; seven skill directories are created inside it.
+   - `--dest <skills root>`: used directly as the skills root; eight skill directories are created inside it.
    - `--target <base>`: legacy-compatible; installs the eight skills under `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup,-report}`.
 
    Exit codes: 0 success or dry-run / 1 bad arguments or overwrite conflict / 2 missing source files / 3 missing or mismatched files / 4 outdated files (add `--force`).
@@ -118,13 +118,14 @@ If the user does not know how to install a skill, follow these steps:
    cp -R skills/stop-wishing-spec    ~/.agents/skills/stop-wishing-spec
    cp -R skills/stop-wishing-tickets ~/.agents/skills/stop-wishing-tickets
    cp -R skills/stop-wishing-setup   ~/.agents/skills/stop-wishing-setup
+   cp -R skills/stop-wishing-report  ~/.agents/skills/stop-wishing-report
 
    # Windows PowerShell
    New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
    Copy-Item skills\stop-wishing* "$env:USERPROFILE\.agents\skills\" -Recurse
    ```
 
-7. **Tell the user how to trigger it**: `/stop-wishing`, or "use the stop-wishing workflow". Review / audit / debt / spec / tickets / setup are `/stop-wishing-review`, `/stop-wishing-audit`, `/stop-wishing-debt`, `/stop-wishing-spec`, `/stop-wishing-tickets`, `/stop-wishing-setup`.
+7. **Tell the user how to trigger it**: `/stop-wishing`, or "use the stop-wishing workflow". Review / audit / debt / spec / tickets / setup / report are `/stop-wishing-review`, `/stop-wishing-audit`, `/stop-wishing-debt`, `/stop-wishing-spec`, `/stop-wishing-tickets`, `/stop-wishing-setup`, `/stop-wishing-report`.
 
 ## Scripts (zero third-party dependencies)
 
