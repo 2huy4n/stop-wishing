@@ -6,7 +6,7 @@ import test from 'node:test'
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const SKILLS_DIR = join(ROOT, 'skills')
-const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
+const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup', 'stop-wishing-report']
 const REFS = ['CARD.md', 'EVIDENCE.md', 'LICENSE.md', 'DECISIONS.md', 'GLOSSARY.md']
 
 function readSkill(name) {
@@ -42,7 +42,7 @@ function frontMatter(text) {
   return fields
 }
 
-test('七个技能目录都存在，且各有 SKILL.md', () => {
+test('八个技能目录都存在，且各有 SKILL.md', () => {
   for (const name of SKILL_NAMES) {
     assert.equal(existsSync(join(SKILLS_DIR, name, 'SKILL.md')), true, `缺 skills/${name}/SKILL.md`)
   }

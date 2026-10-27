@@ -233,3 +233,12 @@ test('init-docs --agents-md 之后跑 setup：只留一个指针段', () => {
   assert.doesNotMatch(text, /## 项目文档/, '旧指针段应被替换，而不是并存')
   assert.match(text, /## Project docs/)
 })
+
+test('setup SKILL.md 不超过 60 行，四个参考文件都在', () => {
+  const text = readFileSync(join(ROOT, 'skills', 'stop-wishing-setup', 'SKILL.md'), 'utf8').trimEnd()
+  const lines = text.split(/\r?\n/).length
+  assert.ok(lines <= 60, `setup SKILL.md 行数 ${lines} 超过 60`)
+  for (const ref of ['SETUP.md', 'FILES.md', 'SAFETY.md', 'CONSUMERS.md']) {
+    assert.equal(existsSync(join(ROOT, 'skills', 'stop-wishing-setup', ref)), true, `缺 ${ref}`)
+  }
+})

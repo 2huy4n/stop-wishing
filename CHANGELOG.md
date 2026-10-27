@@ -12,6 +12,7 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 - **Hacker theme is dense**: render log and evidence/risk streams, a node index, signal/rail status strips, per-node telemetry bars and ASCII separators, all fed by the same payload.
 - **Schema and example**: `schema.json` documents the payload; `examples/delivery.json` demonstrates a real delivery. Output goes to gitignored `reports/`.
 - **Installer**: eight skills now; `--verify` additionally checks `render.js`, `schema.json` and both theme directories.
+- **Setup skill split**: `stop-wishing-setup` goes from 191 lines to a 60-line router plus `SETUP.md` (probes/questions/writer/closing), `FILES.md` (ownership/templates), `SAFETY.md` (reruns/failures) and `CONSUMERS.md` (downstream reads); `--verify` checks all four.
 - **Tests**: config parsing, theme selection, invalid-config fallback, `--init` idempotency, bad payload exits, and a repo-wide guard that the prohibited term never appears in a tracked text file.
 
 ## 0.8.0 — 2026-10-27

@@ -181,6 +181,9 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     groups.push({ label: 'assets/ glossary and translations', files: ['assets/vibe-coding-glossary.html', 'assets/en.json'] })
     groups.push({ label: 'references/ five files present', files: ['CARD.md', 'EVIDENCE.md', 'LICENSE.md', 'DECISIONS.md', 'GLOSSARY.md'] })
   }
+  if (skillName === 'stop-wishing-setup') {
+    groups.push({ label: 'setup references present', files: ['SETUP.md', 'FILES.md', 'SAFETY.md', 'CONSUMERS.md'] })
+  }
   if (skillName === 'stop-wishing-report') {
     groups.push({
       label: 'report runtime and both themes present',
