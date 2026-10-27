@@ -50,7 +50,7 @@ Triggers: 许愿式编程, 先解释再写码, 改动前备份, 禁止硬编码,
 
 ## Scripts
 
-From a repo root use `skills/stop-wishing/scripts/<name>.js`; exit codes are part of the contract.
+Scripts live in this skill's `scripts/` directory — resolve them against the skill base directory, never the project root. Exit codes are part of the contract.
 - `node scripts/preflight.js --dir <repo> --use <self|free-closed|open-source|commercial>` — env + hardcode + licence in one pass: 0 clear, 1 blocking, 2 bad input/IO. `exit 2` is not danger; it usually means no `package-lock.json` / `node_modules`.
 - `check-env.js` (0/1), `init-docs.js` (0/1/2), `check-hardcode.js` (0/2), `check-licenses.js` (0/1/2), `check-tickets.js` (0/1/2), `setup.js` (0/1/2).
 - Install with `install.js`: `--tool <dsh|codex|trae|claude>` `--dest <skills root>` `--verify` `--dry-run` `--force` `--target <old>` (exit 0/1/2/3/4).
