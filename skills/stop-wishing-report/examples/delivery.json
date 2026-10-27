@@ -1,0 +1,70 @@
+{
+  "id": "2026-10-27-license-gate",
+  "type": "delivery",
+  "title": "给交付加一道许可证闸门",
+  "subtitle": "check-licenses.js · v0.7.0",
+  "project": "stop-wishing",
+  "created_at": "2026-10-27T14:50+08:00",
+  "summary": "原来靠人逐份读 LICENSE，现在先由扫描器给出可商用判定；禁止项在交付前阻断，未知项单独标出。",
+  "stats": [
+    { "label": "测试", "value": "51/51" },
+    { "label": "运行依赖", "value": "0" },
+    { "label": "扫描入口", "value": "5 列" }
+  ],
+  "sections": [
+    {
+      "id": "01",
+      "title": "做了什么",
+      "kind": "list",
+      "items": [
+        "读取 package-lock.json，覆盖传递依赖；没有 lock 时回退 node_modules 顶层包。",
+        "按 self / free-closed / open-source / commercial 四种用途给判定。",
+        "GPL、AGPL、LGPL、SSPL、BUSL 与未知许可分开处理，禁止项退出码为 1。",
+        "输出支持表格模式，直接对应 docs/LICENSES.md 的五列。"
+      ]
+    },
+    {
+      "id": "02",
+      "title": "关键决定",
+      "kind": "table",
+      "rows": [
+        { "label": "默认用途", "value": "commercial", "note": "没把握时按最严格处理" },
+        { "label": "未知许可", "value": "不直接判死", "note": "普通模式放行，--strict 才失败" },
+        { "label": "弱 copyleft", "value": "商用需确认", "note": "MPL / EPL / EUPL 不整包拒绝" }
+      ]
+    },
+    {
+      "id": "03",
+      "title": "怎么验证",
+      "kind": "steps",
+      "items": [
+        "node --test：51 个用例全部通过。",
+        "真实仓库跑 --rows，确认表头与五列对齐。",
+        "GPL + commercial 夹具确认退出码为 1；self 夹具为 0。"
+      ]
+    }
+  ],
+  "evidence": [
+    { "claim": "51 个测试通过", "proof": "node --test → 51 pass / 0 fail", "source": "本地 Node 24" },
+    { "claim": "GPL 在商用场景被阻断", "proof": "夹具退出码 1，counts.forbidden = 1", "source": "test/check-licenses.test.mjs" },
+    { "claim": "没有 lock 时不崩溃", "proof": "许可证扫描记为 skipped，预检仍退出 0", "source": "preflight.js" }
+  ],
+  "risks": [
+    { "level": "medium", "text": "自定义商业条款无法由元数据判断。", "mitigation": "遇到自定义许可时人工读条款，不把 unknown 当可用。" },
+    { "level": "low", "text": "lockfileVersion 1 只能回退 node_modules 顶层包。", "mitigation": "升级 lockfile 或接受覆盖范围提示。" }
+  ],
+  "next": [
+    { "id": "0001", "title": "把许可证闸门接入交付清单", "why": "让报告和 docs/LICENSES.md 共用同一次扫描结果。" },
+    { "id": "0002", "title": "补一个真实项目的端到端夹具", "why": "当前夹具是合成 lock，真实依赖树尚未覆盖。" }
+  ],
+  "limits": [
+    "只读许可证元数据，不判断条款在具体业务下的法律效力。",
+    "没有依赖清单时无法给出许可结论。"
+  ],
+  "meta": {
+    "commit": "1b1feab",
+    "tag": "v0.7.0",
+    "tests": "51/51",
+    "ci": "pass"
+  }
+}

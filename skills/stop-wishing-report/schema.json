@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "stop-wishing report payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "title", "summary", "created_at", "sections", "evidence", "risks", "next", "limits"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$",
+      "description": "Stable report id; also used as the output filename."
+    },
+    "type": {
+      "enum": ["prototype", "delivery"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "subtitle": { "type": "string" },
+    "project": { "type": "string" },
+    "created_at": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "value"],
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "kind"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "kind": { "enum": ["text", "list", "table", "steps"] },
+          "body": { "type": "string" },
+          "items": { "type": "array", "items": { "type": "string" } },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "value"],
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" },
+                "note": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim", "proof"],
+        "properties": {
+          "claim": { "type": "string" },
+          "proof": { "type": "string" },
+          "source": { "type": "string" }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level", "text"],
+        "properties": {
+          "level": { "enum": ["high", "medium", "low"] },
+          "text": { "type": "string" },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "next": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "why": { "type": "string" }
+        }
+      }
+    },
+    "limits": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "commit": { "type": "string" },
+        "tag": { "type": "string" },
+        "tests": { "type": "string" },
+        "ci": { "type": "string" }
+      }
+    }
+  }
+}

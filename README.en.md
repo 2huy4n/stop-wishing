@@ -8,7 +8,7 @@ A skill family against **wishing-driven programming**: the user gives one vague 
 
 The rule is simple: **align first, explain before writing, back up before changing, then make the smallest complete change.**
 
-The repo ships **seven side-by-side skills**: one main skill for taking a request from vague to delivered, and six satellites for reviewing one change, auditing a whole repo, keeping a debt ledger, writing a spec, splitting it into ordered tickets, and configuring a repo.
+The repo ships **eight side-by-side skills**: one main skill for taking a request from vague to delivered, and seven satellites for reviewing one change, auditing a whole repo, keeping a debt ledger, writing a spec, splitting it into ordered tickets, configuring a repo, and rendering a report.
 
 | Skill | What it does | When to use it |
 |---|---|---|
@@ -19,22 +19,23 @@ The repo ships **seven side-by-side skills**: one main skill for taking a reques
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | Turn a confirmed requirement card into a spec with acceptance criteria, and keep `card_sha256` in sync with `docs/project.md` | The requirements are settled and need to become a document |
 | [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | Split a spec into tracer-bullet tickets with `blocked_by` edges (a DAG) and status | The spec is bigger than one session and needs ordering |
 | [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | Configure a repo: where issues live (local/GitHub/other), domain terms and ADRs, the five triage labels; optionally maintain the `## Project docs` block in `AGENTS.md` | A new repo, or the conventions changed |
+| [`stop-wishing-report`](skills/stop-wishing-report/SKILL.md) | Render one verified `report.json` into standalone HTML; `hacker_mode` in the project's `report.conf` selects the compact developer report or the hacker theme | Delivery hand-off, prototype confirmation, a printable page or a six-screen demo |
 
 Skill bodies are in English; `description` is bilingual so Chinese trigger words still work. The original Chinese body survives only as a local backup and is **not committed** (`*.bak-*` is ignored); see commit `e428327` if you need it.
 
 ## Install
 
-The installer copies **all seven skills** into a target skills root:
+The installer copies **all eight skills** into a target skills root:
 
 ```bash
 # See what would be copied (writes nothing)
 node install.js --dry-run
 
 # Install into the user-level skills directory:
-# ~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets,stop-wishing-setup}
+# ~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets,stop-wishing-setup,stop-wishing-report}
 node install.js --tool dsh --verify
 
-# Also install for Claude Code: ~/.claude/skills/<seven skills>
+# Also install for Claude Code: ~/.claude/skills/<eight skills>
 node install.js --tool claude --verify
 
 # Custom skills root
@@ -98,7 +99,7 @@ If the user does not know how to install a skill, follow these steps:
    Flags: `--tool` / `--dest` / `--verify` / `--dry-run` / `--force` / `--target`.
 
    - `--dest <skills root>`: used directly as the skills root; seven skill directories are created inside it.
-   - `--target <base>`: legacy-compatible; installs the seven skills under `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup}`.
+   - `--target <base>`: legacy-compatible; installs the eight skills under `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup,-report}`.
 
    Exit codes: 0 success or dry-run / 1 bad arguments or overwrite conflict / 2 missing source files / 3 missing or mismatched files / 4 outdated files (add `--force`).
 

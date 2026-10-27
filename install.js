@@ -30,7 +30,7 @@ const MANIFEST = '.install-manifest.json'
 const LEGACY_STALE = ['scripts/build-portable.js']
 
 export const TOOL_ORDER = ['dsh', 'claude', 'codex', 'trae']
-/** 每个工具对应的 skills 根目录（七个技能会作为子目录放在这里）。 */
+/** 每个工具对应的 skills 根目录（八个技能会作为子目录放在这里）。 */
 export const TOOL_TARGETS = {
   dsh: ['.agents', 'skills'],
   codex: ['.agents', 'skills'],
@@ -38,7 +38,7 @@ export const TOOL_TARGETS = {
   claude: ['.claude', 'skills'],
 }
 
-export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
+export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup', 'stop-wishing-report']
 export const MAIN_SKILL = 'stop-wishing'
 export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'check-licenses', 'preflight', 'check-tickets', 'setup']
 export const TEMPLATE_NAMES = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
@@ -74,7 +74,7 @@ export function usage() {
   return [
     '用法: node install.js [--tool <dsh|claude|codex|trae>] [--dest <skills根目录>] [--verify] [--dry-run] [--force] [--target <base>]',
     '',
-    '  安装 skills/ 下的全部七个技能：stop-wishing、stop-wishing-review、stop-wishing-audit、stop-wishing-debt、stop-wishing-spec、stop-wishing-tickets、stop-wishing-setup。',
+    '  安装 skills/ 下的全部八个技能：stop-wishing、stop-wishing-review、stop-wishing-audit、stop-wishing-debt、stop-wishing-spec、stop-wishing-tickets、stop-wishing-setup、stop-wishing-report。',
     '',
     '  --tool    按用户所用工具选 skills 根目录（推荐 AI 用这个）：',
     '              dsh / codex / trae -> ~/.agents/skills',
@@ -86,7 +86,7 @@ export function usage() {
     '              [PASS] 齐全且与源一致 / [WARN] 齐全但内容落后于源（退出码 4）/ [FAIL] 缺失或不一致（退出码 3）',
     '  --dry-run 只打印会复制什么、将校验什么，不写盘',
     '  --force   目标已存在时覆盖（默认拒绝）',
-    '  --target  【兼容旧用法】只给 base 目录，七个技能装到 <base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup}',
+    '  --target  【兼容旧用法】只给 base 目录，八个技能装到 <base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup,-report}',
     '',
     '不给 --tool/--dest/--target 时默认 ~/.agents/skills（等价 --tool dsh）。',
     '退出码: 0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 自检失败（缺失或不一致） / 4 自检告警（内容落后于源）',
@@ -181,6 +181,23 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
     groups.push({ label: 'assets/ glossary and translations', files: ['assets/vibe-coding-glossary.html', 'assets/en.json'] })
     groups.push({ label: 'references/ five files present', files: ['CARD.md', 'EVIDENCE.md', 'LICENSE.md', 'DECISIONS.md', 'GLOSSARY.md'] })
   }
+  if (skillName === 'stop-wishing-report') {
+    groups.push({
+      label: 'report runtime and both themes present',
+      files: [
+        'render.js',
+        'schema.json',
+        'report.conf.example',
+        'themes/simple/render.mjs',
+        'themes/simple/style.css',
+        'themes/simple/RENDER.md',
+        'themes/hacker/render.mjs',
+        'themes/hacker/style.css',
+        'themes/hacker/RENDER.md',
+        'examples/delivery.json',
+      ],
+    })
+  }
   groups.push({ label: 'agents/openai.yaml present', files: ['agents/openai.yaml'] })
   groups.push({ label: 'license and third-party notices', files: NOTICE_FILES })
 
@@ -241,7 +258,7 @@ export function collectFiles(root) {
   return files.sort()
 }
 
-/** 源文件完整性：七个技能的 SKILL.md 都必须存在。 */
+/** 源文件完整性：八个技能的 SKILL.md 都必须存在。 */
 export function missingSources() {
   return SKILL_NAMES.filter(name => !existsSync(join(SKILLS_ROOT, name, 'SKILL.md')))
 }

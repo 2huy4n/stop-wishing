@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stop Wishing Report"
+  short_description: "Render a verified report payload as a compact or hacker-themed HTML report"

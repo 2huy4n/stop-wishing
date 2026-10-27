@@ -3,6 +3,15 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## 0.9.0 — 2026-10-27
+
+- **New `stop-wishing-report` skill**: renders one verified `report.json` into standalone HTML. No dependencies, no build step, no network.
+- **One config switch**: project-root `report.conf` with `hacker_mode = false|true`. Missing file is created with `false`; an invalid value falls back to `false` and warns. There is no CLI theme flag.
+- **Two renderers, one payload**: `themes/simple` produces a compact printable report plus Markdown; `themes/hacker` produces a six-screen presentation theme. Only the selected theme module is imported; the other theme's CSS/HTML is never read.
+- **Schema and example**: `schema.json` documents the payload; `examples/delivery.json` demonstrates a real delivery. Output goes to gitignored `reports/`.
+- **Installer**: eight skills now; `--verify` additionally checks `render.js`, `schema.json` and both theme directories.
+- **Tests**: config parsing, theme selection, invalid-config fallback, `--init` idempotency, bad payload exits, and a repo-wide guard that the prohibited term never appears in a tracked text file.
+
 ## 0.8.0 — 2026-10-27
 
 - **Main skill rewritten as a 56-line router**: judgement stays inline (licence use question, hard rules, evidence, failure limit); details move to `CARD.md`, `EVIDENCE.md`, `LICENSE.md`, `DECISIONS.md` and `GLOSSARY.md`, with an explicit "read only when needed" routing table. The line cap is enforced by a test.

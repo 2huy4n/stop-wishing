@@ -18,7 +18,7 @@ function cli(args) {
   })
 }
 
-test('install --dry-run：报告七个技能但不写盘，退出码 0', () => {
+test('install --dry-run：报告八个技能但不写盘，退出码 0', () => {
   const base = mkdtempSync(join(tmpdir(), 'sw-install-dry-'))
   const out = cli(['--dry-run', '--target', base])
   assert.equal(out.status, 0, out.stderr)
@@ -27,7 +27,7 @@ test('install --dry-run：报告七个技能但不写盘，退出码 0', () => {
   assert.equal(existsSync(join(base, 'stop-wishing')), false, 'dry-run 绝不能创建目标目录')
 })
 
-test('install：真实复制七个技能到 --target，含主技能脚本/模板与卫星 SKILL.md', () => {
+test('install：真实复制八个技能到 --target，含主技能脚本/模板与卫星 SKILL.md', () => {
   const base = mkdtempSync(join(tmpdir(), 'sw-install-real-'))
   const out = cli(['--target', base])
   assert.equal(out.status, 0, out.stderr)
@@ -64,7 +64,7 @@ test('install：默认不覆盖，并报告与源的差异；--force 才覆盖',
   assert.equal(cli(['--target', base, '--force', '--verify']).status, 0)
 })
 
-test('--dest：作为 skills 根目录，安装七个子目录', () => {
+test('--dest：作为 skills 根目录，安装八个子目录', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-install-dest-'))
   const out = cli(['--dest', root])
   assert.equal(out.status, 0, out.stderr)
@@ -74,7 +74,7 @@ test('--dest：作为 skills 根目录，安装七个子目录', () => {
   assert.equal(existsSync(join(root, 'SKILL.md')), false, '--dest 不应把文件散在根下')
 })
 
-test('--verify：七个技能逐个 PASS，退出码 0', () => {
+test('--verify：八个技能逐个 PASS，退出码 0', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-install-verify-'))
   const out = cli(['--dest', root, '--verify'])
   assert.equal(out.status, 0, out.stdout + out.stderr)
@@ -124,7 +124,7 @@ test('--verify：front-matter name 与目录名不一致时 FAIL', () => {
   assert.match(out.stdout, /front-matter name/)
 })
 
-test('--tool 路径解析：返回 skills 根目录，七个技能由安装器创建子目录', () => {
+test('--tool 路径解析：返回 skills 根目录，八个技能由安装器创建子目录', () => {
   const home = join(tmpdir(), 'sw-fake-home')
   for (const tool of ['dsh', 'codex', 'trae']) {
     const [dest] = resolveDestinations({ tool }, home)
@@ -134,7 +134,7 @@ test('--tool 路径解析：返回 skills 根目录，七个技能由安装器�
   assert.equal(claudeDest, join(home, '.claude', 'skills'))
 })
 
-test('--tool claude --dry-run：解析到 ~/.claude/skills 且列出七个技能', () => {
+test('--tool claude --dry-run：解析到 ~/.claude/skills 且列出八个技能', () => {
   const out = cli(['--tool', 'claude', '--dry-run'])
   assert.equal(out.status, 0, out.stderr)
   assert.match(out.stdout, /\.claude[/\\]skills[/\\]stop-wishing/)
@@ -149,7 +149,7 @@ test('--tool 未知值：退出码 1 并列出可选值', () => {
   assert.match(out.stderr, /dsh \| claude \| codex \| trae/)
 })
 
-test('--dest 与 --target 都是 skills 根目录：各自生成七个子目录', () => {
+test('--dest 与 --target 都是 skills 根目录：各自生成八个子目录', () => {
   const root = mkdtempSync(join(tmpdir(), 'sw-levels-'))
   const destRoot = join(root, 'dest')
   assert.equal(cli(['--dest', destRoot]).status, 0)

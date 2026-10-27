@@ -1,0 +1,4 @@
+# stop-wishing report config
+# false = compact developer report (default)
+# true  = hacker-themed report
+hacker_mode = false

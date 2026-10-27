@@ -33,3 +33,5 @@ skills/stop-wishing/assets/en.json : magic-number : 术语表英文文案中的�
 skills/stop-wishing/assets/vibe-coding-glossary.html : magic-number : 术语表中文文案中的教学示例数字，非可配置常量
 # 许可扫描器用仓库元数据拼 source URL，属于归属证据，不是可配置端点
 skills/stop-wishing/scripts/check-licenses.js : url : 由 package 元数据拼出的仓库地址，用于归属展示，不是业务端点
+# JSON Schema 的 $schema 是规范标识符，不是业务端点
+skills/stop-wishing-report/schema.json : url : JSON Schema 规范标识符，不发起请求

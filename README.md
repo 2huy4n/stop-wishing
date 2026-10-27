@@ -6,7 +6,7 @@
 
 治「许愿式编程」的技能包：**用户给一句模糊指令，AI 别急着写码，先对齐目标/边界/验收、先解释、先备份，再最小差异动手。**
 
-仓库现在包含 **7 个并列技能**：主技能负责接需求与交付流程，六个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」「把需求写成 spec 卡」「把 spec 拆成有依赖顺序的票」「初始化项目文档与协作约定」。
+仓库现在包含 **8 个并列技能**：主技能负责接需求与交付流程，七个卫星技能分别负责「审查一次改动」「审计整个仓库」「维护技术债台账」「把需求写成 spec 卡」「把 spec 拆成有依赖顺序的票」「初始化项目文档与协作约定」「把交付结果渲染成报告」。
 
 | 技能 | 用途 | 何时用 |
 |---|---|---|
@@ -17,21 +17,22 @@
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | 把已确认的需求卡写成带验收标准的 spec 卡，并维护 `card_sha256` 与 `docs/project.md` 的一致性 | 需求谈完、要落成文档时 |
 | [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | 把 spec 拆成 tracer-bullet 票，维护 `blocked_by` 依赖 DAG 与状态 | 一个 spec 一次做不完、要排顺序时 |
 | [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | 初始化项目协作约定：票放哪（local/GitHub/其他）、领域术语与 ADR、五角色标签映射；可选维护 `AGENTS.md` 的 `## Project docs` 段 | 接手空仓库、要把流程落到文档时 |
+| [`stop-wishing-report`](skills/stop-wishing-report/SKILL.md) | 把一份已验证的 `report.json` 渲染成独立 HTML；项目根 `report.conf` 的 `hacker_mode` 决定简洁版或黑客主题 | 交付汇报、原型确认、要一页可打印或六屏演示时 |
 
 主技能正文为英文（`description` 中英双语，中文触发词保留）。原中文版只保留在本地备份，**不入库**（`*.bak-*` 已被 `.gitignore` 忽略）；如需追溯，见提交 `e428327`。
 
 ## 怎么装
 
-安装器会把 `skills/` 下的**七个技能**一起装进目标 skills 根目录：
+安装器会把 `skills/` 下的**八个技能**一起装进目标 skills 根目录：
 
 ```bash
 # 只看看会复制什么（不写盘）
 node install.js --dry-run
 
-# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets,stop-wishing-setup}
+# 装到用户级 skills 目录：~/.agents/skills/{stop-wishing,stop-wishing-review,stop-wishing-audit,stop-wishing-debt,stop-wishing-spec,stop-wishing-tickets,stop-wishing-setup,stop-wishing-report}
 node install.js --tool dsh --verify
 
-# 同时装给 Claude Code：~/.claude/skills/<七个技能>
+# 同时装给 Claude Code：~/.claude/skills/<八个技能>
 node install.js --tool claude --verify
 
 # 自定义 skills 根目录
@@ -41,7 +42,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`。
+`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`；报告技能额外校验 `render.js`、`schema.json` 与两套主题资产。
 
 `--force` 升级时会按上一版安装清单（`.install-manifest.json`）删除新版本不再提供的文件（如旧的 `scripts/build-portable.js`），清单之外的用户自建文件不会动。
 
@@ -95,12 +96,12 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 
    参数：`--tool` / `--dest` / `--verify` / `--dry-run` / `--force` / `--target`。其中：
 
-   - `--dest <skills 根目录>` = 直接作为 skills 根目录，下面创建 7 个技能子目录；
-   - `--target <base>` = **兼容旧用法**，同样把 7 个技能装到 `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup}`。
+   - `--dest <skills 根目录>` = 直接作为 skills 根目录，下面创建 8 个技能子目录；
+   - `--target <base>` = **兼容旧用法**，同样把 8 个技能装到 `<base>/stop-wishing{,-review,-audit,-debt,-spec,-tickets,-setup,-report}`。
 
    `--verify` 逐文件与源做 hash 比对：`[PASS] 齐全且与源一致` / `[WARN] 齐全但内容落后于源（退出码 4，建议加 --force 更新）` / `[FAIL] 缺失或不一致（退出码 3）`。总体退出码：0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 缺失或不一致 / 4 落后于源。
 
-5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/` 七个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（7 个）、`CARD.md` 等 5 个参考文件、`templates/zh` 与 `templates/en`（各 8 份：7 份文档 + `AGENTS.md.tpl`）、`assets/vibe-coding-glossary.html` 与 `assets/en.json`、`LICENSE`。`--verify` 全 PASS 才算装好。
+5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/`、`stop-wishing-report/` 八个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（7 个）、`CARD.md` 等 5 个参考文件、`templates/zh` 与 `templates/en`（各 8 份：7 份文档 + `AGENTS.md.tpl`）、`assets/vibe-coding-glossary.html` 与 `assets/en.json`、`LICENSE`；报告技能另有 `render.js`、`schema.json` 与两套主题资产。`--verify` 全 PASS 才算装好。
 
    **术语问答，装好即用**：用户问「MVP 是什么」这类词时，先查 `<skills 根>/stop-wishing/assets/vibe-coding-glossary.html` 中的 `zh:'<词>'` 或 `en:'<词>'`，用该词条的 `d`/`de` 解释、`a`/`ae` 打比方，并附 `#term-<slug>` 深链（slug = 英文名小写、非字母数字转 `-`）；本地没有这个词再联网搜索。不要自动弹浏览器，也不要把整份词表贴出来。
 6. **失败处理**：若写入被沙箱/权限拒绝，**不要反复重试**，直接告诉用户「需要你手动执行」，并给出可直接复制的命令：
