@@ -5,7 +5,7 @@
 // 不可逆操作（SKILL.md §9 要求人批）。
 // 为什么 --verify 要比 hash：只数文件「齐不齐」会骗人——旧版本文件齐全但内容落后，
 // 用户以为装对了、其实没用上修复。
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, rmdirSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { dirname, join, relative, resolve, sep } from 'node:path'
@@ -21,9 +21,13 @@ const VERSION = (() => {
 })()
 const SKILLS_ROOT = join(ROOT, 'skills')
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'test', 'tmp', '.tmp', 'dist', 'coverage'])
-const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-/
+const SKIP_FILES = /\.(log|tmp|bak)$|\.bak-|^\.install-manifest\.json$/
 // 每个技能安装后都必须携带的许可与归属声明（MIT 要求副本保留声明）。
 const NOTICE_FILES = ['LICENSE', 'THIRD-PARTY-NOTICES.md']
+// 安装清单：升级时据此删除「上一版有、这一版没有」的文件，避免旧脚本残留。
+const MANIFEST = '.install-manifest.json'
+// 没有清单的旧安装也要清掉这些已知废弃文件；清单机制覆盖以后的新增废弃项。
+const LEGACY_STALE = ['scripts/build-portable.js']
 
 export const TOOL_ORDER = ['dsh', 'claude', 'codex', 'trae']
 /** 每个工具对应的 skills 根目录（七个技能会作为子目录放在这里）。 */
@@ -93,6 +97,49 @@ function isInside(child, parent) {
   const target = resolve(child)
   const base = resolve(parent)
   return target === base || target.startsWith(base + sep)
+}
+
+function normalizeRelative(file) {
+  return file.split(sep).join('/')
+}
+
+function readManifest(dest) {
+  try {
+    const parsed = JSON.parse(readFileSync(join(dest, MANIFEST), 'utf8'))
+    return Array.isArray(parsed.files) ? parsed.files.map(normalizeRelative) : null
+  } catch {
+    return null
+  }
+}
+
+function pruneEmptyDirs(dir, stop) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) pruneEmptyDirs(join(dir, entry.name), stop)
+  }
+  if (dir !== stop && readdirSync(dir).length === 0) rmdirSync(dir)
+}
+
+export function pruneStaleFiles(dest, currentFiles) {
+  const previous = readManifest(dest)
+  const current = new Set(currentFiles.map(normalizeRelative))
+  const stale = new Set()
+  if (previous) for (const file of previous) if (!current.has(file)) stale.add(file)
+  for (const file of LEGACY_STALE) if (!current.has(file)) stale.add(file)
+  const removed = []
+  for (const file of stale) {
+    const target = resolve(dest, file)
+    if (!isInside(target, dest) || !existsSync(target)) continue
+    rmSync(target, { force: true })
+    removed.push(file)
+  }
+  if (removed.length > 0) pruneEmptyDirs(dest, dest)
+  return removed
+}
+
+export function writeManifest(dest, files) {
+  const list = files.map(normalizeRelative).filter(file => file !== MANIFEST).sort()
+  writeFileSync(join(dest, MANIFEST), `${JSON.stringify({ version: VERSION, files: list }, null, 2)}\n`)
+  return list
 }
 
 /** 解析目标 skills 根目录列表。home 可注入，便于测试不碰真实家目录。 */
@@ -289,6 +336,8 @@ export function install(options, home = homedir()) {
       mkdirSync(dirname(target), { recursive: true })
       copyFileSync(from, target)
     }
+    if (item.action === '覆盖') pruneStaleFiles(item.dest, skillFiles)
+    writeManifest(item.dest, skillFiles)
   }
 
   let verification = null

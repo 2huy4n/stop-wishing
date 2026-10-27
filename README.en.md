@@ -46,6 +46,8 @@ node install.js --force
 
 `--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`.
 
+`--force` upgrades also prune files listed by the previous install manifest (`.install-manifest.json`) that the new version no longer ships (for example the old `scripts/build-portable.js`); files outside that manifest are left untouched.
+
 Editor-specific notes live in [`adapters/`](adapters/): `claude-code/README.md`, `codex/AGENTS.md`, `trae/README.md`.
 
 ## Project docs and AGENTS.md (optional)

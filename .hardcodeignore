@@ -12,10 +12,6 @@ skills/stop-wishing/scripts/check-hardcode.js : magic-number : 检查器自身�
 skills/stop-wishing/scripts/check-hardcode.js : abs-path : 注释里复述历史 bug 的现象，不是配置路径
 # SKILL.md 里的文档示例值：年份文本（如 2024 年）与 --threshold 1000
 skills/stop-wishing/SKILL.md : magic-number : 文档与注释中的年份/日期文本与命令行示例值，均非可配置常量
-# 便携版由 SKILL.md 生成，同样带示例阈值与年份文本
-portable/*.md : magic-number : 便携版里的年份文本与命令行示例值（源出 SKILL.md），非可配置常量
-# build-portable 里的脚本用法示例同样带 --threshold 1000
-skills/stop-wishing/scripts/build-portable.js : magic-number : SCRIPT_USAGE 字符串里的示例命令行阈值
 # 测试里的负样例（假绝对路径 / 假密钥 / 假 URL / 假端口）与超时参数
 test/*.mjs : abs-path : 负样例：假绝对路径，用于证明 abs-path 规则能命中
 test/*.mjs : secret : 负样例：假密钥，用于证明 secret 规则能命中
@@ -28,3 +24,12 @@ THIRD-PARTY-NOTICES.md : magic-number : MIT 版权行里的年份（2026），�
 README.md : magic-number : 文档里说明 ponytail 版权年份（2026），非可配置常量
 # 工单编号上限是规格说明（4 位全局单调，超过 9999 报错），不是可配置的业务常量
 skills/stop-wishing-tickets/SKILL.md : magic-number : 文档里写明的 4 位编号上限 9999，属规格约束，非可配置常量
+# README 顶部的 CI 徽章链接：文档展示用，不是可配置端点
+README.md : url : CI 徽章与仓库链接，文档展示用，不是业务端点
+README.en.md : url : CI 徽章与仓库链接，文档展示用，不是业务端点
+README.en.md : magic-number : 第三方归属段落里的 MIT 版权年份（2026），许可证要求保留
+# 术语表里的教学示例数字（端口 3000/5173/8080、电梯限重 1000 斤），不是可配置常量
+skills/stop-wishing/assets/en.json : magic-number : 术语表英文文案中的教学示例数字，非可配置常量
+skills/stop-wishing/assets/vibe-coding-glossary.html : magic-number : 术语表中文文案中的教学示例数字，非可配置常量
+# 许可扫描器用仓库元数据拼 source URL，属于归属证据，不是可配置端点
+skills/stop-wishing/scripts/check-licenses.js : url : 由 package 元数据拼出的仓库地址，用于归属展示，不是业务端点

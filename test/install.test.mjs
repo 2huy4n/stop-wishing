@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -201,4 +201,54 @@ test('README 无人值守兜底：无法提问时按环境判断并写明假设'
   assert.match(readme, /无法向用户提问/)
   assert.match(readme, /我假设你用的是/)
   assert.match(readme, /优先装到 `~\/\.agents\/skills`/)
+})
+
+test('install --force：按清单删除旧文件，保留用户自建文件，并写新清单', () => {
+  const base = mkdtempSync(join(tmpdir(), 'sw-install-prune-'))
+  const dest = join(base, 'stop-wishing')
+  try {
+    mkdirSync(join(dest, 'scripts'), { recursive: true })
+    writeFileSync(join(dest, 'scripts', 'build-portable.js'), 'old script')
+    writeFileSync(join(dest, 'OLD.md'), 'old doc')
+    writeFileSync(join(dest, 'notes.md'), 'user note')
+    writeFileSync(join(dest, '.install-manifest.json'), JSON.stringify({
+      version: '0.7.0',
+      files: ['SKILL.md', 'OLD.md', 'scripts/build-portable.js'],
+    }))
+
+    const out = cli(['--force', '--target', base])
+    assert.equal(out.status, 0, out.stdout + out.stderr)
+    assert.equal(existsSync(join(dest, 'scripts', 'build-portable.js')), false, '旧脚本应被删除')
+    assert.equal(existsSync(join(dest, 'OLD.md')), false, '清单里的旧文件应被删除')
+    assert.equal(existsSync(join(dest, 'notes.md')), true, '清单外的用户文件不能删')
+
+    const manifest = JSON.parse(readFileSync(join(dest, '.install-manifest.json'), 'utf8'))
+    assert.ok(manifest.files.includes('SKILL.md'))
+    assert.ok(manifest.files.includes('preflight.js') === false, '清单记录相对路径，不是裸文件名')
+    assert.ok(manifest.files.includes('scripts/preflight.js'))
+    assert.equal(manifest.files.includes('OLD.md'), false)
+  } finally {
+    rmSync(base, { recursive: true, force: true })
+  }
+})
+
+test('install：全新安装也会写清单，且清单不进入自检文件集', () => {
+  const base = mkdtempSync(join(tmpdir(), 'sw-install-manifest-'))
+  try {
+    const out = cli(['--target', base])
+    assert.equal(out.status, 0, out.stdout + out.stderr)
+    const manifestPath = join(base, 'stop-wishing', '.install-manifest.json')
+    assert.equal(existsSync(manifestPath), true)
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+    assert.ok(manifest.files.includes('SKILL.md'))
+    assert.ok(manifest.files.includes('CARD.md'))
+    assert.ok(manifest.files.includes('scripts/preflight.js'))
+    assert.equal(manifest.files.includes('.install-manifest.json'), false)
+
+    const verify = cli(['--dest', base, '--verify'])
+    assert.equal(verify.status, 0, verify.stdout + verify.stderr)
+    assert.doesNotMatch(verify.stdout, /\[FAIL\]/)
+  } finally {
+    rmSync(base, { recursive: true, force: true })
+  }
 })

@@ -43,6 +43,8 @@ node install.js --force
 
 `--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`。
 
+`--force` 升级时会按上一版安装清单（`.install-manifest.json`）删除新版本不再提供的文件（如旧的 `scripts/build-portable.js`），清单之外的用户自建文件不会动。
+
 编辑器适配说明见 [`adapters/`](adapters/)：`claude-code/README.md`、`codex/AGENTS.md`、`trae/README.md`。
 
 ## 项目文档与 AGENTS.md（可选）
