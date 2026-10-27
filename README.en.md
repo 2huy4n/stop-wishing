@@ -44,7 +44,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`.
+`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`.
 
 Editor-specific notes live in [`adapters/`](adapters/): `claude-code/README.md`, `codex/AGENTS.md`, `trae/README.md`.
 
@@ -100,7 +100,7 @@ If the user does not know how to install a skill, follow these steps:
 
    Exit codes: 0 success or dry-run / 1 bad arguments or overwrite conflict / 2 missing source files / 3 missing or mismatched files / 4 outdated files (add `--force`).
 
-5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/` and `stop-wishing-setup/`, each with a `SKILL.md`; the main skill also has `scripts/` (7), `templates/zh` and `templates/en` (8 each: seven docs plus `AGENTS.md.tpl`), `assets/vibe-coding-glossary.html`, `assets/en.json` and `LICENSE`. Only a fully PASSing `--verify` counts as installed.
+5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/` and `stop-wishing-setup/`, each with a `SKILL.md`; the main skill also has `scripts/` (7), five reference files, `templates/zh` and `templates/en` (8 each: seven docs plus `AGENTS.md.tpl`), `assets/vibe-coding-glossary.html`, `assets/en.json` and `LICENSE`. Only a fully PASSing `--verify` counts as installed.
 
    **Term questions work right after install**: when the user asks what "MVP" means, look in `<skills root>/stop-wishing/assets/vibe-coding-glossary.html` for `zh:'<term>'` or `en:'<term>'`, explain with that entry's `d`/`de`, give the analogy from `a`/`ae`, and add the `#term-<slug>` deep link (slug = English name lowercased, non-alphanumerics turned into `-`). Only search the web when the local glossary has no entry. Do not open a browser window automatically, and never paste the whole glossary.
 6. **If writing is denied** (sandbox or permissions): do not retry in a loop. Tell the user it needs one manual command and give a copy-paste one:
@@ -130,10 +130,10 @@ If the user does not know how to install a skill, follow these steps:
 | `skills/stop-wishing/scripts/check-env.js` | Probe git/bash/node and whether this is a git repo; print JSON plus backup advice | 0 ready / 1 missing something critical |
 | `skills/stop-wishing/scripts/init-docs.js` | Generate seven project docs from `templates/<lang>/` (including `LICENSES.md` and a progress snapshot) | 0 ok / 1 bad arguments or already exists / 2 missing template |
 | `skills/stop-wishing/scripts/check-hardcode.js` | Scan for absolute paths, secrets, URLs, ports, magic numbers (honours `.hardcodeignore`) | 0 clean or fully suppressed / 2 unsuppressed hits or invalid ignore file |
-| `skills/stop-wishing/scripts/check-licenses.js` | Scan `package-lock.json` (`lockfileVersion` ≥ 2, transitive and nested packages included) plus `node_modules` (fills in licence fields), parse SPDX (`OR`/`AND`/`WITH`) and apply the §7 use matrix; flags `--use self\|free-closed\|open-source\|commercial`, `--prod-only`, `--strict`, `--json`, `--rows` | 0 no forbidden licences (`warn`/`unknown` warnings allowed) / 1 a forbidden licence or `unknown` under `--strict` / 2 bad arguments or IO |
+| `skills/stop-wishing/scripts/check-licenses.js` | Scan `package-lock.json` (`lockfileVersion` ≥ 2, transitive and nested packages included) plus `node_modules` (fills in licence fields), parse SPDX (`OR`/`AND`/`WITH`) and apply the use matrix in `LICENSE.md`; flags `--use self\|free-closed\|open-source\|commercial`, `--prod-only`, `--strict`, `--json`, `--rows` | 0 no forbidden licences (`warn`/`unknown` warnings allowed) / 1 a forbidden licence or `unknown` under `--strict` / 2 bad arguments or IO |
 | `skills/stop-wishing/scripts/check-tickets.js` | Validate `docs/tickets/*.md` against `docs/specs/` and `docs/project.md`: errors E1–E13, warnings W1–W5 | 0 no errors (warnings allowed) / 1 errors / 2 usage or IO |
 | `skills/stop-wishing/scripts/setup.js` | Create/update `docs/agents/{issue-tracker,domain,triage-labels}.md` (marked blocks only, idempotent; `--issue-tracker local` points at `docs/issues/`, separate from the work-breakdown directory `docs/tickets/`); optionally maintain the `## Project docs` block of an existing `AGENTS.md`/`CLAUDE.md` (**never creates them**) | 0 ok (including unchanged) / 1 bad arguments / 2 IO |
-| `skills/stop-wishing/scripts/build-portable.js` | Merge the main skill body into `portable/stop-wishing.md` | 0 ok / 2 missing `SKILL.md` |
+| `skills/stop-wishing/scripts/preflight.js` | Run environment, hardcoding and dependency-licence checks in one pass (licence scan is marked skipped when there is no lockfile/node_modules) | 0 clean / 1 blocking / 2 bad arguments or IO |
 
 `check-tickets.js` checks: E1 unparsable front-matter, E2 missing required fields (id/title/spec/status/acceptance/verify), E3 file name, E4 id vs file-name prefix, E5 duplicate id, E6 status, E7 spec does not exist, E8 `blocked_by` points at a non-existent ticket, E9 self-dependency, E10 cycle, E11 empty acceptance, E12 empty verify or fewer verifies than acceptances, E13 a done/dropped ticket is still a dependency. Warnings: W1 missing estimate, W2 more than five acceptance items, W3 every verify is non-executable, W4 `card_sha256` disagrees with `docs/project.md`, W5 a spec is referenced by no ticket.
 

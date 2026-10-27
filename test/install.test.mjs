@@ -85,6 +85,7 @@ test('--verify：七个技能逐个 PASS，退出码 0', () => {
   assert.match(out.stdout, /\[PASS\] templates\/zh\/ eight files/)
   assert.match(out.stdout, /\[PASS\] templates\/en\/ eight files/)
   assert.match(out.stdout, /\[PASS\] assets\/ glossary and translations/)
+  assert.match(out.stdout, /\[PASS\] references\/ five files present/)
   assert.match(out.stdout, /\[PASS\] license and third-party notices/)
   const version = readFileSync(join(ROOT, 'VERSION'), 'utf8').trim()
   assert.match(out.stdout, new RegExp(`版本: ${version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), '自检应打印源版本')

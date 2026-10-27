@@ -41,7 +41,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`。
+`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`。
 
 编辑器适配说明见 [`adapters/`](adapters/)：`claude-code/README.md`、`codex/AGENTS.md`、`trae/README.md`。
 
@@ -98,7 +98,7 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 
    `--verify` 逐文件与源做 hash 比对：`[PASS] 齐全且与源一致` / `[WARN] 齐全但内容落后于源（退出码 4，建议加 --force 更新）` / `[FAIL] 缺失或不一致（退出码 3）`。总体退出码：0 成功或 dry-run / 1 参数或覆盖冲突 / 2 源文件缺失 / 3 缺失或不一致 / 4 落后于源。
 
-5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/` 七个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（7 个）、`templates/zh` 与 `templates/en`（各 8 份：7 份文档 + `AGENTS.md.tpl`）、`assets/vibe-coding-glossary.html` 与 `assets/en.json`、`LICENSE`。`--verify` 全 PASS 才算装好。
+5. **验证**：目标 skills 根目录下必须有 `stop-wishing/`、`stop-wishing-review/`、`stop-wishing-audit/`、`stop-wishing-debt/`、`stop-wishing-spec/`、`stop-wishing-tickets/`、`stop-wishing-setup/` 七个目录，每个含 `SKILL.md`；主技能另有 `scripts/`（7 个）、`CARD.md` 等 5 个参考文件、`templates/zh` 与 `templates/en`（各 8 份：7 份文档 + `AGENTS.md.tpl`）、`assets/vibe-coding-glossary.html` 与 `assets/en.json`、`LICENSE`。`--verify` 全 PASS 才算装好。
 
    **术语问答，装好即用**：用户问「MVP 是什么」这类词时，先查 `<skills 根>/stop-wishing/assets/vibe-coding-glossary.html` 中的 `zh:'<词>'` 或 `en:'<词>'`，用该词条的 `d`/`de` 解释、`a`/`ae` 打比方，并附 `#term-<slug>` 深链（slug = 英文名小写、非字母数字转 `-`）；本地没有这个词再联网搜索。不要自动弹浏览器，也不要把整份词表贴出来。
 6. **失败处理**：若写入被沙箱/权限拒绝，**不要反复重试**，直接告诉用户「需要你手动执行」，并给出可直接复制的命令：
@@ -128,10 +128,10 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 | `skills/stop-wishing/scripts/check-env.js` | 探测 git/bash/node/是否 git 仓库，输出 JSON + 备份建议 | 0 就绪 / 1 缺关键项 |
 | `skills/stop-wishing/scripts/init-docs.js` | 从 `templates/<lang>/` 生成 7 份项目文档（含 `LICENSES.md` 与进度快照） | 0 成功 / 1 参数错误或已存在 / 2 模板缺失 |
 | `skills/stop-wishing/scripts/check-hardcode.js` | 扫绝对路径/密钥/URL/端口/魔法数字（支持 `.hardcodeignore`） | 0 干净或全部被抑制 / 2 有未抑制命中或忽略文件非法 |
-| `skills/stop-wishing/scripts/check-licenses.js` | 扫 `package-lock.json`（`lockfileVersion` ≥ 2，含传递/嵌套依赖）与 `node_modules`（补许可证字段），解析 SPDX（`OR`/`AND`/`WITH`），按主技能 §7 的用途矩阵判定；参数 `--use self\|free-closed\|open-source\|commercial`、`--prod-only`、`--strict`、`--json`、`--rows` | 0 无禁止项（可有 `warn`/`unknown` 警告） / 1 有禁止项或 `--strict` 下未知 / 2 参数或 IO |
+| `skills/stop-wishing/scripts/check-licenses.js` | 扫 `package-lock.json`（`lockfileVersion` ≥ 2，含传递/嵌套依赖）与 `node_modules`（补许可证字段），解析 SPDX（`OR`/`AND`/`WITH`），按 `LICENSE.md` 的用途矩阵判定；参数 `--use self\|free-closed\|open-source\|commercial`、`--prod-only`、`--strict`、`--json`、`--rows` | 0 无禁止项（可有 `warn`/`unknown` 警告） / 1 有禁止项或 `--strict` 下未知 / 2 参数或 IO |
 | `skills/stop-wishing/scripts/check-tickets.js` | 校验 `docs/tickets/*.md`（并对照 `docs/specs/`、`docs/project.md`）：E1–E13 错误 + W1–W5 警告 | 0 无错误（可有警告）/ 1 有错误 / 2 用法或 IO |
 | `skills/stop-wishing/scripts/setup.js` | 生成/更新 `docs/agents/{issue-tracker,domain,triage-labels}.md`（只动标记段、幂等；`--issue-tracker local` 指向 `docs/issues/`，与工作计划目录 `docs/tickets/` 分开），可选维护既有 `AGENTS.md`/`CLAUDE.md` 的 `## Project docs` 段（**绝不创建**它们） | 0 成功（含 unchanged）/ 1 参数错误 / 2 IO 错误 |
-| `skills/stop-wishing/scripts/build-portable.js` | 把主技能正文合成 `portable/stop-wishing.md` | 0 成功 / 2 `SKILL.md` 缺失 |
+| `skills/stop-wishing/scripts/preflight.js` | 一次跑完环境、硬编码、依赖许可三项预检（无 lock/node_modules 时许可证标记为跳过） | 0 通过 / 1 有阻断项 / 2 用法或 IO |
 
 `check-tickets.js` 的检查项：E1 front-matter 解析、E2 必填字段（id/title/spec/status/acceptance/verify）、E3 文件名、E4 id 与文件名前缀、E5 id 重复、E6 status、E7 spec 不存在、E8 blocked_by 指向不存在的票、E9 自依赖、E10 成环、E11 验收为空、E12 verify 为空或少于验收条数、E13 done/dropped 仍被依赖；警告：W1 缺 estimate、W2 验收超过 5 条、W3 verify 全不可执行、W4 spec 的 `card_sha256` 与 `docs/project.md` 不一致、W5 spec 未被任何票引用。
 

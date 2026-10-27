@@ -3,9 +3,15 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
-## Unreleased
+## 0.8.0 — 2026-10-27
 
-- **Known debt — mechanical scope fence**: §9 forbids scope creep in prose, but nothing checks the diff mechanically. The deferred upgrade is `check-scope.js`: take `--allow <paths>` (recorded on the card as `Touched:`), run `git diff --name-only`, and exit 1 on out-of-scope files, new files or a new dependency. Trigger: two changes where unrelated files slipped into the diff. Deferred by the owner on 2026-10-26; do not build it before the trigger.
+- **Main skill rewritten as a 55-line router**: judgement stays inline (licence use question, hard rules, evidence, failure limit); details move to `CARD.md`, `EVIDENCE.md`, `LICENSE.md`, `DECISIONS.md` and `GLOSSARY.md`, with an explicit "read only when needed" routing table. The line cap is enforced by a test.
+- **New `preflight.js`**: environment + hardcoding + dependency licence in one pass; exit 0 clear / 1 blocking / 2 bad input or IO. A repo with no `package-lock.json` or `node_modules` reports the licence scan as skipped, not as a failure.
+- **No single-file portable build**: `portable/stop-wishing.md`, `build-portable.js` and its tests are removed (Matt-style sibling references; the owner chose this over a generated bundle). Installers copy the whole skill directory, now including the five reference files.
+- **Install verification** checks the five references; the script count stays seven (`preflight` replaces `build-portable`).
+- **Tests**: line cap (≤60), reference existence and key content, preflight exit semantics; 152 tests on Node 18 and 24.
+
+- **Known debt — mechanical scope fence**: prose forbids scope creep, but nothing checks the diff mechanically. The deferred upgrade is `check-scope.js`: take `--allow <paths>` (recorded on the card as `Touched:`), run `git diff --name-only`, and exit 1 on out-of-scope files, new files or a new dependency. Trigger: two changes where unrelated files slipped into the diff. Deferred by the owner on 2026-10-26; do not build it before the trigger.
 
 ## 0.7.0 — 2026-10-26
 

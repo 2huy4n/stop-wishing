@@ -7,9 +7,14 @@ import test from 'node:test'
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const SKILLS_DIR = join(ROOT, 'skills')
 const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup']
+const REFS = ['CARD.md', 'EVIDENCE.md', 'LICENSE.md', 'DECISIONS.md', 'GLOSSARY.md']
 
 function readSkill(name) {
   return readFileSync(join(SKILLS_DIR, name, 'SKILL.md'), 'utf8')
+}
+
+function readRef(name) {
+  return readFileSync(join(SKILLS_DIR, 'stop-wishing', name), 'utf8')
 }
 
 function frontMatter(text) {
@@ -60,154 +65,119 @@ for (const name of SKILL_NAMES) {
 
 const MAIN = readSkill('stop-wishing')
 
-test('主技能：18 个章节齐全（原 13 章 + ponytail 4 项 + 术语表 1 项）', () => {
-  const headings = [...MAIN.matchAll(/^## (\d+)\)/gm)].map(match => Number(match[1]))
-  assert.deepEqual(headings, Array.from({ length: 18 }, (_, i) => i + 1))
+test('主技能：不超过 60 行，只做路由 + 判断层', () => {
+  const lines = MAIN.split(/\r?\n/).length
+  assert.ok(lines <= 60, `SKILL.md 必须 ≤60 行，当前 ${lines}`)
+  assert.match(MAIN, /^## Route to details/m)
+  assert.match(MAIN, /^## Scripts/m)
 })
 
-test('主技能：定义、三类模糊、许愿句清单、非幻觉区分', () => {
-  assert.match(MAIN, /Wishing-driven programming|wishing-driven programming/)
-  assert.match(MAIN, /Not AI hallucination/)
-  for (const word of ['Goal', 'Boundary', 'Acceptance']) assert.ok(MAIN.includes(word), `缺模糊类型: ${word}`)
-  assert.match(MAIN, /Wishful phrases/)
-  assert.match(MAIN, /whatever \/ you decide/)
+test('主技能：七步循环与硬规则仍在正文', () => {
+  for (const step of ['Clarify', 'Card', 'Search', 'Explain first', 'Back up', 'Minimal diff', 'Verify', 'Close']) {
+    assert.ok(MAIN.includes(step), `工作循环缺: ${step}`)
+  }
+  for (const rule of ['No guessing', 'No scope creep', 'No hardcoding', 'Irreversible', 'Explain before code', 'Evidence or it didn', 'Licence gate', 'Failure: max 3 attempts', 'Never cut']) {
+    assert.ok(MAIN.includes(rule), `硬规则缺: ${rule}`)
+  }
+  assert.match(MAIN, /Skipped \/ Unverified \/ Risk/)
 })
 
-test('主技能：用户画像、≤3 问、术语表至少 12 条', () => {
-  assert.match(MAIN, /zero technical background/)
-  assert.match(MAIN, /≤3 questions per round/)
-  assert.match(MAIN, /A\/B\/C options/)
-  const terms = ['API', 'Dependency', 'Refactor', 'Deploy', 'Idempotent', 'Git', 'Env variable', 'Rollback', 'Viral license', 'Dynamic linking', 'Derivative work', 'Regression test']
-  for (const term of terms) {
-    assert.ok(MAIN.includes(`| ${term} |`) || MAIN.includes(`| ${term} `), `术语表缺: ${term}`)
+test('主技能：许可判断层没有被完全删除', () => {
+  assert.match(MAIN, /A unsure \/ B self \/ C free closed \/ D open source \/ E commercial/)
+  assert.match(MAIN, /vague → commercial/)
+  assert.match(MAIN, /GPL\/AGPL\/LGPL are forbidden/)
+  assert.match(MAIN, /docs\/LICENSES\.md/)
+})
+
+test('主技能：preflight 契约与退出码语义', () => {
+  assert.match(MAIN, /node scripts\/preflight\.js/)
+  assert.match(MAIN, /0 clear, 1 blocking, 2 bad input\/IO/)
+  assert.match(MAIN, /exit 2 is not danger|`exit 2` is not danger/)
+})
+
+test('主技能：五个参考文件都存在，且都在路由表里', () => {
+  for (const ref of REFS) {
+    assert.equal(existsSync(join(SKILLS_DIR, 'stop-wishing', ref)), true, `缺参考文件: ${ref}`)
+    assert.ok(MAIN.includes(ref), `路由表没有指向 ${ref}`)
   }
 })
 
-test('主技能：模糊度三档 + 先报档位', () => {
-  for (const tier of ['**Light**', '**Medium**', '**Heavy**']) assert.ok(MAIN.includes(tier), `缺档位 ${tier}`)
-  assert.match(MAIN, /ambiguity, not change size/)
-  assert.match(MAIN, /Report the tier and why first|report the tier and why/)
-})
-
-test('主技能：需求卡七字段 + 假设区 + 未决区', () => {
-  for (const field of ['**Goal**', '**Users and scenario**', '**Input/output**', '**Scope and boundaries**', '**Acceptance**', '**Constraints**', '**Delivery form**']) {
-    assert.ok(MAIN.includes(field), `需求卡缺字段: ${field}`)
+test('CARD.md：三档、七字段、假设、AGENTS.md、只 offer 一次', () => {
+  const text = readRef('CARD.md')
+  for (const tier of ['**Light**', '**Medium**', '**Heavy**']) assert.ok(text.includes(tier), `缺档位 ${tier}`)
+  for (const field of ['Goal', 'Users and scenario', 'Input/output', 'Scope and boundaries', 'Acceptance', 'Constraints', 'Delivery form']) {
+    assert.ok(text.includes(field), `需求卡缺字段: ${field}`)
   }
-  assert.match(MAIN, /explicitly not done/)
-  assert.match(MAIN, /Assumptions/)
-  assert.match(MAIN, /Open questions/)
-  assert.match(MAIN, /prototype/)
-  assert.match(MAIN, /production/)
+  assert.match(text, /explicitly not done/)
+  assert.match(text, /Assumptions/)
+  assert.match(text, /Open questions/)
+  assert.match(text, /AGENTS\.md/)
+  assert.match(text, /offer the next step \*\*once\*\*/)
 })
 
-test('主技能：默认值规则（推荐值 + 理由 + 假设）', () => {
-  assert.match(MAIN, /one recommendation/)
-  assert.match(MAIN, /one plain reason/)
-  assert.match(MAIN, /record it in Assumptions/)
-  assert.match(MAIN, /not a failed question/)
+test('EVIDENCE.md：证据表、三次失败、收尾三行', () => {
+  const text = readRef('EVIDENCE.md')
+  assert.match(text, /\| Assertion \| Evidence \| Source \|/)
+  assert.match(text, /No evidence → write "unverified" or "unknown"/)
+  assert.match(text, /Max 3 attempts per problem/)
+  assert.match(text, /stop and escalate/)
+  assert.match(text, /Skipped: <what was not done>\. Unverified: <what was not tested>\. Risk:/)
 })
 
-test('主技能：许可证闸门五选项、默认商用闭源、完整矩阵', () => {
-  assert.match(MAIN, /A\) not sure \/ B\) self-use \/ C\) free closed distribution \/ D\) open source \/ E\) commercial/)
-  assert.match(MAIN, /No or vague answer → commercial closed-source/)
-  const licenseRows = MAIN.split(/\r?\n/).filter(line => line.startsWith('| '))
-  const rows = licenseRows.filter(line => line.includes('✅'))
+test('LICENSE.md：五选项、矩阵、LGPL、自有代码例外、覆盖范围', () => {
+  const text = readRef('LICENSE.md')
+  assert.match(text, /\*\*A\*\* — not sure/)
+  assert.match(text, /No or vague answer → commercial closed-source/)
+  const rows = text.split(/\r?\n/).filter(line => line.startsWith('| '))
   const whitelist = rows.find(line => line.includes('MIT / Apache-2.0 / BSD / ISC / 0BSD / Unlicense / CC0'))
   assert.ok(whitelist, '缺白名单行')
   assert.equal((whitelist.match(/✅/g) ?? []).length, 4, '白名单四个场景都应可用')
   const gpl = rows.find(line => line.startsWith('| GPL / AGPL |'))
-  assert.ok(gpl, '缺 GPL/AGPL 行')
-  assert.ok(gpl.includes('| ❌ |') && gpl.endsWith('❌ viral, always refused |'), 'GPL/AGPL 免费闭源与商用闭源都应拒绝')
+  assert.ok(gpl && gpl.includes('| ❌ |') && gpl.endsWith('❌ viral, always refused |'), 'GPL/AGPL 免费闭源与商用闭源都应拒绝')
   const lgpl = rows.find(line => line.startsWith('| LGPL |'))
-  assert.ok(lgpl, '缺 LGPL 行')
-  assert.match(lgpl, /❌ always refused/)
-  const none = licenseRows.find(line => line.startsWith('| No LICENSE |'))
-  assert.ok(none, '缺 No LICENSE 行')
-  assert.match(none, /self-use only/)
-  assert.match(MAIN, /LGPL strict/)
-  assert.match(MAIN, /commercial closed-source always refused/)
-})
-
-test('主技能：许可证覆盖范围与自有代码例外三证据', () => {
+  assert.ok(lgpl && /❌ always refused/.test(lgpl), 'LGPL 商用闭源必须拒绝')
+  const none = rows.find(line => line.startsWith('| No LICENSE |'))
+  assert.ok(none && /self-use only/.test(none), '缺 No LICENSE 行')
+  assert.match(text, /LGPL strict/)
   for (const word of ['code dependencies', 'fonts', 'icons/images', 'third-party API terms', 'template/sample snippets']) {
-    assert.ok(MAIN.includes(word), `覆盖范围缺: ${word}`)
+    assert.ok(text.includes(word), `覆盖范围缺: ${word}`)
   }
-  assert.match(MAIN, /Own-code exception/)
-  assert.match(MAIN, /author statement/)
-  assert.match(MAIN, /exact words/)
-  assert.match(MAIN, /ISO 8601 \+ offset/)
-  assert.match(MAIN, /does not spread/)
-  assert.match(MAIN, /docs\/LICENSES\.md/)
+  assert.match(text, /Own-code exception/)
+  assert.match(text, /author statement/)
+  assert.match(text, /does not spread/)
 })
 
-test('主技能：九步工作循环（澄清→卡→搜索→先解释→备份→最小差异→验证→文档→汇报）', () => {
-  for (const step of ['Clarify', 'Confirm the card', 'Search', 'Explain first', 'Back up', 'Minimal diff', 'Verify with evidence', 'Update docs', 'Report']) {
-    assert.ok(MAIN.includes(step), `工作循环缺: ${step}`)
-  }
-  assert.match(MAIN, /pre-<change>-YYYYMMDD-HHmm/)
-  assert.match(MAIN, /\.bak-YYYYMMDD-HHmm/)
-  assert.match(MAIN, /wait for confirmation/i)
-})
-
-test('主技能：硬约束（禁硬编码、ISO 8601 本机时区、50%/300 行、搜索留痕、不可逆人批）', () => {
-  assert.match(MAIN, /No hardcoding/)
-  assert.match(MAIN, /absolute paths, secrets, magic numbers/)
-  assert.match(MAIN, /machine's local UTC offset/)
-  assert.match(MAIN, /\+09:00/)
-  assert.match(MAIN, /50%/)
-  assert.match(MAIN, /300 lines/)
-  assert.match(MAIN, /Search trail/)
-  assert.match(MAIN, /Irreversible needs human approval/)
-  assert.match(MAIN, /File-header block/)
-})
-
-test('主技能：三列证据格式与 unknown', () => {
-  assert.match(MAIN, /\| Assertion \| Evidence \| Source \|/)
-  assert.match(MAIN, /No evidence → "unverified" or "unknown"/)
-})
-
-test('主技能：冲突裁决顺序', () => {
-  const start = MAIN.indexOf('## 11) Conflict resolution')
-  const end = MAIN.indexOf('## 12)', start)
-  const section = MAIN.slice(start, end)
-  const order = ['safety/irreversible risk', 'explicit user instruction', 'evidence', 'minimal diff', 'reuse', 'beauty/consistency']
+test('DECISIONS.md：默认值、冲突顺序、Never cut', () => {
+  const text = readRef('DECISIONS.md')
+  assert.match(text, /one recommendation/)
+  assert.match(text, /not a failed question/)
+  const order = ['Safety / irreversible risk', 'Explicit user instruction', 'Evidence', 'Minimal diff', 'Reuse', 'Beauty / consistency']
   let last = -1
   for (const item of order) {
-    const index = section.indexOf(item)
+    const index = text.indexOf(item)
     assert.ok(index > last, `冲突裁决顺序不对: ${item}`)
     last = index
   }
-})
-
-test('主技能：失败最多 3 次后升级、逃生门仍先解释', () => {
-  assert.match(MAIN, /Max 3 attempts per problem/)
-  assert.match(MAIN, /stop and escalate/)
-  assert.match(MAIN, /clarification skipped, risk accepted/)
-  assert.match(MAIN, /Still explain first/)
-  assert.match(MAIN, /Only the confirmation wait is waived/)
-})
-
-test('主技能（ponytail）：lite/full/ultra 三档严格度', () => {
-  for (const level of ['**lite**', '**full**', '**ultra**']) assert.ok(MAIN.includes(level), `缺严格度 ${level}`)
-  assert.match(MAIN, /stop-wishing lite\|full\|ultra/)
-  assert.match(MAIN, /default \*\*full\*\*/)
-})
-
-test('主技能（ponytail）：收尾强制句、Never cut、卫星技能指针', () => {
-  assert.match(MAIN, /Mandatory closing lines/)
-  assert.match(MAIN, /Skipped: <what was not done>\. Unverified: <what was not tested>\. Risk:/)
-  assert.match(MAIN, /Never cut/)
+  assert.match(text, /Never cut/)
   for (const item of ['validation', 'error handling that prevents data loss', 'security', 'accessibility', 'hardware calibration']) {
-    assert.ok(MAIN.includes(item), `Never cut 缺: ${item}`)
+    assert.ok(text.includes(item), `Never cut 缺: ${item}`)
   }
-  assert.match(MAIN, /stop-wishing-review/)
-  assert.match(MAIN, /stop-wishing-audit/)
-  assert.match(MAIN, /stop-wishing-debt/)
+})
+
+test('GLOSSARY.md：术语表、147 条、深链、缺失再联网', () => {
+  const text = readRef('GLOSSARY.md')
+  for (const term of ['API', 'Dependency', 'Refactor', 'Deploy', 'Idempotent', 'Git', 'Env variable', 'Rollback', 'Viral license', 'Dynamic linking', 'Derivative work', 'Regression test']) {
+    assert.ok(text.includes(`| ${term} |`), `术语表缺: ${term}`)
+  }
+  assert.match(text, /147 entries/)
+  assert.match(text, /#term-/)
+  assert.match(text, /web search/)
+  assert.match(text, /Never dump the glossary/)
 })
 
 test('审查技能：两轴（Intent / Engineering）、六维、12 条坏味道、并行与串行降级、输出格式', () => {
   const text = readSkill('stop-wishing-review')
-  for (const dim of ['Bug', 'Risk', 'Scale', 'Missing test', 'Speed', 'Lean']) assert.ok(text.includes(`**${dim}**`) || text.includes(dim), `审查缺维度: ${dim}`)
+  for (const dim of ['Bug', 'Risk', 'Scale', 'Missing test', 'Speed', 'Lean']) assert.ok(text.includes(dim), `审查缺维度: ${dim}`)
   assert.match(text, /Intent/)
   assert.match(text, /Engineering/)
   assert.match(text, /docs\/project\.md/)
@@ -279,12 +249,4 @@ test('每个技能都有 agents/openai.yaml（display_name + short_description�
 
 test('技能互引：setup 用完整名字提到 stop-wishing-debt', () => {
   assert.match(readSkill('stop-wishing-setup'), /stop-wishing-debt/)
-})
-
-test('主技能：内置术语表，本地优先、缺失再联网', () => {
-  const text = readSkill('stop-wishing')
-  assert.match(text, /assets\/vibe-coding-glossary\.html/)
-  assert.match(text, /#term-/)
-  assert.match(text, /web search/)
-  assert.match(text, /Never dump the glossary/)
 })
