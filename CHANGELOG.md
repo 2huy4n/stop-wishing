@@ -11,7 +11,8 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 - **Install verification** checks the five references; the script count stays seven (`preflight` replaces `build-portable`).
 - **Installer prunes stale files**: each install writes `.install-manifest.json`; on `--force` it deletes files listed by the previous manifest that the new version no longer ships (plus the legacy `scripts/build-portable.js`), while leaving files it did not install untouched. The manifest is excluded from verification.
 - **`.hardcodeignore` covers the repo's own docs**: README CI badge URLs, glossary teaching numbers and the scanner's attribution URLs are suppressed with reasons, so `preflight.js --dir .` now exits 0 on this repo.
-- **Tests**: line cap (≤60), reference existence and key content, preflight exit semantics, installer manifest/prune; 154 tests on Node 18 and 24.
+- **`setup.js` pointer fix**: the `## Project docs` block now emits only targets that already exist or are being created by the same run (four at most), matching the setup skill; it previously wrote nine fixed pointers, six of them dangling. `omittedPointers` reports what was left out.
+- **Tests**: line cap (≤60), reference existence and key content, preflight exit semantics, installer manifest/prune, setup pointer filtering; 155 tests on Node 18 and 24.
 
 - **Known debt — mechanical scope fence**: prose forbids scope creep, but nothing checks the diff mechanically. The deferred upgrade is `check-scope.js`: take `--allow <paths>` (recorded on the card as `Touched:`), run `git diff --name-only`, and exit 1 on out-of-scope files, new files or a new dependency. Trigger: two changes where unrelated files slipped into the diff. Deferred by the owner on 2026-10-26; do not build it before the trigger.
 

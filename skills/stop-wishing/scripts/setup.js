@@ -214,19 +214,21 @@ export function setup(options) {
       const target = hasAgents ? 'AGENTS.md' : 'CLAUDE.md'
       const file = hasAgents ? agentsPath : claudePath
       const note = hasAgents && hasClaude ? 'AGENTS.md 与 CLAUDE.md 都存在，按规则优先写 AGENTS.md' : null
+      const pointerDefs = [
+        ['docs/project.md', '需求卡与边界'],
+        ['docs/agents/issue-tracker.md', 'issue 在哪里、怎么读写'],
+        ['docs/agents/domain.md', '术语、ADR、目录布局'],
+        ['docs/tickets/', '工单与依赖顺序'],
+      ]
+      const planned = new Set(plans.map(plan => resolve(plan.file)))
+      const willExist = rel => existsSync(join(root, rel)) || planned.has(resolve(join(root, rel)))
+      const pointers = pointerDefs.filter(([rel]) => willExist(rel))
+      const omittedPointers = pointerDefs.filter(([rel]) => !willExist(rel)).map(([rel]) => rel)
       const section = [
         AGENTS_BEGIN,
         '## Project docs',
         '',
-        '- `docs/project.md` — 需求卡与边界',
-        '- `docs/progress.md` — 进展与证据',
-        '- `docs/todo.md` — 待办',
-        '- `docs/discipline.md` — 规范与许可证闸门',
-        '- `docs/structure.md` — 目录与模块',
-        '- `docs/agents/issue-tracker.md` — issue 在哪里、怎么读写',
-        '- `docs/agents/domain.md` — 术语、ADR、目录布局',
-        ...(options.labels === 'default' ? ['- `docs/agents/triage-labels.md` — 五角色标签映射'] : []),
-        '- `docs/tickets/` — 工单与依赖顺序',
+        ...pointers.map(([rel, label]) => `- \`${rel}\` — ${label}`),
         AGENTS_END,
         '',
       ].join('\n')
@@ -248,7 +250,7 @@ export function setup(options) {
           return { ok: false, code: 1, message: `${target}: ${error.message}` }
         }
         const action = next === current ? 'unchanged' : 'updated'
-        agentsMd = { status: 'written', path: target, file, current, next, action, note }
+        agentsMd = { status: 'written', path: target, file, current, next, action, note, omittedPointers }
       }
     } else {
       agentsMd = {

@@ -106,6 +106,19 @@ test('--agents-md 且有 AGENTS.md → 追加 Project docs 段；重跑不重复
   assert.equal(again, first, '重跑不应改字节')
 })
 
+test('--agents-md 只写存在的指针，不写不存在的 docs/project 等', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# 项目约定\n', 'utf8')
+  assert.equal(run(['--dir', root, '--agents-md']).status, 0)
+  const text = read(root, 'AGENTS.md')
+  assert.match(text, /docs\/agents\/issue-tracker\.md/)
+  assert.match(text, /docs\/agents\/domain\.md/)
+  for (const missing of ['docs/project.md', 'docs/progress.md', 'docs/todo.md', 'docs/discipline.md', 'docs/structure.md', 'docs/tickets/']) {
+    assert.doesNotMatch(text, new RegExp(missing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `不应指向不存在的 ${missing}`)
+  }
+  assert.equal((text.match(/^- `/gm) ?? []).length, 2, '空仓库只应有两条存在的指针')
+})
+
 test('--dry-run → 不写盘', () => {
   const root = freshProject()
   const out = run(['--dir', root, '--dry-run'])
