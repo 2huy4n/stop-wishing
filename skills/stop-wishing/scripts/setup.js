@@ -287,15 +287,20 @@ function buildAgentsSection(current, pointerDefs, willExist) {
     inner = current.slice(start, stop)
   }
   const heading = inner.match(/^##\s+.+$/m)?.[0] ?? '## Project docs'
-  const innerLines = inner.split(/\r?\n/).filter(line => line.trim() !== '' && line !== heading)
+  const innerLines = inner.split(/\r?\n/).filter(line => line !== heading)
+  while (innerLines.length > 0 && innerLines[0].trim() === '') innerLines.shift()
+  while (innerLines.length > 0 && innerLines[innerLines.length - 1].trim() === '') innerLines.pop()
   const existingRefs = new Set([...inner.matchAll(/`(docs\/[^`\s]+)`/g)].map(match => match[1]))
   const missing = pointerDefs.filter(([rel]) => willExist(rel) && !existingRefs.has(rel))
   const omitted = pointerDefs.filter(([rel]) => !willExist(rel) && !existingRefs.has(rel)).map(([rel]) => rel)
+  // Keep any trailing generated-by comment at the end; new pointers go before it.
+  const commentAt = innerLines.findIndex(line => line.trim().startsWith('<!--'))
+  const insertAt = commentAt === -1 ? innerLines.length : commentAt
+  innerLines.splice(insertAt, 0, ...missing.map(([rel, label]) => `- \`${rel}\` — ${label}`))
   const lines = [
     heading,
     '',
     ...innerLines,
-    ...missing.map(([rel, label]) => `- \`${rel}\` — ${label}`),
   ]
   return {
     section: `${AGENTS_BEGIN}\n${lines.join('\n')}\n${AGENTS_END}\n`,
