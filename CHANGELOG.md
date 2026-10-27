@@ -5,7 +5,7 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 
 ## 0.8.0 — 2026-10-27
 
-- **Main skill rewritten as a 55-line router**: judgement stays inline (licence use question, hard rules, evidence, failure limit); details move to `CARD.md`, `EVIDENCE.md`, `LICENSE.md`, `DECISIONS.md` and `GLOSSARY.md`, with an explicit "read only when needed" routing table. The line cap is enforced by a test.
+- **Main skill rewritten as a 56-line router**: judgement stays inline (licence use question, hard rules, evidence, failure limit); details move to `CARD.md`, `EVIDENCE.md`, `LICENSE.md`, `DECISIONS.md` and `GLOSSARY.md`, with an explicit "read only when needed" routing table. The line cap is enforced by a test.
 - **New `preflight.js`**: environment + hardcoding + dependency licence in one pass; exit 0 clear / 1 blocking / 2 bad input or IO. A repo with no `package-lock.json` or `node_modules` reports the licence scan as skipped, not as a failure.
 - **No single-file portable build**: `portable/stop-wishing.md`, `build-portable.js` and its tests are removed (Matt-style sibling references; the owner chose this over a generated bundle). Installers copy the whole skill directory, now including the five reference files.
 - **Install verification** checks the five references; the script count stays seven (`preflight` replaces `build-portable`).
