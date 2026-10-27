@@ -93,6 +93,50 @@ h1 {
 
 section { margin-top: 26px; }
 
+.fold { margin-top: 10px; border-top: 1px solid var(--line); }
+.fold:first-of-type { margin-top: 26px; }
+
+.fold summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0 9px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.fold summary::-webkit-details-marker { display: none; }
+.fold summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.fold-title {
+  font: 700 18px/1.3 "Noto Serif SC", "Songti SC", Georgia, serif;
+}
+
+.fold-title .num {
+  margin-right: 9px;
+  color: var(--accent);
+  font: 700 10px/1 ui-monospace, Consolas, monospace;
+  letter-spacing: 0.1em;
+}
+
+.fold-meta {
+  color: var(--muted);
+  font: 10.5px/1.2 ui-monospace, Consolas, monospace;
+  white-space: nowrap;
+}
+
+.fold-meta::after { content: " +"; color: var(--accent); }
+.fold[open] > summary .fold-meta::after { content: " −"; }
+
+.fold-body { padding: 0 0 12px; }
+.fold-body > :last-child { margin-bottom: 0; }
+
+@media print {
+  .fold { border-top-color: var(--line); }
+  .fold-meta::after { content: ""; }
+}
+
 h2 {
   display: flex;
   align-items: baseline;

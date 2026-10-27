@@ -7,12 +7,15 @@ enjoy the terminal look; it is never selected unless `report.conf` has
 ## Layout
 
 1. Top status line: payload id, created time, active theme.
-2. Static ASCII masthead (decorative only, no claims).
-3. Title, subtitle and optional project/commit/test metadata.
-4. Status cards from `stats`.
-5. Executive readout from `summary`.
-6. Payload sections as numbered nodes.
-7. Evidence matrix, risks, limits and next operations.
+2. Signal bars and a section/evidence/risk/next rail.
+3. Static ASCII masthead (decorative only, no claims).
+4. Title, subtitle and optional project/commit/test metadata.
+5. Status cards from `stats`.
+6. Executive readout from `summary`.
+7. Render log terminal plus a node index.
+8. Payload sections as numbered nodes, each with a status strip and telemetry bars.
+9. Evidence stream terminal and evidence matrix.
+10. Risk log terminal, risks, limits and next operations.
 8. Footer with generation time.
 
 ## Rules

@@ -8,6 +8,8 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 - **New `stop-wishing-report` skill**: renders one verified `report.json` into standalone HTML. No dependencies, no build step, no network.
 - **One config switch**: project-root `report.conf` with `hacker_mode = false|true`. Missing file is created with `false`; an invalid value falls back to `false` and warns. There is no CLI theme flag.
 - **Two renderers, one payload**: `themes/simple` produces a compact printable report plus Markdown; `themes/hacker` produces a six-screen presentation theme. Only the selected theme module is imported; the other theme's CSS/HTML is never read.
+- **Simple theme folds secondary detail**: body sections, evidence, risks and limits use native `<details>`; the first section and next steps stay open. A tiny print hook opens everything before printing and restores the previous state afterwards.
+- **Hacker theme is dense**: render log and evidence/risk streams, a node index, signal/rail status strips, per-node telemetry bars and ASCII separators, all fed by the same payload.
 - **Schema and example**: `schema.json` documents the payload; `examples/delivery.json` demonstrates a real delivery. Output goes to gitignored `reports/`.
 - **Installer**: eight skills now; `--verify` additionally checks `render.js`, `schema.json` and both theme directories.
 - **Tests**: config parsing, theme selection, invalid-config fallback, `--init` idempotency, bad payload exits, and a repo-wide guard that the prohibited term never appears in a tracked text file.

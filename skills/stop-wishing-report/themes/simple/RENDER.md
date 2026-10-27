@@ -7,10 +7,10 @@ theme most developers should see.
 
 1. Masthead: report type, id, title, subtitle, metadata chips.
 2. Verdict block: one-sentence conclusion plus optional key numbers.
-3. Body sections in payload order (`text`, `list`, `table`, `steps`).
+3. Body sections in payload order (`text`, `list`, `table`, `steps`); the first is open, the rest fold with a one-line summary and item count.
 4. Evidence table: claim, proof, source.
 5. Risks and limits.
-6. Next steps.
+6. Next steps (open by default).
 
 ## Rules
 

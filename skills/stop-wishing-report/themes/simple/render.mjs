@@ -15,17 +15,23 @@ const TYPE_LABEL = {
   delivery: 'DELIVERY / 交付报告',
 }
 
-function sectionHtml(section) {
-  const head = `<h2><span class="num">${esc(section.id)}</span>${esc(section.title)}</h2>`
-  if (section.kind === 'text') return `<section id="sec-${esc(section.id)}">${head}<p>${esc(section.body)}</p></section>`
+function fold(id, title, meta, body, open = false) {
+  return `<details class="fold" id="sec-${esc(id)}"${open ? ' open' : ''}>
+<summary><span class="fold-title"><span class="num">${esc(id)}</span>${esc(title)}</span><span class="fold-meta">${esc(meta)}</span></summary>
+<div class="fold-body">${body}</div>
+</details>`
+}
+
+function sectionHtml(section, index) {
+  if (section.kind === 'text') return fold(section.id, section.title, '文本', `<p>${esc(section.body)}</p>`, index === 0)
   if (section.kind === 'list') {
-    return `<section id="sec-${esc(section.id)}">${head}<ul>${(section.items ?? []).map(item => `<li>${esc(item)}</li>`).join('')}</ul></section>`
+    return fold(section.id, section.title, `${(section.items ?? []).length} 项`, `<ul>${(section.items ?? []).map(item => `<li>${esc(item)}</li>`).join('')}</ul>`, index === 0)
   }
   if (section.kind === 'steps') {
-    return `<section id="sec-${esc(section.id)}">${head}<ol>${(section.items ?? []).map(item => `<li>${esc(item)}</li>`).join('')}</ol></section>`
+    return fold(section.id, section.title, `${(section.items ?? []).length} 步`, `<ol>${(section.items ?? []).map(item => `<li>${esc(item)}</li>`).join('')}</ol>`, index === 0)
   }
   const rows = (section.rows ?? []).map(row => `<tr><td>${esc(row.label)}</td><td>${esc(row.value)}${row.note ? `<span class="proof"> — ${esc(row.note)}</span>` : ''}</td></tr>`).join('')
-  return `<section id="sec-${esc(section.id)}">${head}<table class="table"><tbody>${rows}</tbody></table></section>`
+  return fold(section.id, section.title, `${(section.rows ?? []).length} 行`, `<table class="table"><tbody>${rows}</tbody></table>`, index === 0)
 }
 
 function sectionMarkdown(section) {
@@ -78,26 +84,25 @@ export function render(data) {
 
 ${sections}
 
-<section id="evidence">
-  <h2><span class="num">E</span>证据</h2>
-  <table class="table">
-    <thead><tr><th>主张</th><th>证据</th><th>来源</th></tr></thead>
-    <tbody>${evidence}</tbody>
-  </table>
-</section>
+${fold('E', '证据', `${data.evidence.length} 条`, `<table class="table"><thead><tr><th>主张</th><th>证据</th><th>来源</th></tr></thead><tbody>${evidence}</tbody></table>`)}
 
-<section id="risks">
-  <h2><span class="num">R</span>风险与限制</h2>
-  ${risks}
-  ${limits ? `<div class="limits"><ul>${limits}</ul></div>` : ''}
-</section>
+${fold('R', '风险与限制', `${data.risks.length + data.limits.length} 项`, `${risks}${limits ? `<div class="limits"><ul>${limits}</ul></div>` : ''}`)}
 
-${next ? `<section id="next"><h2><span class="num">N</span>下一步</h2><div class="next">${next}</div></section>` : ''}
+${data.next.length > 0 ? fold('N', '下一步', `${data.next.length} 项`, `<div class="next">${next}</div>`, true) : ''}
 
 <footer>
   <span>stop-wishing-report · simple theme</span>
   <span>generated ${esc(new Date().toISOString())}</span>
 </footer>
+<script>
+(() => {
+  const all = [...document.querySelectorAll('details.fold')];
+  const openAll = () => all.forEach(d => { d.dataset.wasOpen = d.open; d.open = true; });
+  const restore = () => all.forEach(d => { d.open = d.dataset.wasOpen === 'true'; });
+  addEventListener('beforeprint', openAll);
+  addEventListener('afterprint', restore);
+})();
+</script>
 </body>
 </html>
 `
