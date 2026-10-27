@@ -46,7 +46,8 @@ Triggers: 许愿式编程, 先解释再写码, 改动前备份, 禁止硬编码,
 - Licence matrix, use scenarios, own-code exception, LICENSES.md → `LICENSE.md`
 - Defaults ("you decide"), conflict order, never-cut list → `DECISIONS.md`
 - Term questions → `GLOSSARY.md` + `assets/vibe-coding-glossary.html#term-<slug>`
-- Env check / project docs / hardcode / licences / tickets / setup → `scripts/`
+- Env check / hardcode / licences / tickets → `scripts/`
+- Repo setup conventions → `stop-wishing-setup`
 
 ## Scripts
 

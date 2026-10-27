@@ -19,6 +19,8 @@ git grep --no-index --exclude-standard -nE '(#|//|/[*]) ?(shortcut|ponytail):'
 
 This covers `#`, `//` and `/*` comments in tracked, non-ignored files. If the repo is not a git repository, run the same regex with `rg` and say so in the output.
 
+**Naming:** if `docs/agents/domain.md` exists, use its glossary terms and module boundaries when describing each item; the file never changes what the grep finds.
+
 **Skip non-deferral notes.** A comment such as "keyboard shortcut: Ctrl+K" is not debt. Only keep markers that describe a simplification, a shortcut taken, or a known limit.
 
 ## 2) Parse each marker

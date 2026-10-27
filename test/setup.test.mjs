@@ -230,8 +230,13 @@ test('init-docs --agents-md 之后跑 setup：只留一个指针段', () => {
   assert.equal(out.status, 0, out.stdout + out.stderr)
   const text = read(root, 'AGENTS.md')
   assert.equal((text.match(/stop-wishing:project-docs:begin/g) ?? []).length, 1, '只能有一段指针')
-  assert.doesNotMatch(text, /## 项目文档/, '旧指针段应被替换，而不是并存')
-  assert.match(text, /## Project docs/)
+  assert.match(text, /## 项目文档/, '应保留 init-docs 的原标题')
+  for (const rel of ['docs/project.md', 'docs/progress.md', 'docs/todo.md', 'docs/discipline.md', 'docs/structure.md', 'docs/content.md', 'docs/LICENSES.md']) {
+    assert.match(text, new RegExp(rel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `不得丢掉 ${rel}`)
+  }
+  assert.match(text, /docs\/agents\/issue-tracker\.md/, 'setup 应追加 issue-tracker 指针')
+  assert.match(text, /docs\/agents\/domain\.md/, 'setup 应追加 domain 指针')
+  assert.equal((text.match(/## (Project docs|项目文档)/g) ?? []).length, 1, '不得出现第二个指针标题')
 })
 
 test('setup SKILL.md 不超过 60 行，四个参考文件都在', () => {
@@ -241,4 +246,87 @@ test('setup SKILL.md 不超过 60 行，四个参考文件都在', () => {
   for (const ref of ['SETUP.md', 'FILES.md', 'SAFETY.md', 'CONSUMERS.md']) {
     assert.equal(existsSync(join(ROOT, 'skills', 'stop-wishing-setup', ref)), true, `缺 ${ref}`)
   }
+})
+
+
+test('--agents-file CLAUDE：两个文件都在时只改 CLAUDE，AGENTS 不动', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n\nkeep\n', 'utf8')
+  writeFileSync(join(root, 'CLAUDE.md'), '# CLAUDE\n\nkeep\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md', '--agents-file', 'CLAUDE'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  assert.match(read(root, 'CLAUDE.md'), /stop-wishing:project-docs:begin/)
+  assert.doesNotMatch(read(root, 'AGENTS.md'), /stop-wishing:project-docs:begin/)
+  assert.match(read(root, 'AGENTS.md'), /keep/)
+})
+
+test('两个 AGENTS/CLAUDE 都在且未选文件：exit 1，不写任何东西', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8')
+  writeFileSync(join(root, 'CLAUDE.md'), '# CLAUDE\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md'])
+  assert.equal(out.status, 1)
+  assert.match(out.stderr, /--agents-file/)
+  assert.equal(existsSync(join(root, 'docs')), false)
+  assert.equal(read(root, 'AGENTS.md'), '# AGENTS\n')
+  assert.equal(read(root, 'CLAUDE.md'), '# CLAUDE\n')
+})
+
+test('--agents-file 必须配合 --agents-md', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'CLAUDE.md'), '# CLAUDE\n', 'utf8')
+  const out = run(['--dir', root, '--agents-file', 'CLAUDE'])
+  assert.equal(out.status, 1)
+  assert.match(out.stderr, /--agents-md/)
+})
+
+test('omittedPointers 会出现在 JSON 和 notes 中', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md', '--json'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.ok(json.agentsMd.omittedPointers.includes('docs/project.md'))
+  assert.ok(json.agentsMd.omittedPointers.includes('docs/tickets/'))
+  assert.ok(json.notes.some(note => note.includes('省略的指针')))
+})
+
+test('已有标签映射：重跑保留右列，不把 bug 改回 needs-triage', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const rel = 'docs/agents/triage-labels.md'
+  const before = read(root, rel).replace('| needs-triage | \`needs-triage\` |', '| needs-triage | \`bug\` |')
+  writeFileSync(join(root, rel), before, 'utf8')
+  const out = run(['--dir', root, '--json'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const after = read(root, rel)
+  assert.match(after, /needs-triage \| \`bug\`/)
+  assert.doesNotMatch(after, /needs-triage \| \`needs-triage\`/)
+})
+
+test('domain：glossary 路径、multi layout 和 contexts 写入文件', () => {
+  const root = freshProject()
+  const out = run(['--dir', root, '--layout', 'multi', '--contexts', 'web -> api', '--glossary', 'docs/glossary.md', '--json'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const text = read(root, 'docs/agents/domain.md')
+  assert.match(text, /docs\/glossary\.md/)
+  assert.match(text, /multi-context/)
+  assert.match(text, /web -> api/)
+})
+
+test('issue-tracker other + detail：写入用户描述，不再提问', () => {
+  const root = freshProject()
+  const out = run(['--dir', root, '--issue-tracker', 'other', '--issue-tracker-detail', 'Linear TEAM-123', '--json'])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.questions.length, 0)
+  const text = read(root, 'docs/agents/issue-tracker.md')
+  assert.match(text, /Linear TEAM-123/)
+  assert.match(text, /按“Linear TEAM-123”的约定创建/)
+})
+
+test('FILES.md 的三个 docs/agents 模板都带 setup marker', () => {
+  const text = readFileSync(join(ROOT, 'skills', 'stop-wishing-setup', 'FILES.md'), 'utf8')
+  assert.ok((text.match(/stop-wishing-setup:begin/g) ?? []).length >= 3)
+  assert.ok((text.match(/stop-wishing-setup:end/g) ?? []).length >= 3)
 })

@@ -29,6 +29,7 @@ Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed ca
 | This conversation | Yes | what the user said, including corrections they made later |
 | Existing specs | No | `docs/specs/` — avoid a duplicate `id` |
 | Repo facts | Optional | entry points, stack, commands — to state constraints, never to invent intent |
+| Domain docs | Optional | `docs/agents/domain.md` — glossary and ADR locations; fall back to `GLOSSARY.md` / `docs/adr/` |
 
 **No card → stop, do not invent one.** Say: "I can't find `docs/project.md`. Run `stop-wishing` first so we agree on goal / boundary / acceptance — or paste the requirement and I'll write the card first."
 

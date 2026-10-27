@@ -18,7 +18,7 @@ The repo ships **eight side-by-side skills**: one main skill for taking a reques
 | [`stop-wishing-debt`](skills/stop-wishing-debt/SKILL.md) | Build a debt ledger from `shortcut:` comments | Planning cleanup, estimating how much was deferred |
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | Turn a confirmed requirement card into a spec with acceptance criteria, and keep `card_sha256` in sync with `docs/project.md` | The requirements are settled and need to become a document |
 | [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | Split a spec into tracer-bullet tickets with `blocked_by` edges (a DAG) and status | The spec is bigger than one session and needs ordering |
-| [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | Configure a repo: where issues live (local/GitHub/other), domain terms and ADRs, the five triage labels; optionally maintain the `## Project docs` block in `AGENTS.md` | A new repo, or the conventions changed |
+| [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | Configure a repo: where issues live (local/GitHub/other), domain terms and ADRs, the five triage labels; optionally maintain the `## Project docs` block in `AGENTS.md` / `CLAUDE.md` | A new repo, or the conventions changed |
 | [`stop-wishing-report`](skills/stop-wishing-report/SKILL.md) | Render one verified `report.json` into standalone HTML; `hacker_mode` in the project's `report.conf` selects the compact developer report or the hacker theme | Delivery hand-off, prototype confirmation, a printable page or a six-screen demo |
 
 Skill bodies are in English; `description` is bilingual so Chinese trigger words still work. The original Chinese body survives only as a local backup and is **not committed** (`*.bak-*` is ignored); see commit `e428327` if you need it.
@@ -45,7 +45,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`.
+`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`; the report skill checks its renderer, schema and both themes; the setup skill checks `SETUP.md`, `FILES.md`, `SAFETY.md` and `CONSUMERS.md`.
 
 `--force` upgrades also prune files listed by the previous install manifest (`.install-manifest.json`) that the new version no longer ships (for example the old `scripts/build-portable.js`); files outside that manifest are left untouched.
 
@@ -135,7 +135,7 @@ If the user does not know how to install a skill, follow these steps:
 | `skills/stop-wishing/scripts/check-hardcode.js` | Scan for absolute paths, secrets, URLs, ports, magic numbers (honours `.hardcodeignore`) | 0 clean or fully suppressed / 2 unsuppressed hits or invalid ignore file |
 | `skills/stop-wishing/scripts/check-licenses.js` | Scan `package-lock.json` (`lockfileVersion` ≥ 2, transitive and nested packages included) plus `node_modules` (fills in licence fields), parse SPDX (`OR`/`AND`/`WITH`) and apply the use matrix in `LICENSE.md`; flags `--use self\|free-closed\|open-source\|commercial`, `--prod-only`, `--strict`, `--json`, `--rows` | 0 no forbidden licences (`warn`/`unknown` warnings allowed) / 1 a forbidden licence or `unknown` under `--strict` / 2 bad arguments or IO |
 | `skills/stop-wishing/scripts/check-tickets.js` | Validate `docs/tickets/*.md` against `docs/specs/` and `docs/project.md`: errors E1–E13, warnings W1–W5 | 0 no errors (warnings allowed) / 1 errors / 2 usage or IO |
-| `skills/stop-wishing/scripts/setup.js` | Create/update `docs/agents/{issue-tracker,domain,triage-labels}.md` (marked blocks only, idempotent; `--issue-tracker local` points at `docs/issues/`, separate from the work-breakdown directory `docs/tickets/`); optionally maintain the `## Project docs` block of an existing `AGENTS.md`/`CLAUDE.md` (**never creates them**) | 0 ok (including unchanged) / 1 bad arguments / 2 IO |
+| `skills/stop-wishing/scripts/setup.js` | Create/update `docs/agents/{issue-tracker,domain,triage-labels}.md` (marked blocks only, idempotent; `--issue-tracker local` points at `docs/issues/`, separate from the work-breakdown directory `docs/tickets/`); optionally maintain the `## Project docs` block of an existing `AGENTS.md`/`CLAUDE.md` (**never creates them**; when both exist, `--agents-file` is required) | 0 ok (including unchanged) / 1 bad arguments or marker conflict / 2 IO |
 | `skills/stop-wishing/scripts/preflight.js` | Run environment, hardcoding and dependency-licence checks in one pass (licence scan is marked skipped when there is no lockfile/node_modules) | 0 clean / 1 blocking / 2 bad arguments or IO |
 
 `check-tickets.js` checks: E1 unparsable front-matter, E2 missing required fields (id/title/spec/status/acceptance/verify), E3 file name, E4 id vs file-name prefix, E5 duplicate id, E6 status, E7 spec does not exist, E8 `blocked_by` points at a non-existent ticket, E9 self-dependency, E10 cycle, E11 empty acceptance, E12 empty verify or fewer verifies than acceptances, E13 a done/dropped ticket is still a dependency. Warnings: W1 missing estimate, W2 more than five acceptance items, W3 every verify is non-executable, W4 `card_sha256` disagrees with `docs/project.md`, W5 a spec is referenced by no ticket.
@@ -145,9 +145,10 @@ node skills/stop-wishing/scripts/check-tickets.js --dir <project> [--json]
 # 0 = no errors (warnings do not change the exit code); 1 = errors; 2 = usage or IO
 
 node skills/stop-wishing/scripts/setup.js --dir <project> \
-  [--issue-tracker local|github|other] [--labels default|none] [--layout single|multi] \
-  [--agents-md] [--dry-run] [--json]
-# 0 = ok (including unchanged); 1 = bad arguments; 2 = IO
+  [--issue-tracker local|github|other] [--issue-tracker-detail <text>] \
+  [--labels default|none] [--layout single|multi] [--glossary <path>] [--contexts <text>] \
+  [--agents-md] [--agents-file AGENTS|CLAUDE] [--dry-run] [--json]
+# 0 = ok (including unchanged); 1 = bad arguments or marker conflict; 2 = IO
 ```
 
 ## Bonus: Vibe Coding glossary

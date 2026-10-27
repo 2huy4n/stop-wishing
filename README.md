@@ -16,7 +16,7 @@
 | [`stop-wishing-debt`](skills/stop-wishing-debt/SKILL.md) | 从 `shortcut:` 注释生成技术债台账 | 规划清理、评估欠了多少债 |
 | [`stop-wishing-spec`](skills/stop-wishing-spec/SKILL.md) | 把已确认的需求卡写成带验收标准的 spec 卡，并维护 `card_sha256` 与 `docs/project.md` 的一致性 | 需求谈完、要落成文档时 |
 | [`stop-wishing-tickets`](skills/stop-wishing-tickets/SKILL.md) | 把 spec 拆成 tracer-bullet 票，维护 `blocked_by` 依赖 DAG 与状态 | 一个 spec 一次做不完、要排顺序时 |
-| [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | 初始化项目协作约定：票放哪（local/GitHub/其他）、领域术语与 ADR、五角色标签映射；可选维护 `AGENTS.md` 的 `## Project docs` 段 | 接手空仓库、要把流程落到文档时 |
+| [`stop-wishing-setup`](skills/stop-wishing-setup/SKILL.md) | 初始化项目协作约定：issue 放哪（local/GitHub/其他）、领域术语与 ADR、五角色标签映射；可选维护 `AGENTS.md` / `CLAUDE.md` 的 `## Project docs` 段 | 接手空仓库、要把流程落到文档时 |
 | [`stop-wishing-report`](skills/stop-wishing-report/SKILL.md) | 把一份已验证的 `report.json` 渲染成独立 HTML；项目根 `report.conf` 的 `hacker_mode` 决定简洁版或黑客主题 | 交付汇报、原型确认、要一页可打印或六屏演示时 |
 
 主技能正文为英文（`description` 中英双语，中文触发词保留）。原中文版只保留在本地备份，**不入库**（`*.bak-*` 已被 `.gitignore` 忽略）；如需追溯，见提交 `e428327`。
@@ -42,7 +42,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`；报告技能额外校验 `render.js`、`schema.json` 与两套主题资产。
+`--verify` 会逐个技能校验 `SKILL.md` 存在、front-matter `name` 与目录名一致、与源文件 hash 一致；主技能额外校验 `scripts/` 7 个脚本、`CARD.md` 等 5 个参考文件、`templates/{zh,en}` 各 8 份（7 份文档 + `AGENTS.md.tpl`）、`LICENSE`；报告技能额外校验 `render.js`、`schema.json` 与两套主题资产；setup 技能额外校验 `SETUP.md`、`FILES.md`、`SAFETY.md`、`CONSUMERS.md`。
 
 `--force` 升级时会按上一版安装清单（`.install-manifest.json`）删除新版本不再提供的文件（如旧的 `scripts/build-portable.js`），清单之外的用户自建文件不会动。
 
@@ -133,7 +133,7 @@ node skills/stop-wishing/scripts/init-docs.js --lang zh --dir <项目目录> --a
 | `skills/stop-wishing/scripts/check-hardcode.js` | 扫绝对路径/密钥/URL/端口/魔法数字（支持 `.hardcodeignore`） | 0 干净或全部被抑制 / 2 有未抑制命中或忽略文件非法 |
 | `skills/stop-wishing/scripts/check-licenses.js` | 扫 `package-lock.json`（`lockfileVersion` ≥ 2，含传递/嵌套依赖）与 `node_modules`（补许可证字段），解析 SPDX（`OR`/`AND`/`WITH`），按 `LICENSE.md` 的用途矩阵判定；参数 `--use self\|free-closed\|open-source\|commercial`、`--prod-only`、`--strict`、`--json`、`--rows` | 0 无禁止项（可有 `warn`/`unknown` 警告） / 1 有禁止项或 `--strict` 下未知 / 2 参数或 IO |
 | `skills/stop-wishing/scripts/check-tickets.js` | 校验 `docs/tickets/*.md`（并对照 `docs/specs/`、`docs/project.md`）：E1–E13 错误 + W1–W5 警告 | 0 无错误（可有警告）/ 1 有错误 / 2 用法或 IO |
-| `skills/stop-wishing/scripts/setup.js` | 生成/更新 `docs/agents/{issue-tracker,domain,triage-labels}.md`（只动标记段、幂等；`--issue-tracker local` 指向 `docs/issues/`，与工作计划目录 `docs/tickets/` 分开），可选维护既有 `AGENTS.md`/`CLAUDE.md` 的 `## Project docs` 段（**绝不创建**它们） | 0 成功（含 unchanged）/ 1 参数错误 / 2 IO 错误 |
+| `skills/stop-wishing/scripts/setup.js` | 生成/更新 `docs/agents/{issue-tracker,domain,triage-labels}.md`（只动标记段、幂等；`--issue-tracker local` 指向 `docs/issues/`，与工作计划目录 `docs/tickets/` 分开），可选维护既有 `AGENTS.md`/`CLAUDE.md` 的 `## Project docs` 段（**绝不创建**它们；两者都在时必须用 `--agents-file`） | 0 成功（含 unchanged）/ 1 参数错误或标记段异常 / 2 IO 错误 |
 | `skills/stop-wishing/scripts/preflight.js` | 一次跑完环境、硬编码、依赖许可三项预检（无 lock/node_modules 时许可证标记为跳过） | 0 通过 / 1 有阻断项 / 2 用法或 IO |
 
 `check-tickets.js` 的检查项：E1 front-matter 解析、E2 必填字段（id/title/spec/status/acceptance/verify）、E3 文件名、E4 id 与文件名前缀、E5 id 重复、E6 status、E7 spec 不存在、E8 blocked_by 指向不存在的票、E9 自依赖、E10 成环、E11 验收为空、E12 verify 为空或少于验收条数、E13 done/dropped 仍被依赖；警告：W1 缺 estimate、W2 验收超过 5 条、W3 verify 全不可执行、W4 spec 的 `card_sha256` 与 `docs/project.md` 不一致、W5 spec 未被任何票引用。
@@ -143,9 +143,10 @@ node skills/stop-wishing/scripts/check-tickets.js --dir <项目根> [--json]
 # 0 = 无错误（警告不影响退出码）；1 = 有错误；2 = 用法或 IO 错误
 
 node skills/stop-wishing/scripts/setup.js --dir <项目根> \
-  [--issue-tracker local|github|other] [--labels default|none] [--layout single|multi] \
-  [--agents-md] [--dry-run] [--json]
-# 0 = 成功（含 unchanged）；1 = 参数错误；2 = IO 错误
+  [--issue-tracker local|github|other] [--issue-tracker-detail <text>] \
+  [--labels default|none] [--layout single|multi] [--glossary <path>] [--contexts <text>] \
+  [--agents-md] [--agents-file AGENTS|CLAUDE] [--dry-run] [--json]
+# 0 = 成功（含 unchanged）；1 = 参数错误或标记段异常；2 = IO 错误
 ```
 
 ## 附赠：Vibe Coding 名词速查表

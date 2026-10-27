@@ -13,6 +13,8 @@ Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill
 - **Schema and example**: `schema.json` documents the payload; `examples/delivery.json` demonstrates a real delivery. Output goes to gitignored `reports/`.
 - **Installer**: eight skills now; `--verify` additionally checks `render.js`, `schema.json` and both theme directories.
 - **Setup skill split**: `stop-wishing-setup` goes from 191 lines to a 60-line router plus `SETUP.md` (probes/questions/writer/closing), `FILES.md` (ownership/templates), `SAFETY.md` (reruns/failures) and `CONSUMERS.md` (downstream reads); `--verify` checks all four.
+- **Setup contract fixes**: skill-base command paths; `--agents-file AGENTS|CLAUDE` required when both files exist; existing `## Project docs` blocks are merged and `omittedPointers` reported; `--issue-tracker-detail`, `--glossary` and `--contexts`; existing triage labels are preserved; marker/exit/JSON contracts documented and tested.
+- **Consumers wired**: spec reads `domain.md`, tickets reads `issue-tracker.md` + `triage-labels.md` without confusing issues with tickets, review reads `issue-tracker.md`, audit and debt read `domain.md`. `CONSUMERS.md` and README now describe the real reads.
 - **Tests**: config parsing, theme selection, invalid-config fallback, `--init` idempotency, bad payload exits, and a repo-wide guard that the prohibited term never appears in a tracked text file.
 
 ## 0.8.0 — 2026-10-27

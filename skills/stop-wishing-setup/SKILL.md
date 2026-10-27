@@ -6,55 +6,53 @@ user-invocable: true
 ---
 
 # stop-wishing-setup — configure the repo once
-Read-only until the user answers. Writes three small files and one marked block, nothing else.
+Read-only until the user answers. Writes three small files and updates one marked block, nothing else.
 
 ## When to use
 
 - A repository is using this skill family for the first time.
 - Repo conventions changed: issues moved, labels renamed, glossary relocated, a second package appeared.
 
-Do not use it for requirements (`stop-wishing`), code review/audit (`stop-wishing-review` / `stop-wishing-audit`), the debt ledger (`stop-wishing-debt`), or the seven project docs (`init-docs.js`).
+Do not use it for requirements (`stop-wishing`), writing/reviewing/auditing code, the debt ledger (`stop-wishing-debt`), or the seven project docs (`init-docs.js`).
 
 ## Hard rules
 
-- **One writer per file**: `init-docs.js` owns the seven docs; this skill owns `docs/agents/*` and the marked `AGENTS.md` block; never edit outside the markers.
-- **Never create `AGENTS.md` or `CLAUDE.md`.** Neither exists → point to `init-docs.js --agents-md` and skip Q4.
-- **The script is the writer.** Do not hand-edit `docs/agents/*` while `setup.js` exists.
-- Only the marked bytes change; re-running replaces, never appends.
+- **Ownership**: `init-docs.js` creates the seven docs and the initial `## Project docs` block; this skill owns the three `docs/agents/*.md` files and updates that same block. Never write the seven docs or edit outside the markers.
+- **Never create `AGENTS.md` or `CLAUDE.md`.** Neither exists → point to `init-docs.js --agents-md` and skip Q4; both exist → ask, then pass `--agents-file`.
+- **The script is the writer.** If it is unavailable, follow `FILES.md` exactly and say you did so.
+- Only marked bytes change; re-running updates in place, never appends a second block. Preserve an existing richer pointer block and report any omitted pointers.
 - `--labels none` writes no triage file and never deletes an existing one.
 
 ## Workflow
 
-1. Probe and report: read `SETUP.md` for the probe table, then ask Q1–Q4 one at a time.
-2. Run the writer; paste its raw output, including every `questions` entry.
-3. Read `FILES.md` for ownership, exact file shapes and the pointer block.
-4. Read `SAFETY.md` before a re-run, when markers look wrong, or when a probe fails.
-5. Close in the order in `SETUP.md`: files written, skipped, next step.
+1. Read `SETUP.md`; if there is no git or the user may decline everything, read `SAFETY.md` before any write.
+2. Probe, report, then ask Q1–Q4 one at a time.
+3. Run the writer; paste its raw output, including every `questions` and `notes` entry.
+4. Read `FILES.md` for ownership, exact file shapes and marker rules.
+5. Close as `SETUP.md` says: files written, skipped, next step, then `Skipped / Unverified / Risk`.
 
 ## Questions at a glance
 
 | Q | Default |
 |---|---|
 | Q1 where issues live | local markdown in `docs/issues/` |
-| Q2 define labels | yes, five default roles |
-| Q3 domain layout | single-context |
-| Q4 pointer block | yes, if `AGENTS.md` or `CLAUDE.md` exists |
-
-If the user says "whatever you think", take these defaults and list each as an assumption in `Skipped:`.
+| Q2 define labels | yes, five default roles; keep existing right column |
+| Q3 domain layout | single-context; use `--layout multi --contexts` when real |
+| Q4 pointer block | yes; if both files exist, choose one with `--agents-file AGENTS|CLAUDE` |
 
 ## Command
 
 ```bash
-node skills/stop-wishing/scripts/setup.js --dir . [--issue-tracker local|github|other] [--labels default|none] [--layout single|multi] [--agents-md] [--dry-run] [--json]
+node "<skill-base>/../stop-wishing/scripts/setup.js" --dir . [--issue-tracker local|github|other] [--issue-tracker-detail <text>] [--labels default|none] [--layout single|multi] [--glossary <path>] [--contexts <text>] [--agents-md] [--agents-file AGENTS|CLAUDE] [--dry-run] [--json]
 ```
 
-Exit 0 success / 1 bad arguments / 2 IO error.
+`<skill-base>` is the directory containing this `SKILL.md`; resolve it first, never against the target repo. Init-docs uses the same base. Exit 0 success / 1 bad arguments or marker conflict / 2 IO error.
 
 ## Read on demand
 
 | File | Read when |
 |---|---|
-| `SETUP.md` | probes, the four questions, writer invocation, closing report |
-| `FILES.md` | ownership, file templates, pointer block |
-| `SAFETY.md` | reruns, malformed markers, degraded environments |
-| `CONSUMERS.md` | explaining which skill reads which config |
+| `SETUP.md` | probes, Q1–Q4, writer invocation, closing report |
+| `FILES.md` | ownership, file templates, marker rules |
+| `SAFETY.md` | no git, decline-all, reruns, malformed markers |
+| `CONSUMERS.md` | which skill reads which config |

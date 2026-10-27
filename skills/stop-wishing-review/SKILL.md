@@ -29,7 +29,7 @@ A change can pass one axis and fail the other: code that follows every rule but 
 
 1. `docs/specs/*.md` — a spec written by `stop-wishing-spec` for this change. Match its slug or `title` against the branch name, the commit subjects and the files touched. If several match, take the newest and say which. Read its `status` and `card_sha256`.
 2. `docs/project.md` — the requirement card (goal, scope, acceptance). The normal source when no spec exists.
-3. Issue references in commit messages (`#123`, `Closes #45`, `!67`).
+3. Issue references in commit messages (`#123`, `Closes #45`, `!67`). If `docs/agents/issue-tracker.md` exists, use its `Where` / `Read` fields to resolve each reference before treating it as a path.
 4. A spec file or path the user names (`docs/`, `specs/`, `.scratch/`).
 5. Ask the user. If they say there is no spec, **skip this axis** and write `Intent: no spec available — not reviewed`. Never invent requirements.
 

@@ -5,7 +5,7 @@
 // 三条设计底线：
 // 1. 只动标记段（`<!-- stop-wishing-setup:begin/end -->`），段外一个字节都不碰；
 // 2. 幂等：内容没变就不写盘（避免无意义的 mtime 变化与「每次都像改了什么」）；
-// 3. **绝不创建 AGENTS.md**：它属于用户，不存在就跳过并说明。
+// 3. **绝不创建 AGENTS.md / CLAUDE.md**：它们属于用户，不存在就跳过并说明。
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
@@ -17,9 +17,25 @@ export const AGENTS_END = '<!-- stop-wishing:project-docs:end -->'
 const TRACKERS = ['local', 'github', 'other']
 const LABELS = ['default', 'none']
 const LAYOUTS = ['single', 'multi']
+const AGENT_FILES = ['AGENTS', 'CLAUDE']
+const TRIAGE_ROLES = ['needs-triage', 'ready', 'blocked', 'in-progress', 'done']
 
 export function parseArgs(argv) {
-  const options = { dir: null, issueTracker: 'local', labels: 'default', layout: 'single', agentsMd: false, dryRun: false, json: false, help: false, unknown: [] }
+  const options = {
+    dir: null,
+    issueTracker: 'local',
+    issueTrackerDetail: null,
+    labels: 'default',
+    layout: 'single',
+    glossary: 'GLOSSARY.md',
+    contexts: null,
+    agentsMd: false,
+    agentsFile: null,
+    dryRun: false,
+    json: false,
+    help: false,
+    unknown: [],
+  }
   const value = i => argv[i + 1] ?? null
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
@@ -35,6 +51,10 @@ export function parseArgs(argv) {
       options.issueTracker = value(i)
       i += 1
     } else if (arg.startsWith('--issue-tracker=')) options.issueTracker = arg.slice('--issue-tracker='.length)
+    else if (arg === '--issue-tracker-detail') {
+      options.issueTrackerDetail = value(i)
+      i += 1
+    } else if (arg.startsWith('--issue-tracker-detail=')) options.issueTrackerDetail = arg.slice('--issue-tracker-detail='.length)
     else if (arg === '--labels') {
       options.labels = value(i)
       i += 1
@@ -43,6 +63,18 @@ export function parseArgs(argv) {
       options.layout = value(i)
       i += 1
     } else if (arg.startsWith('--layout=')) options.layout = arg.slice('--layout='.length)
+    else if (arg === '--glossary') {
+      options.glossary = value(i)
+      i += 1
+    } else if (arg.startsWith('--glossary=')) options.glossary = arg.slice('--glossary='.length)
+    else if (arg === '--contexts') {
+      options.contexts = value(i)
+      i += 1
+    } else if (arg.startsWith('--contexts=')) options.contexts = arg.slice('--contexts='.length)
+    else if (arg === '--agents-file') {
+      options.agentsFile = value(i)
+      i += 1
+    } else if (arg.startsWith('--agents-file=')) options.agentsFile = arg.slice('--agents-file='.length)
     else options.unknown.push(arg)
   }
   return options
@@ -50,19 +82,23 @@ export function parseArgs(argv) {
 
 export function usage() {
   return [
-    '用法: node setup.js --dir <项目根> [--issue-tracker local|github|other] [--labels default|none] [--layout single|multi] [--agents-md] [--dry-run] [--json]',
+    '用法: node setup.js --dir <项目根> [--issue-tracker local|github|other] [--issue-tracker-detail <text>] [--labels default|none] [--layout single|multi] [--glossary <path>] [--contexts <text>] [--agents-md] [--agents-file AGENTS|CLAUDE] [--dry-run] [--json]',
     '',
-    '  --dir            项目根目录（必填）',
-    '  --issue-tracker  外部 issue 放在哪：local=docs/issues/（默认）/ github=GitHub Issues / other=自定义（会在问题里列出）',
-    '  --labels         是否生成五角色标签映射：default（默认）/ none',
-    '  --layout         单包 single（默认）/ 多包 monorepo multi',
-    '  --agents-md      若 AGENTS.md（优先）或 CLAUDE.md 已存在，在末尾维护 ## Project docs 段；绝不创建它们',
-    '  --dry-run        只报告将创建/更新什么，不写盘',
-    '  --json           结构化输出 {files, agentsMd, questions}',
+    '  --dir                  项目根目录（必填）',
+    '  --issue-tracker        外部 issue 放在哪：local=docs/issues/（默认）/ github=GitHub Issues / other=自定义',
+    '  --issue-tracker-detail other 的具体工具/字段/路径；给出后不再返回该问题',
+    '  --labels               是否生成五角色标签映射：default（默认，保留已有右列）/ none',
+    '  --layout               单包 single（默认）/ 多包 monorepo multi',
+    '  --glossary             glossary 路径，默认 GLOSSARY.md',
+    '  --contexts             multi 布局的包边界描述',
+    '  --agents-md            若 AGENTS.md 或 CLAUDE.md 已存在，在末尾维护 ## Project docs 段；绝不创建它们',
+    '  --agents-file         两者都存在时必填：AGENTS 或 CLAUDE；只维护选中的文件',
+    '  --dry-run              只报告将创建/更新什么，不写盘',
+    '  --json                 结构化输出 {files, agentsMd, questions, notes}',
     '',
     '只写三个文件：docs/agents/issue-tracker.md、docs/agents/domain.md、docs/agents/triage-labels.md（--labels default 时）。',
     '每个文件只替换 <!-- stop-wishing-setup:begin -->…<!-- stop-wishing-setup:end --> 段，段外内容原样保留；内容没变不写盘。',
-    '退出码: 0 成功（含 unchanged）/ 1 参数错误 / 2 IO 错误',
+    '退出码: 0 成功（含 unchanged）/ 1 参数错误或标记段异常 / 2 IO 错误',
   ].join('\n')
 }
 
@@ -70,21 +106,30 @@ function assertEnum(value, allowed, name) {
   if (!allowed.includes(value)) throw new Error(`${name} 非法: ${value}（允许 ${allowed.join('/')}）`)
 }
 
+function normalizeAgentsFile(value) {
+  if (!value) return null
+  const normalized = String(value).replace(/\.md$/i, '').toUpperCase()
+  assertEnum(normalized, AGENT_FILES, '--agents-file')
+  return normalized
+}
+
 export function issueTrackerContent(options) {
+  const detail = options.issueTrackerDetail?.trim()
+  const fallback = '由用户指定（见 questions）'
   const where = {
     local: '`docs/issues/`（本地 issue = 外部反馈；我们自己的工作切片在 `docs/tickets/`，两者分开）',
     github: 'GitHub Issues（用 `gh issue list` / `gh issue create` 读写）',
-    other: '由用户指定（见 questions）',
+    other: detail || fallback,
   }[options.issueTracker]
   const create = {
     local: '在 `docs/issues/` 新建 `<NNNN>-<slug>.md`，一条外部反馈一份',
     github: '`gh issue create --title <title> --body-file <file>`',
-    other: '由用户指定（见 questions）',
+    other: detail ? `按“${detail}”的约定创建` : fallback,
   }[options.issueTracker]
   const read = {
     local: '读 `docs/issues/*.md`；需要转成工作计划时再到 `docs/tickets/`',
     github: '`gh issue list --state all`，单票 `gh issue view <n>`',
-    other: '由用户指定（见 questions）',
+    other: detail ? `按“${detail}”的约定读取` : fallback,
   }[options.issueTracker]
   return [
     `- **Where:** ${where}`,
@@ -94,31 +139,45 @@ export function issueTrackerContent(options) {
     ...(options.labels === 'default'
       ? ['- **Status mapping:** 见 `docs/agents/triage-labels.md`（needs-triage / ready / blocked / in-progress / done）']
       : []),
+    '- **Ticket status:** todo / doing / blocked / done',
     '- **Managed by:** 由 stop-wishing-setup 管理（重跑会更新本段，段外可自由编辑）',
   ].join('\n')
 }
 
 export function domainContent(options) {
+  const glossary = options.glossary?.trim() || 'GLOSSARY.md'
   const layout = options.layout === 'multi'
-    ? '多包仓库（monorepo）：每个包的入口与职责写在各自包内；跨包依赖在 ADR 里记'
-    : '单包仓库：源码 / 测试 / 文档三个顶层目录；新模块在 `docs/agents/domain.md` 登记'
+    ? `multi-context — ${options.contexts?.trim() || '各包边界待登记'}`
+    : 'single-context — 源码 / 测试 / 文档三个顶层目录；新模块在此登记'
   return [
-    '- **Glossary:** 在此登记领域术语（一条一行：术语 → 一句人话 → 影响）',
+    `- **Glossary:** \`${glossary}\`（一条一行：术语 → 一句人话 → 影响）`,
     '- **ADR:** `docs/adr/NNNN-<slug>.md`，一个决定一篇，写清背景 / 选项 / 结论 / 代价',
     `- **Layout:** ${layout}`,
   ].join('\n')
 }
 
-export function triageLabelsContent() {
+function formatLabel(value) {
+  const raw = String(value ?? '').trim().replace(/^`|`$/g, '')
+  return `\`${raw || 'needs-triage'}\``
+}
+
+export function triageLabelsContent(labelMap = {}) {
   return [
     '| 角色 | 标签 |',
     '|---|---|',
-    '| needs-triage | `needs-triage` |',
-    '| ready | `ready` |',
-    '| blocked | `blocked` |',
-    '| in-progress | `in-progress` |',
-    '| done | `done` |',
+    ...TRIAGE_ROLES.map(role => `| ${role} | ${formatLabel(labelMap[role] ?? role)} |`),
   ].join('\n')
+}
+
+export function readTriageMap(root) {
+  const file = join(root, 'docs', 'agents', 'triage-labels.md')
+  if (!existsSync(file)) return {}
+  const map = {}
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const match = /^\|\s*([a-z-]+)\s*\|\s*`?([^`|]+)`?\s*\|$/.exec(line.trim())
+    if (match && TRIAGE_ROLES.includes(match[1])) map[match[1]] = match[2].trim()
+  }
+  return map
 }
 
 /** 用标记段包住内容；段外内容不动。 */
@@ -181,6 +240,48 @@ function planFile(root, rel, content, title) {
   return { path: rel, file, exists, current, next: withTitle, action }
 }
 
+function buildAgentsSection(current, pointerDefs, willExist) {
+  const hasBlock = current.includes(AGENTS_BEGIN) && current.includes(AGENTS_END)
+  let inner = ''
+  if (hasBlock) {
+    const start = current.indexOf(AGENTS_BEGIN) + AGENTS_BEGIN.length
+    const stop = current.indexOf(AGENTS_END)
+    inner = current.slice(start, stop)
+  }
+  const heading = inner.match(/^##\s+.+$/m)?.[0] ?? '## Project docs'
+  const innerLines = inner.split(/\r?\n/).filter(line => line.trim() !== '' && line !== heading)
+  const existingRefs = new Set([...inner.matchAll(/`(docs\/[^`\s]+)`/g)].map(match => match[1]))
+  const missing = pointerDefs.filter(([rel]) => willExist(rel) && !existingRefs.has(rel))
+  const omitted = pointerDefs.filter(([rel]) => !willExist(rel)).map(([rel]) => rel)
+  const lines = [
+    heading,
+    '',
+    ...innerLines,
+    ...missing.map(([rel, label]) => `- \`${rel}\` — ${label}`),
+  ]
+  return {
+    section: `${AGENTS_BEGIN}\n${lines.join('\n')}\n${AGENTS_END}\n`,
+    omitted,
+    hadBlock: hasBlock,
+    preservedLines: innerLines.length,
+  }
+}
+
+function selectAgentsFile(root, options) {
+  const choice = options.agentsFile
+  if (choice) {
+    const name = `${choice}.md`
+    if (!existsSync(join(root, name))) return { error: `--agents-file ${name} 不存在；本技能绝不创建 AGENTS.md / CLAUDE.md` }
+    return { target: name, file: join(root, name) }
+  }
+  const hasAgents = existsSync(join(root, 'AGENTS.md'))
+  const hasClaude = existsSync(join(root, 'CLAUDE.md'))
+  if (hasAgents && hasClaude) return { error: 'AGENTS.md 与 CLAUDE.md 都存在；请用 --agents-file AGENTS|CLAUDE 选择要维护的一个' }
+  if (hasAgents) return { target: 'AGENTS.md', file: join(root, 'AGENTS.md') }
+  if (hasClaude) return { target: 'CLAUDE.md', file: join(root, 'CLAUDE.md') }
+  return { target: null, file: null }
+}
+
 export function setup(options) {
   const root = resolve(options.dir)
   if (!existsSync(root)) return { ok: false, code: 2, message: '目录不存在: ' + root }
@@ -188,32 +289,30 @@ export function setup(options) {
     assertEnum(options.issueTracker, TRACKERS, '--issue-tracker')
     assertEnum(options.labels, LABELS, '--labels')
     assertEnum(options.layout, LAYOUTS, '--layout')
+    if (options.agentsFile) options.agentsFile = normalizeAgentsFile(options.agentsFile)
+    if (options.agentsFile && !options.agentsMd) throw new Error('--agents-file 必须和 --agents-md 一起使用')
   } catch (error) {
     return { ok: false, code: 1, message: error.message }
   }
 
+  const labelMap = options.labels === 'default' ? readTriageMap(root) : {}
   const plans = [
     planFile(root, 'docs/agents/issue-tracker.md', issueTrackerContent(options), 'Issue tracker'),
     planFile(root, 'docs/agents/domain.md', domainContent(options), 'Domain docs'),
   ]
   if (options.labels === 'default') {
-    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(), 'Triage labels'))
+    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(labelMap), 'Triage labels'))
   }
   const broken = plans.filter(plan => plan.error)
   if (broken.length > 0) {
     return { ok: false, code: 1, message: '标记段异常，未写任何文件：\n' + broken.map(plan => '  - ' + plan.error).join('\n') }
   }
 
-  let agentsMd = { status: options.agentsMd ? 'not-applicable' : 'disabled', path: null, action: 'skipped' }
+  let agentsMd = { status: options.agentsMd ? 'not-applicable' : 'disabled', path: null, action: 'skipped', omittedPointers: [] }
   if (options.agentsMd) {
-    const agentsPath = join(root, 'AGENTS.md')
-    const claudePath = join(root, 'CLAUDE.md')
-    const hasAgents = existsSync(agentsPath)
-    const hasClaude = existsSync(claudePath)
-    if (hasAgents || hasClaude) {
-      const target = hasAgents ? 'AGENTS.md' : 'CLAUDE.md'
-      const file = hasAgents ? agentsPath : claudePath
-      const note = hasAgents && hasClaude ? 'AGENTS.md 与 CLAUDE.md 都存在，按规则优先写 AGENTS.md' : null
+    const selected = selectAgentsFile(root, options)
+    if (selected.error) return { ok: false, code: 1, message: selected.error }
+    if (selected.target) {
       const pointerDefs = [
         ['docs/project.md', '需求卡与边界'],
         ['docs/agents/issue-tracker.md', 'issue 在哪里、怎么读写'],
@@ -222,35 +321,38 @@ export function setup(options) {
       ]
       const planned = new Set(plans.map(plan => resolve(plan.file)))
       const willExist = rel => existsSync(join(root, rel)) || planned.has(resolve(join(root, rel)))
-      const pointers = pointerDefs.filter(([rel]) => willExist(rel))
-      const omittedPointers = pointerDefs.filter(([rel]) => !willExist(rel)).map(([rel]) => rel)
-      const section = [
-        AGENTS_BEGIN,
-        '## Project docs',
-        '',
-        ...pointers.map(([rel, label]) => `- \`${rel}\` — ${label}`),
-        AGENTS_END,
-        '',
-      ].join('\n')
-      const current = readFileSync(file, 'utf8')
+      const current = readFileSync(selected.file, 'utf8')
       // 已有指针段但没有标记（旧版 init-docs 写的）：不追加，避免两份指针。
       if (!current.includes(AGENTS_BEGIN) && /^##\s+(Project docs|项目文档)/m.test(current)) {
         agentsMd = {
           status: 'skipped',
-          path: target,
-          file,
+          path: selected.target,
+          file: selected.file,
           action: 'skipped',
           note: '已有指针段但没有标记；为避免重复未追加，请手动合并后重跑',
+          omittedPointers: pointerDefs.filter(([rel]) => !willExist(rel)).map(([rel]) => rel),
         }
       } else {
+        const section = buildAgentsSection(current, pointerDefs, willExist)
         let next
         try {
-          next = upsertBlock(current, section, AGENTS_BEGIN, AGENTS_END)
+          next = upsertBlock(current, section.section, AGENTS_BEGIN, AGENTS_END)
         } catch (error) {
-          return { ok: false, code: 1, message: `${target}: ${error.message}` }
+          return { ok: false, code: 1, message: `${selected.target}: ${error.message}` }
         }
         const action = next === current ? 'unchanged' : 'updated'
-        agentsMd = { status: 'written', path: target, file, current, next, action, note, omittedPointers }
+        agentsMd = {
+          status: 'written',
+          path: selected.target,
+          file: selected.file,
+          current,
+          next,
+          action,
+          note: section.preservedLines > 0
+            ? `已保留原有 ${section.preservedLines} 行指针内容，只追加缺失项`
+            : null,
+          omittedPointers: section.omitted,
+        }
       }
     } else {
       agentsMd = {
@@ -258,6 +360,7 @@ export function setup(options) {
         path: null,
         action: 'skipped',
         note: '没有 AGENTS.md 也没有 CLAUDE.md：按约定绝不创建，已跳过（需要时先跑 init-docs.js --lang <zh|en> --agents-md，或让用户自己创建后重跑）',
+        omittedPointers: [],
       }
     }
   }
@@ -278,8 +381,8 @@ export function setup(options) {
   }
 
   const questions = []
-  if (options.issueTracker === 'other') questions.push('issue tracker 具体用哪个工具/字段？（--issue-tracker other）')
-  if (options.layout === 'multi') questions.push('多包各自的包名与入口目录是什么？')
+  if (options.issueTracker === 'other' && !options.issueTrackerDetail?.trim()) questions.push('issue tracker 具体用哪个工具/字段/路径？（--issue-tracker other --issue-tracker-detail <text>）')
+  if (options.layout === 'multi' && !options.contexts?.trim()) questions.push('多包各自的包名、入口目录和边界是什么？（--layout multi --contexts <text>）')
 
   const notes = []
   if (options.labels === 'none') {
@@ -287,6 +390,9 @@ export function setup(options) {
     if (existsSync(join(root, 'docs/agents/triage-labels.md'))) {
       notes.push('已存在 docs/agents/triage-labels.md：--labels none 不会删除它（非破坏性）')
     }
+  }
+  if (agentsMd.omittedPointers?.length > 0) {
+    notes.push('省略的指针（目标不存在）: ' + agentsMd.omittedPointers.join(', '))
   }
 
   return {
@@ -300,6 +406,7 @@ export function setup(options) {
       path: agentsMd.path,
       action: options.dryRun && agentsMd.action === 'updated' ? 'would-update' : agentsMd.action,
       note: agentsMd.note ?? null,
+      omittedPointers: agentsMd.omittedPointers ?? [],
     },
     questions,
     notes,
