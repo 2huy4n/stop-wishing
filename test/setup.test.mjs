@@ -127,9 +127,9 @@ test('--dry-run → 不写盘', () => {
   assert.equal(existsSync(join(root, 'docs')), false, 'dry-run 不应创建 docs/')
 })
 
-test('--json → 结构化输出 {files, agentsMd, questions}', () => {
+test('--json → 结构化输出 {files, agentsMd, questions, notes}', () => {
   const root = freshProject()
-  const out = run(['--dir', root, '--json', '--issue-tracker', 'other'])
+  const out = run(['--dir', root, '--json', '--issue-tracker', 'other', '--issue-tracker-detail', 'Linear TEAM-123'])
   assert.equal(out.status, 0, out.stdout + out.stderr)
   const parsed = JSON.parse(out.stdout)
   assert.ok(Array.isArray(parsed.files) && parsed.files.length === 3)
@@ -138,7 +138,20 @@ test('--json → 结构化输出 {files, agentsMd, questions}', () => {
     assert.ok(['created', 'updated', 'unchanged'].includes(file.action))
   }
   assert.equal(typeof parsed.agentsMd, 'object')
-  assert.ok(Array.isArray(parsed.questions) && parsed.questions.length >= 1, 'other 应产生待确认问题')
+  assert.ok(Array.isArray(parsed.questions) && parsed.questions.length === 0)
+})
+
+test('other 无 detail / multi 无 contexts → exit 1，且不写盘', () => {
+  for (const args of [
+    ['--issue-tracker', 'other'],
+    ['--layout', 'multi'],
+  ]) {
+    const root = freshProject()
+    const out = run(['--dir', root, ...args])
+    assert.equal(out.status, 1, out.stdout + out.stderr)
+    assert.match(out.stderr, /需要/)
+    assert.equal(existsSync(join(root, 'docs')), false, '缺必填信息时不应写盘')
+  }
 })
 
 test('参数错误 → exit 1；目录不存在 → exit 2', () => {
@@ -329,4 +342,75 @@ test('FILES.md 的三个 docs/agents 模板都带 setup marker', () => {
   const text = readFileSync(join(ROOT, 'skills', 'stop-wishing-setup', 'FILES.md'), 'utf8')
   assert.ok((text.match(/stop-wishing-setup:begin/g) ?? []).length >= 3)
   assert.ok((text.match(/stop-wishing-setup:end/g) ?? []).length >= 3)
+})
+
+
+test('AGENTS 标记只剩 end → exit 1，整棵树不写', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# 项目约定\n', 'utf8')
+  assert.equal(run(['--dir', root, '--agents-md']).status, 0)
+  const before = read(root, 'AGENTS.md').replace(/^.*stop-wishing:project-docs:begin.*\n/m, '')
+  writeFileSync(join(root, 'AGENTS.md'), before, 'utf8')
+  const domainBefore = read(root, 'docs/agents/domain.md')
+  const issueBefore = read(root, 'docs/agents/issue-tracker.md')
+  const out = run(['--dir', root, '--agents-md', '--glossary', 'docs/changed.md'])
+  assert.equal(out.status, 1, out.stdout + out.stderr)
+  assert.match(out.stderr, /标记段异常|标记段/)
+  assert.equal(read(root, 'docs/agents/domain.md'), domainBefore)
+  assert.equal(read(root, 'docs/agents/issue-tracker.md'), issueBefore)
+  assert.match(read(root, 'AGENTS.md'), /project-docs:end/)
+})
+
+test('已存在的空 docs/agents 文件也会补 H1', () => {
+  const root = freshProject()
+  mkdirSync(join(root, 'docs', 'agents'), { recursive: true })
+  writeFileSync(join(root, 'docs', 'agents', 'domain.md'), '', 'utf8')
+  assert.equal(run(['--dir', root]).status, 0)
+  assert.match(read(root, 'docs/agents/domain.md').split('\n')[0], /^# Domain docs$/)
+})
+
+
+test('重跑保留已有 other detail、glossary、multi contexts', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root, '--issue-tracker', 'other', '--issue-tracker-detail', 'Linear TEAM-123', '--layout', 'multi', '--contexts', 'web -> api', '--glossary', 'docs/terms.md']).status, 0)
+  const out = run(['--dir', root])
+  assert.equal(out.status, 0, out.stdout + out.stderr)
+  assert.match(read(root, 'docs/agents/issue-tracker.md'), /Linear TEAM-123/)
+  assert.match(read(root, 'docs/agents/domain.md'), /docs\/terms\.md/)
+  assert.match(read(root, 'docs/agents/domain.md'), /web -> api/)
+})
+
+test('旧版无 marker 的 docs/agents 文件：停止，不追加第二份', () => {
+  const root = freshProject()
+  mkdirSync(join(root, 'docs', 'agents'), { recursive: true })
+  writeFileSync(join(root, 'docs', 'agents', 'issue-tracker.md'), '# Issue tracker\n\n- **Where:** old\n', 'utf8')
+  const out = run(['--dir', root])
+  assert.equal(out.status, 1, out.stdout + out.stderr)
+  assert.match(out.stderr, /没有 setup marker|marker/)
+  assert.equal(read(root, 'docs/agents/issue-tracker.md'), '# Issue tracker\n\n- **Where:** old\n')
+})
+
+test('--agents-file 缺少值 → exit 1', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md', '--agents-file'])
+  assert.equal(out.status, 1)
+  assert.match(out.stderr, /缺少值|--agents-file/)
+  assert.equal(existsSync(join(root, 'docs')), false)
+})
+
+test('Ticket status 使用 check-tickets 接受的状态集合', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const text = read(root, 'docs/agents/issue-tracker.md')
+  assert.match(text, /Ticket status:\*\* todo \/ doing \/ done \/ dropped/)
+  assert.doesNotMatch(text, /Ticket status:\*\*[^\n]*blocked/)
+})
+
+test('docs/agents 目标是目录 → exit 2，不写盘', () => {
+  const root = freshProject()
+  mkdirSync(join(root, 'docs', 'agents', 'issue-tracker.md'), { recursive: true })
+  const out = run(['--dir', root])
+  assert.equal(out.status, 2, out.stdout + out.stderr)
+  assert.match(out.stderr, /读取失败|EISDIR/)
 })

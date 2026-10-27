@@ -33,6 +33,8 @@ Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed ca
 
 **No card → stop, do not invent one.** Say: "I can't find `docs/project.md`. Run `stop-wishing` first so we agree on goal / boundary / acceptance — or paste the requirement and I'll write the card first."
 
+**Domain terms.** Before writing a term or constraint, read `docs/agents/domain.md` if present; otherwise fall back to `GLOSSARY.md` / `docs/adr/` when they exist. Use the repo's words; never copy the glossary into the spec.
+
 **A gap becomes `Open`, not prose.** One line in §9 with who must decide it. Filling a gap with a plausible guess is the failure this repo exists to prevent.
 
 ## 3) Synthesise, do not interview

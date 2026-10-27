@@ -14,7 +14,7 @@ Read-only. **Do not modify code.** For a single diff or PR, use `stop-wishing-re
 Before reading code, write down:
 
 - **README** — claimed purpose, setup, known limitations.
-- **Project conventions** — `docs/agents/domain.md` if present: glossary, ADR and context boundaries.
+- **Project conventions** — `docs/agents/domain.md` if present: glossary, ADR and context boundaries; otherwise fall back to `GLOSSARY.md` and `docs/adr/` when they exist.
 - **Build and deploy** — scripts, CI, container/cloud config, environment variables, release process.
 - **Dependencies** — runtime and dev, versions, lockfile, license flags.
 - **Entry points** — HTTP routes, CLI commands, jobs, event handlers, UI pages.

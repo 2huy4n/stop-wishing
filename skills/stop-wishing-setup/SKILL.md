@@ -38,7 +38,7 @@ Do not use it for requirements (`stop-wishing`), writing/reviewing/auditing code
 | Q1 where issues live | local markdown in `docs/issues/` |
 | Q2 define labels | yes, five default roles; keep existing right column |
 | Q3 domain layout | single-context; use `--layout multi --contexts` when real |
-| Q4 pointer block | yes; if both files exist, choose one with `--agents-file AGENTS|CLAUDE` |
+| Q4 pointer block | yes; if both files exist, choose one with `--agents-md --agents-file AGENTS|CLAUDE` |
 
 ## Command
 

@@ -1,6 +1,6 @@
 # Files this skill owns
 
-Read only when writing or inspecting setup output. Two writers on one path is how documents start contradicting each other. The split is absolute, with one shared block: `init-docs.js` creates the `## Project docs` block, and this skill updates that same marked block.
+Read only when writing or inspecting setup output. Two writers on one path is how documents start contradicting each other. The split is absolute, with one shared block: `init-docs.js` creates the `## Project docs` block, and this skill updates that same marked block. The generated strings below are the writer's authoritative text; use the same fields and markers if you must write by hand.
 
 ## Ownership
 
@@ -12,7 +12,7 @@ Read only when writing or inspecting setup output. Two writers on one path is ho
 | Every other part of `AGENTS.md` / `CLAUDE.md` | the user | never touched, byte for byte |
 
 - **This skill never creates `AGENTS.md` or `CLAUDE.md`.** Neither exists → point to `init-docs.js --agents-md` and continue without it.
-- `CLAUDE.md` is never created either. If it exists and the user picks it, pass `--agents-file CLAUDE`; only that file is touched.
+- `CLAUDE.md` is never created either. If it exists and the user picks it, pass `--agents-md --agents-file CLAUDE`; only that file is touched.
 - Three small files, not stubs: files not chosen by Q2/Q4 are absent. Do not create placeholder files.
 
 ## `docs/agents/issue-tracker.md`
@@ -24,11 +24,13 @@ Read only when writing or inspecting setup output. Two writers on one path is ho
 - **Where:** <local issues: `docs/issues/` | GitHub Issues on <owner/repo> | the user's exact tool/field/path>
 - **Create:** <how a new issue is opened>
 - **Read:** <how an issue is read>
-- **Status mapping:** see `docs/agents/triage-labels.md` (omit when labels = none)
-- **Ticket status:** todo / doing / blocked / done
-- **Managed by:** stop-wishing-setup; re-run instead of editing by hand
+- **Status mapping:** see `docs/agents/triage-labels.md`
+- **Ticket status:** todo / doing / done / dropped
+- **Managed by:** 由 stop-wishing-setup 管理（重跑会更新本段，段外可自由编辑）
 <!-- stop-wishing-setup:end -->
 ```
+
+Omit the `Status mapping` line when `--labels none`; a pointer to a file that is not there is worse than no pointer.
 
 `Where` is about **incoming issues**, not tickets. Ticket files always live in `docs/tickets/`.
 
@@ -38,9 +40,9 @@ Read only when writing or inspecting setup output. Two writers on one path is ho
 # Domain docs
 
 <!-- stop-wishing-setup:begin -->
-- **Glossary:** `GLOSSARY.md` (or the path passed with `--glossary`)
+- **Glossary:** `GLOSSARY.md`（首次登记术语时创建；or the path passed with `--glossary`）
 - **ADR:** `docs/adr/NNNN-<slug>.md`, one decision per file
-- **Layout:** single-context — source / tests / docs; new modules are registered here
+- **Layout:** single-context — 源码 / 测试 / 文档；new modules are registered here
 <!-- stop-wishing-setup:end -->
 ```
 
@@ -66,20 +68,18 @@ Left column is the role every skill speaks; right column is what the tracker act
 
 ## The `## Project docs` block
 
-Up to four pointers, no prose:
+Up to four pointers, no prose. The two `docs/agents/` pointers always exist after setup; add the other two only when their targets exist:
 
 ```markdown
 <!-- stop-wishing:project-docs:begin -->
 ## Project docs
 
-- `docs/project.md` — requirement card and boundary
 - `docs/agents/issue-tracker.md` — issue location and read/write path
 - `docs/agents/domain.md` — terms, ADR, layout
-- `docs/tickets/` — tickets and dependency order
 <!-- stop-wishing:project-docs:end -->
 ```
 
-Only pointers whose targets exist (or are created by this run) are written. `omittedPointers` lists the rest; say so in the report. A pointer to a file that is not there is worse than no pointer.
+Only pointers whose targets exist (or are created by this run) are written. `docs/project.md` and `docs/tickets/` are added only when those paths exist; `omittedPointers` lists the rest, so say so in the report. A pointer to a file that is not there is worse than no pointer.
 
 An existing `init-docs` block may contain seven prose pointers. **Preserve it and append only missing bullets**; never replace the whole block. The same applies to user notes added around the block.
 

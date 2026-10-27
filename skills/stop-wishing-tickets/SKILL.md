@@ -34,6 +34,8 @@ Read-only for code. **Only `docs/tickets/` and the spec's `tickets:` array are w
 
 **No spec → ask, do not improvise.** "Point me at the spec, or run `stop-wishing-spec` first — I won't invent a scope to split."
 
+**Inbound issue refs.** If a ticket references `#123` or `!67`, resolve it through `docs/agents/issue-tracker.md` when present; otherwise look for `docs/issues/<n>.md` or a matching file under `docs/issues/`. Never copy an issue into `docs/tickets/` or treat the issue tracker as the ticket directory.
+
 ## 3) Tracer bullet first
 
 A **tracer bullet** is the thinnest change that touches every layer the feature needs and produces one observable result. It proves the path end to end before anything is built wide.
@@ -124,10 +126,10 @@ Risks, decisions, anything the next ticket needs to know.
 ## 9) Validate before reporting
 
 ```bash
-node skills/stop-wishing/scripts/check-tickets.js --dir <project root>
+node "<skill-base>/../stop-wishing/scripts/check-tickets.js" --dir <project root>
 ```
 
-Exit `0` = clean, `1` = errors found, `2` = usage or I/O problem. Paste the raw output.
+`<skill-base>` is the directory holding this `SKILL.md`; resolve it before running, never against the project root. Exit `0` = clean, `1` = errors found, `2` = usage or I/O problem. Paste the raw output.
 
 **If the script is not there yet**, write `check-tickets.js: not present — graph checked by hand` and list what you checked (uniqueness, self-reference, cycles, unknown ids, orphan status). Never report a clean run you did not see.
 

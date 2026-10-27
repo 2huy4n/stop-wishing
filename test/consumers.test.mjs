@@ -28,3 +28,17 @@ test('tickets 不把 issue tracker 当成 ticket 目录', () => {
   assert.match(text, /ticket files always stay in `docs\/tickets\/`/)
   assert.match(text, /issues are not tickets|Issues are not tickets/i)
 })
+
+test('无 docs/agents 时五个技能都有文档化回退', () => {
+  const fallbacks = {
+    'stop-wishing-spec': /GLOSSARY\.md/,
+    'stop-wishing-tickets': /docs\/issues\//,
+    'stop-wishing-review': /docs\/issues\//,
+    'stop-wishing-audit': /GLOSSARY\.md[\s\S]*docs\/adr\//,
+    'stop-wishing-debt': /GLOSSARY\.md[\s\S]*docs\/adr\//,
+  }
+  for (const [skill, pattern] of Object.entries(fallbacks)) {
+    const text = readFileSync(join(ROOT, 'skills', skill, 'SKILL.md'), 'utf8')
+    assert.match(text, pattern, `${skill} 缺少无配置回退`)
+  }
+})

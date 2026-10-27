@@ -24,57 +24,62 @@ export function parseArgs(argv) {
   const options = {
     dir: null,
     issueTracker: 'local',
+    issueTrackerExplicit: false,
     issueTrackerDetail: null,
     labels: 'default',
     layout: 'single',
-    glossary: 'GLOSSARY.md',
+    layoutExplicit: false,
+    glossary: null,
     contexts: null,
     agentsMd: false,
     agentsFile: null,
     dryRun: false,
     json: false,
     help: false,
+    missingValue: null,
     unknown: [],
   }
   const value = i => argv[i + 1] ?? null
-  for (let i = 0; i < argv.length; i += 1) {
+  const takeValue = name => {
+    const v = value(i)
+    if (v === null || v === '') {
+      options.missingValue = name
+      return null
+    }
+    i += 1
+    return v
+  }
+  let i = 0
+  for (; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === '--agents-md') options.agentsMd = true
     else if (arg === '--dry-run') options.dryRun = true
     else if (arg === '--json') options.json = true
     else if (arg === '--help' || arg === '-h') options.help = true
-    else if (arg === '--dir') {
-      options.dir = value(i)
-      i += 1
-    } else if (arg.startsWith('--dir=')) options.dir = arg.slice('--dir='.length)
+    else if (arg === '--dir') options.dir = takeValue('--dir')
+    else if (arg.startsWith('--dir=')) options.dir = arg.slice('--dir='.length)
     else if (arg === '--issue-tracker') {
-      options.issueTracker = value(i)
-      i += 1
-    } else if (arg.startsWith('--issue-tracker=')) options.issueTracker = arg.slice('--issue-tracker='.length)
-    else if (arg === '--issue-tracker-detail') {
-      options.issueTrackerDetail = value(i)
-      i += 1
-    } else if (arg.startsWith('--issue-tracker-detail=')) options.issueTrackerDetail = arg.slice('--issue-tracker-detail='.length)
-    else if (arg === '--labels') {
-      options.labels = value(i)
-      i += 1
-    } else if (arg.startsWith('--labels=')) options.labels = arg.slice('--labels='.length)
+      options.issueTracker = takeValue('--issue-tracker')
+      options.issueTrackerExplicit = true
+    } else if (arg.startsWith('--issue-tracker=')) {
+      options.issueTracker = arg.slice('--issue-tracker='.length)
+      options.issueTrackerExplicit = true
+    } else if (arg === '--issue-tracker-detail') options.issueTrackerDetail = takeValue('--issue-tracker-detail')
+    else if (arg.startsWith('--issue-tracker-detail=')) options.issueTrackerDetail = arg.slice('--issue-tracker-detail='.length)
+    else if (arg === '--labels') options.labels = takeValue('--labels')
+    else if (arg.startsWith('--labels=')) options.labels = arg.slice('--labels='.length)
     else if (arg === '--layout') {
-      options.layout = value(i)
-      i += 1
-    } else if (arg.startsWith('--layout=')) options.layout = arg.slice('--layout='.length)
-    else if (arg === '--glossary') {
-      options.glossary = value(i)
-      i += 1
-    } else if (arg.startsWith('--glossary=')) options.glossary = arg.slice('--glossary='.length)
-    else if (arg === '--contexts') {
-      options.contexts = value(i)
-      i += 1
-    } else if (arg.startsWith('--contexts=')) options.contexts = arg.slice('--contexts='.length)
-    else if (arg === '--agents-file') {
-      options.agentsFile = value(i)
-      i += 1
-    } else if (arg.startsWith('--agents-file=')) options.agentsFile = arg.slice('--agents-file='.length)
+      options.layout = takeValue('--layout')
+      options.layoutExplicit = true
+    } else if (arg.startsWith('--layout=')) {
+      options.layout = arg.slice('--layout='.length)
+      options.layoutExplicit = true
+    } else if (arg === '--glossary') options.glossary = takeValue('--glossary')
+    else if (arg.startsWith('--glossary=')) options.glossary = arg.slice('--glossary='.length)
+    else if (arg === '--contexts') options.contexts = takeValue('--contexts')
+    else if (arg.startsWith('--contexts=')) options.contexts = arg.slice('--contexts='.length)
+    else if (arg === '--agents-file') options.agentsFile = takeValue('--agents-file')
+    else if (arg.startsWith('--agents-file=')) options.agentsFile = arg.slice('--agents-file='.length)
     else options.unknown.push(arg)
   }
   return options
@@ -139,7 +144,7 @@ export function issueTrackerContent(options) {
     ...(options.labels === 'default'
       ? ['- **Status mapping:** 见 `docs/agents/triage-labels.md`（needs-triage / ready / blocked / in-progress / done）']
       : []),
-    '- **Ticket status:** todo / doing / blocked / done',
+    '- **Ticket status:** todo / doing / done / dropped',
     '- **Managed by:** 由 stop-wishing-setup 管理（重跑会更新本段，段外可自由编辑）',
   ].join('\n')
 }
@@ -150,7 +155,7 @@ export function domainContent(options) {
     ? `multi-context — ${options.contexts?.trim() || '各包边界待登记'}`
     : 'single-context — 源码 / 测试 / 文档三个顶层目录；新模块在此登记'
   return [
-    `- **Glossary:** \`${glossary}\`（一条一行：术语 → 一句人话 → 影响）`,
+    `- **Glossary:** \`${glossary}\`（首次登记术语时创建；一条一行：术语 → 一句人话 → 影响）`,
     '- **ADR:** `docs/adr/NNNN-<slug>.md`，一个决定一篇，写清背景 / 选项 / 结论 / 代价',
     `- **Layout:** ${layout}`,
   ].join('\n')
@@ -178,6 +183,31 @@ export function readTriageMap(root) {
     if (match && TRIAGE_ROLES.includes(match[1])) map[match[1]] = match[2].trim()
   }
   return map
+}
+
+export function readIssueTrackerSettings(root) {
+  const file = join(root, 'docs', 'agents', 'issue-tracker.md')
+  if (!existsSync(file)) return {}
+  const text = readFileSync(file, 'utf8')
+  const where = /^- \*\*Where:\*\*\s*(.+)$/m.exec(text)?.[1]?.trim() ?? ''
+  if (where.includes('docs/issues/')) return { mode: 'local' }
+  if (/GitHub/i.test(where)) return { mode: 'github' }
+  if (where && !where.includes('由用户指定')) return { mode: 'other', detail: where.replace(/`/g, '') }
+  return {}
+}
+
+export function readDomainSettings(root) {
+  const file = join(root, 'docs', 'agents', 'domain.md')
+  if (!existsSync(file)) return {}
+  const text = readFileSync(file, 'utf8')
+  const glossary = /^- \*\*Glossary:\*\*\s*`([^`]+)`/m.exec(text)?.[1] ?? null
+  const layout = /^- \*\*Layout:\*\*\s*(.+)$/m.exec(text)?.[1]?.trim() ?? ''
+  if (layout.startsWith('multi-context')) {
+    const contexts = layout.replace(/^multi-context\s*—\s*/, '').trim()
+    return { glossary, mode: 'multi', contexts: contexts || null }
+  }
+  if (layout.startsWith('single-context')) return { glossary, mode: 'single' }
+  return { glossary }
 }
 
 /** 用标记段包住内容；段外内容不动。 */
@@ -228,14 +258,22 @@ export function upsertBlock(text, blockText, begin = BEGIN, end = END) {
 function planFile(root, rel, content, title) {
   const file = join(root, rel)
   const exists = existsSync(file)
-  const current = exists ? readFileSync(file, 'utf8') : ''
+  let current = ''
+  try {
+    current = exists ? readFileSync(file, 'utf8') : ''
+  } catch (error) {
+    return { path: rel, file, exists, current, ioError: true, error: `${rel}: 读取失败: ${error.message}` }
+  }
+  if (exists && current.trim() !== '' && !current.includes(BEGIN) && !current.includes(END)) {
+    return { path: rel, file, exists, current, error: `${rel}: 旧文件没有 setup marker；为避免追加第二份内容已停止，请先手动包上 begin/end` }
+  }
   let next
   try {
     next = upsertBlock(current, block(content))
   } catch (error) {
     return { path: rel, file, exists, current, error: `${rel}: ${error.message}` }
   }
-  const withTitle = exists ? next : `# ${title}\n\n${next}`
+  const withTitle = !exists || current.trim() === '' || !/^#\s+/m.test(current) ? `# ${title}\n\n${next}` : next
   const action = !exists ? 'created' : withTitle === current ? 'unchanged' : 'updated'
   return { path: rel, file, exists, current, next: withTitle, action }
 }
@@ -252,7 +290,7 @@ function buildAgentsSection(current, pointerDefs, willExist) {
   const innerLines = inner.split(/\r?\n/).filter(line => line.trim() !== '' && line !== heading)
   const existingRefs = new Set([...inner.matchAll(/`(docs\/[^`\s]+)`/g)].map(match => match[1]))
   const missing = pointerDefs.filter(([rel]) => willExist(rel) && !existingRefs.has(rel))
-  const omitted = pointerDefs.filter(([rel]) => !willExist(rel)).map(([rel]) => rel)
+  const omitted = pointerDefs.filter(([rel]) => !willExist(rel) && !existingRefs.has(rel)).map(([rel]) => rel)
   const lines = [
     heading,
     '',
@@ -285,24 +323,58 @@ function selectAgentsFile(root, options) {
 export function setup(options) {
   const root = resolve(options.dir)
   if (!existsSync(root)) return { ok: false, code: 2, message: '目录不存在: ' + root }
+  let existingIssue
+  let existingDomain
   try {
-    assertEnum(options.issueTracker, TRACKERS, '--issue-tracker')
+    existingIssue = readIssueTrackerSettings(root)
+    existingDomain = readDomainSettings(root)
+  } catch (error) {
+    return { ok: false, code: 2, message: '读取 docs/agents 失败: ' + error.message }
+  }
+  const effectiveIssue = options.issueTrackerExplicit ? options.issueTracker : (existingIssue.mode || options.issueTracker)
+  const effectiveDetail = options.issueTrackerDetail?.trim() || existingIssue.detail || null
+  const effectiveLayout = options.layoutExplicit ? options.layout : (existingDomain.mode || options.layout)
+  const effectiveContexts = options.contexts?.trim() || existingDomain.contexts || null
+  const effectiveGlossary = options.glossary?.trim() || existingDomain.glossary || 'GLOSSARY.md'
+  const contentOptions = {
+    ...options,
+    issueTracker: effectiveIssue,
+    issueTrackerDetail: effectiveDetail,
+    layout: effectiveLayout,
+    contexts: effectiveContexts,
+    glossary: effectiveGlossary,
+  }
+  try {
+    assertEnum(effectiveIssue, TRACKERS, '--issue-tracker')
     assertEnum(options.labels, LABELS, '--labels')
-    assertEnum(options.layout, LAYOUTS, '--layout')
+    assertEnum(effectiveLayout, LAYOUTS, '--layout')
     if (options.agentsFile) options.agentsFile = normalizeAgentsFile(options.agentsFile)
     if (options.agentsFile && !options.agentsMd) throw new Error('--agents-file 必须和 --agents-md 一起使用')
+    if (effectiveIssue === 'other' && !effectiveDetail) {
+      throw new Error('--issue-tracker other 需要 --issue-tracker-detail <text>；未写任何文件')
+    }
+    if (effectiveLayout === 'multi' && !effectiveContexts) {
+      throw new Error('--layout multi 需要 --contexts <text>；未写任何文件')
+    }
   } catch (error) {
     return { ok: false, code: 1, message: error.message }
   }
 
-  const labelMap = options.labels === 'default' ? readTriageMap(root) : {}
+  let labelMap = {}
+  try {
+    labelMap = options.labels === 'default' ? readTriageMap(root) : {}
+  } catch (error) {
+    return { ok: false, code: 2, message: '读取 triage-labels.md 失败: ' + error.message }
+  }
   const plans = [
-    planFile(root, 'docs/agents/issue-tracker.md', issueTrackerContent(options), 'Issue tracker'),
-    planFile(root, 'docs/agents/domain.md', domainContent(options), 'Domain docs'),
+    planFile(root, 'docs/agents/issue-tracker.md', issueTrackerContent(contentOptions), 'Issue tracker'),
+    planFile(root, 'docs/agents/domain.md', domainContent(contentOptions), 'Domain docs'),
   ]
   if (options.labels === 'default') {
     plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(labelMap), 'Triage labels'))
   }
+  const ioBroken = plans.find(plan => plan.ioError)
+  if (ioBroken) return { ok: false, code: 2, message: ioBroken.error }
   const broken = plans.filter(plan => plan.error)
   if (broken.length > 0) {
     return { ok: false, code: 1, message: '标记段异常，未写任何文件：\n' + broken.map(plan => '  - ' + plan.error).join('\n') }
@@ -321,9 +393,14 @@ export function setup(options) {
       ]
       const planned = new Set(plans.map(plan => resolve(plan.file)))
       const willExist = rel => existsSync(join(root, rel)) || planned.has(resolve(join(root, rel)))
-      const current = readFileSync(selected.file, 'utf8')
-      // 已有指针段但没有标记（旧版 init-docs 写的）：不追加，避免两份指针。
-      if (!current.includes(AGENTS_BEGIN) && /^##\s+(Project docs|项目文档)/m.test(current)) {
+      let current
+      try {
+        current = readFileSync(selected.file, 'utf8')
+      } catch (error) {
+        return { ok: false, code: 2, message: `读取 ${selected.target} 失败: ${error.message}` }
+      }
+      // 只有“两个标记都不存在”才是旧版无标记指针段；只剩 end 说明标记残缺，必须让 upsertBlock 报错。
+      if (!current.includes(AGENTS_BEGIN) && !current.includes(AGENTS_END) && /^##\s+(Project docs|项目文档)/m.test(current)) {
         agentsMd = {
           status: 'skipped',
           path: selected.target,
@@ -381,8 +458,8 @@ export function setup(options) {
   }
 
   const questions = []
-  if (options.issueTracker === 'other' && !options.issueTrackerDetail?.trim()) questions.push('issue tracker 具体用哪个工具/字段/路径？（--issue-tracker other --issue-tracker-detail <text>）')
-  if (options.layout === 'multi' && !options.contexts?.trim()) questions.push('多包各自的包名、入口目录和边界是什么？（--layout multi --contexts <text>）')
+  if (effectiveIssue === 'other' && !effectiveDetail) questions.push('issue tracker 具体用哪个工具/字段/路径？（--issue-tracker other --issue-tracker-detail <text>）')
+  if (effectiveLayout === 'multi' && !effectiveContexts) questions.push('多包各自的包名、入口目录和边界是什么？（--layout multi --contexts <text>）')
 
   const notes = []
   if (options.labels === 'none') {
@@ -418,8 +495,13 @@ if (process.argv[1]?.endsWith('setup.js')) {
   if (options.help) {
     process.stdout.write(usage() + '\n')
     process.exitCode = 0
-  } else if (!options.dir || options.unknown.length > 0) {
-    process.stderr.write((options.unknown.length > 0 ? '未知参数: ' + options.unknown.join(' ') : '缺少 --dir') + '\n\n' + usage() + '\n')
+  } else if (!options.dir || options.unknown.length > 0 || options.missingValue) {
+    const reason = options.unknown.length > 0
+      ? '未知参数: ' + options.unknown.join(' ')
+      : options.missingValue
+        ? '参数缺少值: ' + options.missingValue
+        : '缺少 --dir'
+    process.stderr.write(reason + '\n\n' + usage() + '\n')
     process.exitCode = 1
   } else {
     const result = setup(options)

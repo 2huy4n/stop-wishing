@@ -27,11 +27,12 @@ Read only when there is no git, the user may decline everything, this is a re-ru
 | No git | Continue after the backups above; say plainly that history and tag-based rollback are unavailable |
 | No `gh` | GitHub Issues leaves the menu; the recommendation becomes local markdown |
 | `docs/` already exists | Keep every existing file. Update only `docs/agents/*`; never regenerate the seven |
-| `AGENTS.md` **and** `CLAUDE.md` both exist | Ask which one; pass `--agents-file`; name the other in the report as untouched |
+| `AGENTS.md` **and** `CLAUDE.md` both exist | Ask which one; pass `--agents-md --agents-file`; name the other in the report as untouched |
 | Neither `AGENTS.md` nor `CLAUDE.md` | Do not create one. Point to `init-docs.js --agents-md`; skip Q4 |
-| `--issue-tracker other` without detail | Run with `--issue-tracker-detail` or take the script's question to the user; never hand-edit the file |
-| `--layout multi` without contexts | Ask for package names, entry directories and boundaries; pass `--contexts` |
+| `--issue-tracker other` without detail | Script exits 1 and writes nothing; get the tool/fields/path, then rerun with `--issue-tracker-detail` |
+| `--layout multi` without contexts | Script exits 1 and writes nothing; get package names, entry directories and boundaries, then pass `--contexts` |
 | `--labels none` | No triage file is written; an existing one is kept and named in `notes` |
+| Old `docs/agents` template with no marker | Stop with exit 1; do not append a second block. Ask the user to wrap the old content or migrate it once by hand |
 | User declines all four | Write nothing; report `Skipped: repository not configured — defaults apply` |
 | Markers malformed | Stop, show line numbers, wait. Never rewrite a block you cannot delimit |
 

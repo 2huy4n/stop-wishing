@@ -24,18 +24,18 @@ One question per turn, the recommendation first, the reason in one clause. Never
 **Q1 — Where do issues live?**
 Recommended: **local markdown files in the repo** — works offline, diffs in review, no account needed. `--issue-tracker local` puts them in `docs/issues/`, kept separate from the tracer-bullet tickets in `docs/tickets/` (an issue is an incoming report; a ticket is our own planned slice of work).
 
-Alternatives: GitHub Issues (*only* when the remote is GitHub **and** `gh` answered); anything else → `--issue-tracker other --issue-tracker-detail "<tool, fields, path>"`. Without the detail the script returns a question; with it, the answer is written into `issue-tracker.md`.
+Alternatives: GitHub Issues (*only* when the remote is GitHub **and** `gh` answered); anything else → `--issue-tracker other --issue-tracker-detail "<tool, fields, path>"`. Without the detail the script exits 1 and asks for it; nothing is written with a placeholder.
 
 **Q2 — Define the label vocabulary now?**
 Recommended: **yes, the five default roles** in `FILES.md`. Existing right-column labels are preserved on a re-run; `--labels none` writes no file and never deletes one.
 
 **Q3 — Domain docs layout?**
-Recommended: **single-context** — one `GLOSSARY.md` at the root plus `docs/adr/`. Pick **multi-context** only when the repo really holds several deployable parts; then pass `--layout multi --contexts "<package boundaries>"` so the boundaries are written down.
+Recommended: **single-context** — one `GLOSSARY.md` at the root plus `docs/adr/`. Pick **multi-context** only when the repo really holds several deployable parts; then pass `--layout multi --contexts "<package boundaries>"` so the boundaries are written down. Without `--contexts` the script exits 1 and writes nothing.
 
 **Q4 — Add the `## Project docs` pointer block?**
 Recommended: **yes**.
 - Exactly one of `AGENTS.md` / `CLAUDE.md` exists → offer that one.
-- Both exist → ask which one, then pass `--agents-file AGENTS` or `--agents-file CLAUDE`. Without the flag the script refuses rather than guessing.
+- Both exist → ask which one, then pass `--agents-md --agents-file AGENTS` or `--agents-md --agents-file CLAUDE`. Without the flag the script refuses rather than guessing.
 - Neither exists → this skill creates nothing; point to `init-docs.js --agents-md` and continue.
 
 **All answers "whatever you think"** → take every recommendation, list each one in the closing `Skipped:` line as an assumption, and say they can be changed later by re-running this skill.

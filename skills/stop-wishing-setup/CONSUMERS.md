@@ -10,4 +10,4 @@ Read only when explaining why a value matters. Nothing here is required.
 | `stop-wishing-audit` | `docs/agents/domain.md` | naming things the way the repo names them |
 | `stop-wishing-debt` | `docs/agents/domain.md` | the same naming, applied to debt entries |
 
-When `docs/agents/` is absent, every skill works on its defaults: card at `docs/project.md`, tickets at `docs/tickets/`, issue refs resolved by the review order in `stop-wishing-review`, glossary optional. Setup removes guesswork; it must not add a new precondition.
+When `docs/agents/` is absent, every skill works on its defaults: card at `docs/project.md`, tickets at `docs/tickets/`, issue refs fall back to `docs/issues/`, glossary/ADR fall back to `GLOSSARY.md` / `docs/adr/` when present. Setup removes guesswork; it must not add a new precondition.
