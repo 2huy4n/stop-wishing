@@ -45,7 +45,7 @@ node install.js --dest /path/to/skills --verify
 node install.js --force
 ```
 
-`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`; the report skill checks its renderer, schema and both themes; the setup skill checks `SETUP.md`, `FILES.md`, `SAFETY.md` and `CONSUMERS.md`.
+`--verify` checks every skill: `SKILL.md` exists, front-matter `name` matches the directory, and the file hash matches the source; the main skill additionally checks the seven scripts, five reference files, both template sets (8 each: seven docs plus `AGENTS.md.tpl`) and `LICENSE`; the review skill checks `INTENT.md`, `ENGINEERING.md` and `REPORT.md`; the report skill checks its renderer, schema and both themes; the setup skill checks `SETUP.md`, `FILES.md`, `SAFETY.md` and `CONSUMERS.md`.
 
 `--force` upgrades also prune files listed by the previous install manifest (`.install-manifest.json`) that the new version no longer ships (for example the old `scripts/build-portable.js`); files outside that manifest are left untouched.
 
@@ -103,7 +103,7 @@ If the user does not know how to install a skill, follow these steps:
 
    Exit codes: 0 success or dry-run / 1 bad arguments or overwrite conflict / 2 missing source files / 3 missing or mismatched files / 4 outdated files (add `--force`).
 
-5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/`, `stop-wishing-setup/` and `stop-wishing-report/`, each with a `SKILL.md`; the main skill also has `scripts/` (7), five reference files, `templates/zh` and `templates/en` (8 each: seven docs plus `AGENTS.md.tpl`), `assets/vibe-coding-glossary.html`, `assets/en.json` and `LICENSE`; the report skill has its renderer, schema and both themes; the setup skill has `SETUP.md`, `FILES.md`, `SAFETY.md` and `CONSUMERS.md`. Only a fully PASSing `--verify` counts as installed.
+5. **Verify**: the skills root must contain `stop-wishing/`, `stop-wishing-review/`, `stop-wishing-audit/`, `stop-wishing-debt/`, `stop-wishing-spec/`, `stop-wishing-tickets/`, `stop-wishing-setup/` and `stop-wishing-report/`, each with a `SKILL.md`; the main skill also has `scripts/` (7), five reference files, `templates/zh` and `templates/en` (8 each: seven docs plus `AGENTS.md.tpl`), `assets/vibe-coding-glossary.html`, `assets/en.json` and `LICENSE`; the review skill has `INTENT.md`, `ENGINEERING.md` and `REPORT.md`; the report skill has its renderer, schema and both themes; the setup skill has `SETUP.md`, `FILES.md`, `SAFETY.md` and `CONSUMERS.md`. Only a fully PASSing `--verify` counts as installed.
 
    **Term questions work right after install**: when the user asks what "MVP" means, look in `<skills root>/stop-wishing/assets/vibe-coding-glossary.html` for `zh:'<term>'` or `en:'<term>'`, explain with that entry's `d`/`de`, give the analogy from `a`/`ae`, and add the `#term-<slug>` deep link (slug = English name lowercased, non-alphanumerics turned into `-`). Only search the web when the local glossary has no entry. Do not open a browser window automatically, and never paste the whole glossary.
 6. **If writing is denied** (sandbox or permissions): do not retry in a loop. Tell the user it needs one manual command and give a copy-paste one:

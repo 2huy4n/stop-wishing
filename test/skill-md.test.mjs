@@ -72,6 +72,16 @@ test('主技能：不超过 60 行，只做路由 + 判断层', () => {
   assert.match(MAIN, /^## Scripts/m)
 })
 
+test('review：60 行路由 + 三个按需参考文件', () => {
+  const text = readSkill('stop-wishing-review')
+  assert.ok(text.split(/\r?\n/).length <= 60, 'review SKILL.md 必须 ≤60 行')
+  for (const ref of ['INTENT.md', 'ENGINEERING.md', 'REPORT.md']) {
+    assert.equal(existsSync(join(SKILLS_DIR, 'stop-wishing-review', ref)), true, `缺 ${ref}`)
+    assert.ok(text.includes(ref), `router 未路由到 ${ref}`)
+  }
+  assert.match(text, /^## 2\) Route to details/m)
+})
+
 test('主技能：七步循环与硬规则仍在正文', () => {
   for (const step of ['Clarify', 'Card', 'Search', 'Explain first', 'Back up', 'Minimal diff', 'Verify', 'Close']) {
     assert.ok(MAIN.includes(step), `工作循环缺: ${step}`)
@@ -176,7 +186,10 @@ test('GLOSSARY.md：术语表、147 条、深链、缺失再联网', () => {
 })
 
 test('审查技能：两轴（Intent / Engineering）、六维、12 条坏味道、并行与串行降级、输出格式', () => {
-  const text = readSkill('stop-wishing-review')
+  const reviewDir = join(SKILLS_DIR, 'stop-wishing-review')
+  const text = ['SKILL.md', 'INTENT.md', 'ENGINEERING.md', 'REPORT.md']
+    .map(file => readFileSync(join(reviewDir, file), 'utf8'))
+    .join('\n')
   for (const dim of ['Bug', 'Risk', 'Scale', 'Missing test', 'Speed', 'Lean']) assert.ok(text.includes(dim), `审查缺维度: ${dim}`)
   assert.match(text, /Intent/)
   assert.match(text, /Engineering/)
