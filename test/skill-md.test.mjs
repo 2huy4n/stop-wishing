@@ -78,7 +78,7 @@ test('review：60 行路由 + 三个按需参考文件', () => {
   for (const ref of ['INTENT.md', 'ENGINEERING.md', 'REPORT.md']) {
     assert.equal(existsSync(join(SKILLS_DIR, 'stop-wishing-review', ref)), true, `缺 ${ref}`)
   }
-  const route = /## 2\) Route to details\n([\s\S]*?)\n## 3\)/.exec(text)?.[1] ?? ''
+  const route = /## 2\) Route to details\r?\n([\s\S]*?)\r?\n## 3\)/.exec(text)?.[1] ?? ''
   for (const ref of ['INTENT.md', 'ENGINEERING.md', 'REPORT.md']) {
     assert.match(route, new RegExp(`\\| .*${ref.replace('.', '\\.')}.*\\|`), `路由表缺 ${ref}`)
   }
