@@ -439,3 +439,52 @@ test('--agents-file= 空等号值 → exit 1，不写盘', () => {
   assert.match(out.stderr, /缺少值|--agents-file/)
   assert.equal(existsSync(join(root, 'docs')), false)
 })
+
+test('自由文本参数不吞下一个 --flag', () => {
+  for (const args of [
+    ['--issue-tracker', 'other', '--issue-tracker-detail', '--agents-md'],
+    ['--glossary', '--agents-md'],
+    ['--layout', 'multi', '--contexts', '--agents-md'],
+  ]) {
+    const root = freshProject()
+    const out = run(['--dir', root, ...args])
+    assert.equal(out.status, 1, out.stdout + out.stderr)
+    assert.equal(existsSync(join(root, 'docs')), false, '缺值时不应写盘')
+  }
+})
+
+test('重跑保留五角色之外的 triage 行', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const file = join(root, 'docs', 'agents', 'triage-labels.md')
+  const text = read(root, 'docs/agents/triage-labels.md')
+  writeFileSync(file, text.replace('<!-- stop-wishing-setup:end -->', '| security | security-review |\n<!-- stop-wishing-setup:end -->'), 'utf8')
+  assert.equal(run(['--dir', root]).status, 0)
+  assert.match(read(root, 'docs/agents/triage-labels.md'), /security-review/)
+})
+
+test('非反引号已有指针不重复追加', () => {
+  const root = freshProject()
+  mkdirSync(join(root, 'docs'), { recursive: true })
+  writeFileSync(join(root, 'docs', 'project.md'), '# project\n', 'utf8')
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8')
+  assert.equal(run(['--dir', root, '--agents-md']).status, 0)
+  const file = join(root, 'AGENTS.md')
+  const text = read(root, 'AGENTS.md').replace(/\x60/g, '').replace('- docs/project.md — 需求卡与边界', '- docs/project.md — requirement card')
+  writeFileSync(file, text, 'utf8')
+  assert.equal(run(['--dir', root, '--agents-md']).status, 0)
+  const again = read(root, 'AGENTS.md')
+  assert.equal((again.match(/docs\/project\.md/g) ?? []).length, 1)
+})
+
+test('CRLF 文件只替换标记段且保持换行风格', () => {
+  const root = freshProject()
+  assert.equal(run(['--dir', root]).status, 0)
+  const file = join(root, 'docs', 'agents', 'domain.md')
+  const crlf = read(root, 'docs/agents/domain.md').replace(/\n/g, '\r\n')
+  writeFileSync(file, crlf, 'utf8')
+  assert.equal(run(['--dir', root, '--glossary', 'docs/new-terms.md']).status, 0)
+  const text = read(root, 'docs/agents/domain.md')
+  assert.ok(text.includes('docs/new-terms.md'))
+  assert.doesNotMatch(text, /(?<!\r)\n/)
+})

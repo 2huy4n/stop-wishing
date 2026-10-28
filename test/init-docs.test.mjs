@@ -142,3 +142,11 @@ test('init-docs：模板缺失时整体失败，不留下半套文档', () => {
   assert.match(out.stderr, /模板缺失/)
   assert.equal(existsSync(join(target, 'docs')), false, '校验应先于任何写入')
 })
+
+test('init-docs：--dir 缺值/空值都 exit 1，不写 cwd', () => {
+  for (const args of [['--lang', 'zh', '--dir'], ['--lang', 'zh', '--dir=']]) {
+    const out = cli(args)
+    assert.equal(out.status, 1, out.stdout + out.stderr)
+    assert.match(out.stderr, /--dir|缺少值/)
+  }
+})

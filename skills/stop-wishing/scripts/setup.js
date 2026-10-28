@@ -42,7 +42,7 @@ export function parseArgs(argv) {
   const value = i => argv[i + 1] ?? null
   const takeValue = name => {
     const v = value(i)
-    if (v === null || v === '') {
+    if (v === null || v === '' || v.startsWith('--')) {
       options.missingValue = name
       return null
     }
@@ -175,23 +175,39 @@ function formatLabel(value) {
   return `\`${raw || 'needs-triage'}\``
 }
 
-export function triageLabelsContent(labelMap = {}) {
-  return [
-    '| 角色 | 标签 |',
-    '|---|---|',
-    ...TRIAGE_ROLES.map(role => `| ${role} | ${formatLabel(labelMap[role] ?? role)} |`),
-  ].join('\n')
+export function readTriageRows(root) {
+  const file = join(root, 'docs', 'agents', 'triage-labels.md')
+  if (!existsSync(file)) return []
+  const rows = []
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const match = /^\|\s*([a-z][a-z0-9-]*)\s*\|\s*`?([^`|]+)`?\s*\|$/.exec(line.trim())
+    if (match) rows.push({ role: match[1], label: match[2].trim() })
+  }
+  return rows
 }
 
 export function readTriageMap(root) {
-  const file = join(root, 'docs', 'agents', 'triage-labels.md')
-  if (!existsSync(file)) return {}
   const map = {}
-  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
-    const match = /^\|\s*([a-z-]+)\s*\|\s*`?([^`|]+)`?\s*\|$/.exec(line.trim())
-    if (match && TRIAGE_ROLES.includes(match[1])) map[match[1]] = match[2].trim()
+  for (const row of readTriageRows(root)) {
+    if (TRIAGE_ROLES.includes(row.role)) map[row.role] = row.label
   }
   return map
+}
+
+export function triageLabelsContent(labelMap = {}, extraRows = []) {
+  const rows = TRIAGE_ROLES.map(role => ({ role, label: labelMap[role] ?? role }))
+  const known = new Set(TRIAGE_ROLES)
+  for (const row of extraRows) {
+    if (!known.has(row.role)) {
+      rows.push(row)
+      known.add(row.role)
+    }
+  }
+  return [
+    '| 角色 | 标签 |',
+    '|---|---|',
+    ...rows.map(row => `| ${row.role} | ${formatLabel(row.label)} |`),
+  ].join('\n')
 }
 
 export function readIssueTrackerSettings(root) {
@@ -251,10 +267,12 @@ function markerLine(text, marker) {
 export function upsertBlock(text, blockText, begin = BEGIN, end = END) {
   const begins = markerCount(text, begin)
   const ends = markerCount(text, end)
+  const newline = text.includes('\r\n') ? '\r\n' : '\n'
+  const normalizedBlock = blockText.replace(/\r?\n/g, newline)
   if (begins === 0 && ends === 0) {
-    if (text === '') return blockText
+    if (text === '') return normalizedBlock
     const needsNewline = !text.endsWith('\n')
-    return text + (needsNewline ? '\n' : '') + (text.trimEnd() === '' ? '' : '\n') + blockText
+    return text + (needsNewline ? newline : '') + (text.trimEnd() === '' ? '' : newline) + normalizedBlock
   }
   if (begins !== 1 || ends !== 1) {
     throw new Error(`标记段异常：begin ${begins} 个（${markerLine(text, begin)}），end ${ends} 个（${markerLine(text, end)}）；为避免猜错已停止`)
@@ -264,7 +282,7 @@ export function upsertBlock(text, blockText, begin = BEGIN, end = END) {
   if (stop < start) throw new Error('标记段顺序错误：end 出现在 begin 之前；为避免猜错已停止')
   // blockText 自带结尾换行；把紧跟 END 的那个换行吃掉，避免每跑一次多一行。
   const tail = text.slice(stop + end.length).replace(/^\r?\n/, '')
-  return text.slice(0, start) + blockText + tail
+  return text.slice(0, start) + normalizedBlock + tail
 }
 
 function planFile(root, rel, content, title) {
@@ -302,12 +320,14 @@ function buildAgentsSection(current, pointerDefs, willExist) {
   const innerLines = inner.split(/\r?\n/).filter(line => line !== heading)
   while (innerLines.length > 0 && innerLines[0].trim() === '') innerLines.shift()
   while (innerLines.length > 0 && innerLines[innerLines.length - 1].trim() === '') innerLines.pop()
-  const existingRefs = new Set([...inner.matchAll(/`(docs\/[^`\s]+)`/g)].map(match => match[1]))
+  const existingRefs = new Set([...inner.matchAll(/`?(docs\/[^`\s]+)`?/g)].map(match => match[1]))
   const missing = pointerDefs.filter(([rel]) => willExist(rel) && !existingRefs.has(rel))
   const omitted = pointerDefs.filter(([rel]) => !willExist(rel) && !existingRefs.has(rel)).map(([rel]) => rel)
-  // Keep any trailing generated-by comment at the end; new pointers go before it.
+  // Keep any trailing generated-by comment at the end; new pointers go before its preceding blank line.
   const commentAt = innerLines.findIndex(line => line.trim().startsWith('<!--'))
-  const insertAt = commentAt === -1 ? innerLines.length : commentAt
+  let insertAt = commentAt === -1 ? innerLines.length : commentAt
+  if (commentAt > 0 && innerLines[commentAt - 1].trim() === '') insertAt = commentAt - 1
+  const originalLineCount = innerLines.length
   innerLines.splice(insertAt, 0, ...missing.map(([rel, label]) => `- \`${rel}\` — ${label}`))
   const lines = [
     heading,
@@ -318,7 +338,7 @@ function buildAgentsSection(current, pointerDefs, willExist) {
     section: `${AGENTS_BEGIN}\n${lines.join('\n')}\n${AGENTS_END}\n`,
     omitted,
     hadBlock: hasBlock,
-    preservedLines: innerLines.length,
+    preservedLines: originalLineCount,
   }
 }
 
@@ -378,8 +398,12 @@ export function setup(options) {
   }
 
   let labelMap = {}
+  let triageRows = []
   try {
-    labelMap = options.labels === 'default' ? readTriageMap(root) : {}
+    triageRows = options.labels === 'default' ? readTriageRows(root) : []
+    for (const row of triageRows) {
+      if (TRIAGE_ROLES.includes(row.role)) labelMap[row.role] = row.label
+    }
   } catch (error) {
     return { ok: false, code: 2, message: '读取 triage-labels.md 失败: ' + error.message }
   }
@@ -388,7 +412,7 @@ export function setup(options) {
     planFile(root, 'docs/agents/domain.md', domainContent(contentOptions), 'Domain docs'),
   ]
   if (options.labels === 'default') {
-    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(labelMap), 'Triage labels'))
+    plans.push(planFile(root, 'docs/agents/triage-labels.md', triageLabelsContent(labelMap, triageRows), 'Triage labels'))
   }
   const ioBroken = plans.find(plan => plan.ioError)
   if (ioBroken) return { ok: false, code: 2, message: ioBroken.error }

@@ -15,21 +15,31 @@ const DOCS = ['project', 'content', 'structure', 'progress', 'todo', 'discipline
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 export function parseArgs(argv) {
-  const options = { lang: null, dir: process.cwd(), force: false, agentsMd: false, help: false, unknown: [] }
-  for (let i = 0; i < argv.length; i += 1) {
+  const options = { lang: null, dir: process.cwd(), force: false, agentsMd: false, help: false, missingValue: null, unknown: [] }
+  let i = 0
+  const takeValue = name => {
+    const value = argv[i + 1] ?? null
+    if (value === null || value === '' || value.startsWith('--')) {
+      options.missingValue = name
+      return null
+    }
+    i += 1
+    return value
+  }
+  for (; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === '--help' || arg === '-h') options.help = true
     else if (arg === '--force') options.force = true
     else if (arg === '--agents-md') options.agentsMd = true
-    else if (arg === '--lang') {
-      options.lang = argv[i + 1] ?? null
-      i += 1
-    } else if (arg.startsWith('--lang=')) options.lang = arg.slice('--lang='.length)
-    else if (arg === '--dir') {
-      options.dir = argv[i + 1] ?? options.dir
-      i += 1
-    } else if (arg.startsWith('--dir=')) options.dir = arg.slice('--dir='.length)
-    else options.unknown.push(arg)
+    else if (arg === '--lang') options.lang = takeValue('--lang')
+    else if (arg.startsWith('--lang=')) {
+      options.lang = arg.slice('--lang='.length)
+      if (!options.lang) options.missingValue = '--lang'
+    } else if (arg === '--dir') options.dir = takeValue('--dir')
+    else if (arg.startsWith('--dir=')) {
+      options.dir = arg.slice('--dir='.length)
+      if (!options.dir) options.missingValue = '--dir'
+    } else options.unknown.push(arg)
   }
   return options
 }
@@ -143,7 +153,9 @@ if (process.argv[1]?.endsWith('init-docs.js')) {
     process.stdout.write(usage() + '\n')
     process.exitCode = 0
   } else {
-    const result = initDocs(options)
+    const result = options.missingValue
+      ? { ok: false, code: 1, message: `参数缺少值: ${options.missingValue}\n\n${usage()}` }
+      : initDocs(options)
     if (result.ok) {
       process.stdout.write(`已生成 ${result.written.length} 份文档到 ${result.docsDir}\n`)
       for (const file of result.written) process.stdout.write('  - ' + file + '\n')
