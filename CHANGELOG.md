@@ -3,6 +3,11 @@
 All notable changes to the stop-wishing skill family.
 Version numbers follow `MAJOR.MINOR.PATCH`: breaking workflow change / new skill or capability / fix.
 
+## 0.9.1 — 2026-10-28
+
+- **README quick install**: adds the `npx skills add` path and keeps the repository installer as the full-notice path.
+- **README example**: adds the before/after login case to the first screen.
+
 ## 0.9.0 — 2026-10-27
 
 - **New `stop-wishing-report` skill**: renders one verified `report.json` into standalone HTML. No dependencies, no build step, no network.

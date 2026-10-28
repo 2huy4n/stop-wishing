@@ -10,6 +10,23 @@ The rule is simple: **align first, explain before writing, back up before changi
 
 The repo ships **eight side-by-side skills**: one main skill for taking a request from vague to delivered, and seven satellites for reviewing one change, auditing a whole repo, keeping a debt ledger, writing a spec, splitting it into ordered tickets, configuring a repo, and rendering a report.
 
+## A quick example
+
+```text
+Without stop-wishing:
+You: Add a login for me.
+AI: Sure, right away. (Adds OAuth, passport, a users migration, and rewrites the login page.)
+You: I didn't ask for Google, and I didn't ask you to touch the database.
+
+With stop-wishing:
+You: Add a login for me.
+AI: Let's align first. This is heavy. Three questions:
+    Who logs in? How, and where are accounts stored? How far does this go?
+You: Internal staff, email + password, login and logout only; don't touch the schema.
+AI: The requirement card is ready; I'll write it to docs/project.md after confirmation.
+    After confirmation I'll explain the files, risks and rollback, then back up and start.
+```
+
 | Skill | What it does | When to use it |
 |---|---|---|
 | [`stop-wishing`](skills/stop-wishing/SKILL.md) | Main skill: clarification, requirement card, license gate, backup, minimal diff, evidence-based report | A vague request, someone else's repo, adding a dependency/font/icon/API |
@@ -24,6 +41,20 @@ The repo ships **eight side-by-side skills**: one main skill for taking a reques
 Skill bodies are in English; `description` is bilingual so Chinese trigger words still work. The original Chinese body survives only as a local backup and is **not committed** (`*.bak-*` is ignored); see commit `e428327` if you need it.
 
 ## Install
+
+### Quick install (recommended)
+
+If you use Claude Code, Codex or another tool that supports Agent Skills:
+
+```bash
+npx -y skills add 2huy4n/stop-wishing --copy
+```
+
+This installs into the current project by default; add `-g` for the user level. Node.js 18+ and GitHub access are required. `--copy` copies the complete skill directories, including `scripts/`, `templates/` and reference files.
+
+`npx` copies only the skill directories; use the repository installer below when you also need the root `LICENSE` and `THIRD-PARTY-NOTICES.md`.
+
+### Repository installer
 
 The installer copies **all eight skills** into a target skills root:
 
