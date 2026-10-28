@@ -18,7 +18,7 @@ Then two sections, in this order:
 
 ```text
 ## Intent (vs spec)
-Spec source: <docs/specs/<file>.md (card matches | drift | draft) | docs/project.md | issue #123 | path | none>
+Spec source: <docs/specs/<file>.md (card matches | drift — provisional | draft — provisional | drift + draft — provisional) | docs/project.md | issue #123 | path | none>
 
 I1. <title>
     What this is: <one sentence.>
@@ -26,6 +26,8 @@ I1. <title>
     Fix: <the smallest change that closes the gap.>
     If we skip it: <what the user gets instead of what they asked for.>
 ```
+
+If there is no spec, keep the heading but write only `Spec source: none` and `Intent: no spec available — not reviewed`, with no I-items; then continue with Engineering.
 
 ```text
 ## Engineering
@@ -43,7 +45,7 @@ E1. <title>  [Must fix | Should fix | Nice to have]
 End with:
 
 ```text
-Intent: <N findings | no spec available>
+Intent: <N findings | no spec available — not reviewed>
 Engineering: <N findings; worst: ...>
 Verdict: <ship / ship after Must fix / do not ship>
 Lean: -N lines possible (delete X, reuse Y, stdlib Z)

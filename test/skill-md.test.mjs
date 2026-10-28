@@ -220,6 +220,11 @@ test('审查技能：两轴（Intent / Engineering）、六维、12 条坏味道
   assert.match(text, /Verdict:/)
   assert.match(text, /Lean: -N lines possible/)
   assert.match(text, /Not checked:/)
+  assert.match(text, /Spec source: none/)
+  assert.match(text, /Intent: no spec available — not reviewed/)
+  assert.match(text, /drift — provisional/)
+  assert.match(text, /draft — provisional/)
+  assert.match(text, /drift \+ draft — provisional/)
   assert.match(text, /Skipped: <what was not reviewed>/)
 })
 
