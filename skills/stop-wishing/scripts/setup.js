@@ -65,8 +65,10 @@ export function parseArgs(argv) {
       options.issueTracker = arg.slice('--issue-tracker='.length)
       options.issueTrackerExplicit = true
     } else if (arg === '--issue-tracker-detail') options.issueTrackerDetail = takeValue('--issue-tracker-detail')
-    else if (arg.startsWith('--issue-tracker-detail=')) options.issueTrackerDetail = arg.slice('--issue-tracker-detail='.length)
-    else if (arg === '--labels') options.labels = takeValue('--labels')
+    else if (arg.startsWith('--issue-tracker-detail=')) {
+      options.issueTrackerDetail = arg.slice('--issue-tracker-detail='.length)
+      if (!options.issueTrackerDetail) options.missingValue = '--issue-tracker-detail'
+    } else if (arg === '--labels') options.labels = takeValue('--labels')
     else if (arg.startsWith('--labels=')) options.labels = arg.slice('--labels='.length)
     else if (arg === '--layout') {
       options.layout = takeValue('--layout')
@@ -75,12 +77,18 @@ export function parseArgs(argv) {
       options.layout = arg.slice('--layout='.length)
       options.layoutExplicit = true
     } else if (arg === '--glossary') options.glossary = takeValue('--glossary')
-    else if (arg.startsWith('--glossary=')) options.glossary = arg.slice('--glossary='.length)
-    else if (arg === '--contexts') options.contexts = takeValue('--contexts')
-    else if (arg.startsWith('--contexts=')) options.contexts = arg.slice('--contexts='.length)
-    else if (arg === '--agents-file') options.agentsFile = takeValue('--agents-file')
-    else if (arg.startsWith('--agents-file=')) options.agentsFile = arg.slice('--agents-file='.length)
-    else options.unknown.push(arg)
+    else if (arg.startsWith('--glossary=')) {
+      options.glossary = arg.slice('--glossary='.length)
+      if (!options.glossary) options.missingValue = '--glossary'
+    } else if (arg === '--contexts') options.contexts = takeValue('--contexts')
+    else if (arg.startsWith('--contexts=')) {
+      options.contexts = arg.slice('--contexts='.length)
+      if (!options.contexts) options.missingValue = '--contexts'
+    } else if (arg === '--agents-file') options.agentsFile = takeValue('--agents-file')
+    else if (arg.startsWith('--agents-file=')) {
+      options.agentsFile = arg.slice('--agents-file='.length)
+      if (!options.agentsFile) options.missingValue = '--agents-file'
+    } else options.unknown.push(arg)
   }
   return options
 }
@@ -137,6 +145,7 @@ export function issueTrackerContent(options) {
     other: detail ? `按“${detail}”的约定读取` : fallback,
   }[options.issueTracker]
   return [
+    `- **Tracker kind:** ${options.issueTracker}`,
     `- **Where:** ${where}`,
     `- **Create:** ${create}`,
     `- **Read:** ${read}`,
@@ -190,9 +199,12 @@ export function readIssueTrackerSettings(root) {
   if (!existsSync(file)) return {}
   const text = readFileSync(file, 'utf8')
   const where = /^- \*\*Where:\*\*\s*(.+)$/m.exec(text)?.[1]?.trim() ?? ''
+  const kind = /^- \*\*Tracker kind:\*\*\s*(local|github|other)\b/m.exec(text)?.[1]
+  if (kind) return kind === 'other' ? { mode: 'other', detail: where || null } : { mode: kind }
+  // Older files have no Tracker kind; infer conservatively from Where.
   if (where.includes('docs/issues/')) return { mode: 'local' }
   if (/GitHub/i.test(where)) return { mode: 'github' }
-  if (where && !where.includes('由用户指定')) return { mode: 'other', detail: where.replace(/`/g, '') }
+  if (where && !where.includes('由用户指定')) return { mode: 'other', detail: where }
   return {}
 }
 

@@ -21,6 +21,7 @@ Read only when writing or inspecting setup output. Two writers on one path is ho
 # Issue tracker
 
 <!-- stop-wishing-setup:begin -->
+- **Tracker kind:** local (or github / other)
 - **Where:** <local issues: `docs/issues/` | GitHub Issues on <owner/repo> | the user's exact tool/field/path>
 - **Create:** <how a new issue is opened>
 - **Read:** <how an issue is read>

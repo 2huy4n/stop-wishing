@@ -345,6 +345,7 @@ test('FILES.md 的三个 docs/agents 模板都带 setup marker', () => {
   assert.match(text, /# Issue tracker/)
   assert.match(text, /# Domain docs/)
   assert.match(text, /# Triage labels/)
+  assert.match(text, /\*\*Tracker kind:\*\*/)
   assert.match(text, /\*\*Ticket status:\*\* todo \/ doing \/ done \/ dropped/)
 })
 
@@ -417,4 +418,24 @@ test('docs/agents 目标是目录 → exit 2，不写盘', () => {
   const out = run(['--dir', root])
   assert.equal(out.status, 2, out.stdout + out.stderr)
   assert.match(out.stderr, /读取失败|EISDIR/)
+})
+
+test('other detail 含 GitHub/docs/issues 时重跑仍保留', () => {
+  for (const detail of ['GitHub Projects board team=SW', 'Jira board mirrors docs/issues/archive']) {
+    const root = freshProject()
+    const first = run(['--dir', root, '--issue-tracker', 'other', '--issue-tracker-detail', detail])
+    assert.equal(first.status, 0, first.stdout + first.stderr)
+    const second = run(['--dir', root])
+    assert.equal(second.status, 0, second.stdout + second.stderr)
+    assert.ok(read(root, 'docs/agents/issue-tracker.md').includes(detail))
+  }
+})
+
+test('--agents-file= 空等号值 → exit 1，不写盘', () => {
+  const root = freshProject()
+  writeFileSync(join(root, 'AGENTS.md'), '# AGENTS\n', 'utf8')
+  const out = run(['--dir', root, '--agents-md', '--agents-file='])
+  assert.equal(out.status, 1, out.stdout + out.stderr)
+  assert.match(out.stderr, /缺少值|--agents-file/)
+  assert.equal(existsSync(join(root, 'docs')), false)
 })
