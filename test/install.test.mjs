@@ -86,10 +86,21 @@ test('--verify：八个技能逐个 PASS，退出码 0', () => {
   assert.match(out.stdout, /\[PASS\] templates\/en\/ eight files/)
   assert.match(out.stdout, /\[PASS\] assets\/ glossary and translations/)
   assert.match(out.stdout, /\[PASS\] references\/ five files present/)
+  assert.match(out.stdout, /\[PASS\] review references present/)
   assert.match(out.stdout, /\[PASS\] license and third-party notices/)
   const version = readFileSync(join(ROOT, 'VERSION'), 'utf8').trim()
   assert.match(out.stdout, new RegExp(`版本: ${version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), '自检应打印源版本')
   assert.doesNotMatch(out.stdout, /\[FAIL\]/)
+})
+
+test('--verify：review 参考文件缺失会失败并定位', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sw-install-review-refs-'))
+  assert.equal(cli(['--dest', root]).status, 0)
+  rmSync(join(root, 'stop-wishing-review', 'INTENT.md'))
+  const out = cli(['--dest', root, '--verify'])
+  assert.equal(out.status, 3, out.stdout + out.stderr)
+  assert.match(out.stdout, /\[FAIL\] review references present/)
+  assert.match(out.stdout, /INTENT\.md/)
 })
 
 test('--verify：删掉主技能一个脚本后自检失败，退出码 3', () => {

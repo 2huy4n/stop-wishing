@@ -2,7 +2,7 @@
 
 ## How to run: two sub-agents, in parallel
 
-- Spawn **one sub-agent per axis** with an isolated context: give each the diff command, the commit list, and its own source material (Axis 1: the spec text; Axis 2: the standards files plus `ENGINEERING.md`).
+- Spawn **one sub-agent per axis** with an isolated context: give each the diff command, the commit list, and its own source material (Axis 1: `INTENT.md` plus the spec text; Axis 2: the standards files plus `ENGINEERING.md`).
 - **If the environment has no sub-agent tool, run the two axes sequentially** and say `Not parallel: sub-agent tool unavailable` in the report. Do not skip an axis because it cannot be parallelised.
 - Aggregate the two reports **verbatim or lightly cleaned**. Do not merge, renumber across axes, or pick a single "worst finding" across them.
 

@@ -39,6 +39,10 @@ export const TOOL_TARGETS = {
 }
 
 export const SKILL_NAMES = ['stop-wishing', 'stop-wishing-review', 'stop-wishing-audit', 'stop-wishing-debt', 'stop-wishing-spec', 'stop-wishing-tickets', 'stop-wishing-setup', 'stop-wishing-report']
+const REQUIRED_SKILL_REFS = {
+  'stop-wishing-review': ['INTENT.md', 'ENGINEERING.md', 'REPORT.md'],
+  'stop-wishing-setup': ['SETUP.md', 'FILES.md', 'SAFETY.md', 'CONSUMERS.md'],
+}
 export const MAIN_SKILL = 'stop-wishing'
 export const SCRIPT_NAMES = ['check-env', 'init-docs', 'check-hardcode', 'check-licenses', 'preflight', 'check-tickets', 'setup']
 export const TEMPLATE_NAMES = ['project', 'content', 'structure', 'progress', 'todo', 'discipline', 'LICENSES']
@@ -82,7 +86,8 @@ export function usage() {
     '  --dest    【skills 根目录】装成 <目录>/stop-wishing、<目录>/stop-wishing-review、<目录>/stop-wishing-audit、<目录>/stop-wishing-debt、<目录>/stop-wishing-spec、<目录>/stop-wishing-tickets、<目录>/stop-wishing-setup、<目录>/stop-wishing-report',
     '              例: --dest <目录>  →  <目录>/stop-wishing/SKILL.md + 七个卫星技能目录',
     '  --verify  安装后自检：逐个技能校验 SKILL.md 存在、front-matter name 与目录名一致、与源 hash 一致；',
-    '              主技能额外校验 scripts/ 7 个、5 个参考文件、templates/{zh,en} 各 8 份（7 份文档 + AGENTS.md.tpl）、LICENSE。',
+    '              主技能额外校验 scripts/ 7 个、5 个参考文件、templates/{zh,en} 各 8 份（7 份文档 + AGENTS.md.tpl）、LICENSE；',
+    '              review 额外校验 INTENT.md / ENGINEERING.md / REPORT.md；setup 额外校验四参考文件；report 额外校验渲染器与两主题。',
     '              [PASS] 齐全且与源一致 / [WARN] 齐全但内容落后于源（退出码 4）/ [FAIL] 缺失或不一致（退出码 3）',
     '  --dry-run 只打印会复制什么、将校验什么，不写盘',
     '  --force   目标已存在时覆盖（默认拒绝）',
@@ -210,6 +215,7 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
   const results = []
   for (const group of groups) {
     const missing = []
+    const sourceMissing = []
     const stale = []
     for (const file of group.files) {
       const target = join(dir, file)
@@ -220,13 +226,20 @@ export function verifyInstall(dir, skillName = MAIN_SKILL, sourceRoot = ROOT) {
         missing.push(file)
         continue
       }
-      if (existsSync(source) && sha256(target) !== sha256(source)) stale.push(file)
+      if (!existsSync(source)) {
+        sourceMissing.push(file)
+        continue
+      }
+      if (sha256(target) !== sha256(source)) stale.push(file)
     }
     let status = 'PASS'
     let detail = '齐全且与源一致'
     if (missing.length > 0) {
       status = 'FAIL'
       detail = '缺失: ' + missing.join(', ')
+    } else if (sourceMissing.length > 0) {
+      status = 'FAIL'
+      detail = '源文件缺失: ' + sourceMissing.join(', ')
     } else if (stale.length > 0) {
       status = 'WARN'
       detail = '内容落后于源（建议 --force 更新）: ' + stale.join(', ')
@@ -264,15 +277,22 @@ export function collectFiles(root) {
   return files.sort()
 }
 
-/** 源文件完整性：八个技能的 SKILL.md 都必须存在。 */
+/** 源文件完整性：八个技能的 SKILL.md 与已声明的参考文件都必须存在。 */
 export function missingSources() {
-  return SKILL_NAMES.filter(name => !existsSync(join(SKILLS_ROOT, name, 'SKILL.md')))
+  const missing = []
+  for (const name of SKILL_NAMES) {
+    if (!existsSync(join(SKILLS_ROOT, name, 'SKILL.md'))) missing.push(`${name}/SKILL.md`)
+    for (const ref of REQUIRED_SKILL_REFS[name] ?? []) {
+      if (!existsSync(join(SKILLS_ROOT, name, ref))) missing.push(`${name}/${ref}`)
+    }
+  }
+  return missing
 }
 
 export function install(options, home = homedir()) {
   const missing = missingSources()
   if (missing.length > 0) {
-    return { ok: false, code: 2, message: '源文件缺失: ' + missing.map(name => join(SKILLS_ROOT, name, 'SKILL.md')).join(', ') }
+    return { ok: false, code: 2, message: '源文件缺失: ' + missing.map(file => join(SKILLS_ROOT, file)).join(', ') }
   }
   if (options.unknown?.length) {
     return { ok: false, code: 1, message: '未知参数: ' + options.unknown.join(' ') + '\n\n' + usage() }
@@ -321,7 +341,7 @@ export function install(options, home = homedir()) {
       files,
       plan,
       defaultHint,
-      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 7 个、5 个参考文件、templates/{zh,en} 各 8 份；不一致报 WARN 并退出 4',
+      verifyPlan: '将逐个技能校验：SKILL.md 存在且 name 与目录名一致、与源 hash 一致；每个技能另查 LICENSE 与 THIRD-PARTY-NOTICES.md；主技能再加 scripts/ 7 个、5 个参考文件、templates/{zh,en} 各 8 份；review 加 INTENT.md / ENGINEERING.md / REPORT.md；setup 加四参考文件；report 加渲染器与两主题；不一致报 WARN 并退出 4',
     }
   }
 

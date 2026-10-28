@@ -31,7 +31,7 @@ A change can pass one axis and fail the other: code that follows every rule but 
 | Six Engineering dimensions, the 12-smell baseline, finding rules | `ENGINEERING.md` |
 | Two sub-agents, output format, severity and closing | `REPORT.md` |
 
-Read `INTENT.md` and `ENGINEERING.md` before forming findings; read `REPORT.md` before writing. If the environment has no sub-agent tool, run the two axes sequentially and say `Not parallel: sub-agent tool unavailable` in the report. Do not skip an axis because it cannot be parallelised.
+Read `INTENT.md` and `ENGINEERING.md` before forming findings; read `REPORT.md` before planning the run and before writing. If the environment has no sub-agent tool, run the two axes sequentially and say `Not parallel: sub-agent tool unavailable` in the report. Do not skip an axis because it cannot be parallelised.
 
 ## 3) Evidence gate
 

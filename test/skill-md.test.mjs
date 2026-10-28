@@ -77,9 +77,12 @@ test('review：60 行路由 + 三个按需参考文件', () => {
   assert.ok(text.split(/\r?\n/).length <= 60, 'review SKILL.md 必须 ≤60 行')
   for (const ref of ['INTENT.md', 'ENGINEERING.md', 'REPORT.md']) {
     assert.equal(existsSync(join(SKILLS_DIR, 'stop-wishing-review', ref)), true, `缺 ${ref}`)
-    assert.ok(text.includes(ref), `router 未路由到 ${ref}`)
   }
-  assert.match(text, /^## 2\) Route to details/m)
+  const route = /## 2\) Route to details\n([\s\S]*?)\n## 3\)/.exec(text)?.[1] ?? ''
+  for (const ref of ['INTENT.md', 'ENGINEERING.md', 'REPORT.md']) {
+    assert.match(route, new RegExp(`\\| .*${ref.replace('.', '\\.')}.*\\|`), `路由表缺 ${ref}`)
+  }
+  assert.match(text, /Read `INTENT\.md` and `ENGINEERING\.md` before forming findings; read `REPORT\.md` before planning the run and before writing\./)
 })
 
 test('主技能：七步循环与硬规则仍在正文', () => {
