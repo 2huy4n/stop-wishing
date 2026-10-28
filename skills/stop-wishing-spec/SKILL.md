@@ -8,6 +8,7 @@ user-invocable: true
 # stop-wishing-spec — write the spec from what was already said
 
 Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed card.
+
 ## 1) When to use
 
 - The requirement card in `docs/project.md` is confirmed (tier medium/heavy, `stop-wishing` §4–§5).
@@ -15,6 +16,7 @@ Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed ca
 - Scope is agreed but still only lives in the conversation.
 
 **Do not use it to:** collect new requirements (`stop-wishing` §4), split work into tickets (`stop-wishing-tickets`), review a change, audit a repo, or list debt (`stop-wishing-review` / `-audit` / `-debt`). This skill never runs a new interview.
+
 ## 2) Inputs
 
 | Input | Required | Where |
@@ -27,7 +29,10 @@ Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed ca
 
 **No card → stop, do not invent one.** Say: "I can't find `docs/project.md`. Run `stop-wishing` first so we agree on goal / boundary / acceptance — or paste the requirement and I'll write the card first."
 
-**Domain terms.** Before writing a term or constraint, read `docs/agents/domain.md` if present; otherwise fall back to `GLOSSARY.md` / `docs/adr/` when they exist. Use the repo's words; never copy the glossary into the spec. **A gap becomes `Open`, not prose.** One line in §9 with who must decide it; filling a gap with a plausible guess is the failure this repo exists to prevent.
+**Domain terms.** Before writing a term or constraint, read `docs/agents/domain.md` if present; otherwise fall back to `GLOSSARY.md` / `docs/adr/` when they exist. Use the repo's words; never copy the glossary into the spec.
+
+**A gap becomes `Open`, not prose.** One line in §9 with who must decide it; filling a gap with a plausible guess is the failure this repo exists to prevent.
+
 ## 3) Synthesise, do not interview
 
 | Situation | What to write |
@@ -48,11 +53,17 @@ Read-only for code. **Only `docs/specs/` is written.** One spec per confirmed ca
 - `<slug>` = lowercase kebab from the title: ASCII letters and digits, `-` between words, ≤40 chars, drop articles, punctuation and filler. "Parse CSV exports" → `parse-csv-exports`.
 - `id` = the file stem (`2026-10-23-parse-csv-exports`). Never renumber a file.
 - Name collision → append `-2`, `-3`. Never overwrite an existing spec.
+
 ## 5) `card_sha256` — how to compute it
 
 Purpose: prove the spec was written against *this* version of the card, and detect later drift.
 
-Rule — byte-exact, because a validator must reproduce the same number: read `docs/project.md` as UTF-8; drop every line matching `^>\s*最后更新：` (the Chinese header line, full-width colon); join the remaining lines with `\n` — this normalises CRLF to LF; SHA-256 over the UTF-8 bytes; lowercase hex.
+Rule — byte-exact, because a validator must reproduce the same number:
+
+1. Read `docs/project.md` as UTF-8.
+2. Drop every line matching `^>\s*最后更新：` (the Chinese header line, full-width colon).
+3. Join the remaining lines with `\n` — this normalises CRLF to LF.
+4. SHA-256 over the UTF-8 bytes; lowercase hex.
 
 ```bash
 node -e "const c=require('node:crypto'),f=require('node:fs');const t=f.readFileSync('docs/project.md','utf8').split(/\r?\n/).filter(l=>!/^>\s*\u6700\u540e\u66f4\u65b0\uff1a/.test(l)).join('\n');console.log(c.createHash('sha256').update(t,'utf8').digest('hex'))"
@@ -61,6 +72,7 @@ node -e "const c=require('node:crypto'),f=require('node:fs');const t=f.readFileS
 - The `\u` escapes are those Chinese characters written ASCII-only, so the command survives any terminal encoding. Do not "simplify" them back to literal CJK.
 - **Do not widen the pattern.** English cards write `> Last updated:` — that line is **kept** in the hash. Changing the rule breaks agreement with the validator.
 - Print the hash and copy it. Cannot compute (missing or unreadable file) → write `card_sha256: unknown` and say so. Never guess a hash.
+
 ## 6) Front matter — nine fields
 
 | Field | Type | Rule |
@@ -76,6 +88,7 @@ node -e "const c=require('node:crypto'),f=require('node:fs');const t=f.readFileS
 | `lang` | enum | `zh` or `en` — the language of the card and the conversation. |
 
 **No offset in a timestamp is a bug** (`stop-wishing` §9): write `+08:00` or `-05:00` as the machine reports it, never a fixed value.
+
 ## 7) Body — ten sections, fixed order
 
 | # | Section | What goes in | What stays out |
